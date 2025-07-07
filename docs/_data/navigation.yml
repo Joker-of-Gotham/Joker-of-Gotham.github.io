@@ -1,4 +1,7 @@
-- name: Home
+# docs/_data/navigation.yml
+
+- name: 主页
   link: /
-- name: About
+
+- name: 关于
   link: /about.html
