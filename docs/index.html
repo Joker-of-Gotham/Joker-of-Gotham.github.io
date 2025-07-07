@@ -43,22 +43,34 @@
   </header>
 
   <main class="page-content" aria-label="Content">
-    <div class="wrapper">
-      <h1>欢迎来到数学领域学习整理</h1>
-      <div class="home">
-        <h2 class="post-list-heading">文章列表</h2>
-        <ul>
-          {% assign articles = site.data.articles | sort: 'date' | reverse %}
-          {% for article in articles %}
-            <li>
-              <a href="{{ article.link | relative_url }}">{{ article.title }}</a>
-              <span>{{ article.date | date: "%Y-%m-%d" }}</span>
-            </li>
-          {% endfor %}
-        </ul>
+      <div class="wrapper">
+        <div class="home">
+          
+          {%- if site.posts.size > 0 -%}
+            <h1 class="page-heading">欢迎来到数学领域学习整理</h1>
+            <h2 class="post-list-heading">文章列表</h2>
+            <ul class="post-list">
+              {%- for post in site.posts -%}
+              <li>
+                <h3>
+                  <a class="post-link" href="{{ post.url | relative_url }}">
+                    {{ post.title | escape }}
+                  </a>
+                </h3>
+                <span class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</span>
+                {%- if site.show_excerpts -%}
+                  {{ post.excerpt }}
+                {%- endif -%}
+              </li>
+              {%- endfor -%}
+            </ul>
+
+            <!-- <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p> -->
+          {%- endif -%}
+
+        </div>
       </div>
-    </div>
-  </main>
+    </main>
 
   <footer class="site-footer h-card">
     <div class="wrapper">
