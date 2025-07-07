@@ -48,7 +48,7 @@
       <div class="home">
         <h2 class="post-list-heading">文章列表</h2>
         <ul>
-          {% assign articles = site.data.articles | sort: 'date' | reverse %}
+          {% assign articles = site.data.article | sort: 'date' | reverse %}
           {% for article in articles %}
             <li>
               <a href="{{ article.link | relative_url }}">{{ article.title }}</a>
