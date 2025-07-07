@@ -31,8 +31,8 @@ github_username:  Joker
 theme: minima
 plugins:
   - jekyll-feed
-include:
-  - docs
+# include:
+#   - docs
 
 # Exclude from processing.
 # The following items will not be processed, by default.
