@@ -31,9 +31,6 @@ github_username:  Joker
 theme: minima
 plugins:
   - jekyll-feed
-includes:
-  - head.html
-  - mathjax.html
 # include:
 #   - docs
 
