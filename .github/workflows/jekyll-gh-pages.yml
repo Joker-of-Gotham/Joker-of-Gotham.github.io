@@ -31,21 +31,30 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2' # We use Ruby 3.2 as required by the theme's dependencies
-          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+          ruby-version: '3.2'
+          bundler-cache: true
+          cache-version: 1 # Increment this to bust cache, if needed
+
+      # This step is now crucial
+      - name: Change working directory to docs
+        run: cd docs
+
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v4
+
       - name: Build with Jekyll
-        # Specifies your Jekyll source directory and uses the baseurl from the pages-build-artifact
-        run: bundle exec jekyll build --source ./docs --destination ./_site --baseurl "${{ steps.pages.outputs.base_url }}"
+        # Now we run the build from within the 'docs' directory
+        working-directory: ./docs # ★★★ 关键修改：指定工作目录
+        run: bundle exec jekyll build --destination ./_site --baseurl "${{ steps.pages.outputs.base_url }}"
         env:
           JEKYLL_ENV: production
+          
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the entire contents of the ./_site directory
-          path: './_site'
+          # Upload the generated site from the _site directory in docs
+          path: './_site' # ★★★ 关键修改：指定上传路径
 
   # Deployment job
   deploy:
