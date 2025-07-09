@@ -31,6 +31,11 @@ github_username:  Joker
 theme: minima
 plugins:
   - jekyll-feed
+
+collections:
+  graph_theory:
+    output: true
+    permalink: /graph-theory/:path/
 # include:
 #   - docs
 

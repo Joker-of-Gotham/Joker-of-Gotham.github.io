@@ -1,7 +1,11 @@
-# docs/_data/navigation.yml
+# This file contains the links for the site's main navigation.
+# All items MUST use 'title' and 'url' keys.
 
-- name: 主页
-  link: /
+- title: 主页
+  url: /
 
-- name: 关于
-  link: /about.html
+- title: 图论笔记
+  url: /graph-theory/
+
+- title: 关于
+  url: /about/
