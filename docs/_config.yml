@@ -101,7 +101,6 @@ jekyll-archives:
   permalinks:
     tag: /tags/:name/
     category: /categories/:name/
-  collections: ['graph_theory']
 
 # 其他 Chirpy 主题的默认配置（如果你没有特殊需求，可以暂时不加，等主功能正常再补充）
 # theme_mode: dark
