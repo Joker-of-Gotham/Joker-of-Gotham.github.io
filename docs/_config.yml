@@ -1,60 +1,111 @@
-# Welcome to Jekyll!
-#
-# This config file is meant for settings that affect your whole blog, values
-# which you are expected to set up once and rarely edit after that. If you find
-# yourself editing this file very often, consider using Jekyll's data files
-# feature for the data you need to update frequently.
-#
-# For technical reasons, this file is *NOT* reloaded automatically when you use
-# 'bundle exec jekyll serve'. If you change this file, please restart the server process.
-#
-# If you need help with YAML syntax, here are some quick references for you:
-# https://learn-the-web.algonquindesign.ca/topics/markdown-yaml-cheat-sheet/#yaml
-# https://learnxinyminutes.com/docs/yaml/
-#
-# Site settings
-# These are used to personalize your new site. If you look in the HTML files,
-# you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
-# You can create any custom variable you would like, and they will be accessible
-# in the templates via {{ site.myvariable }}.
+# docs/_config.yml (请精确核对以下内容)
 
-title: 数学领域学习整理
-email: jinitaimei22233@gmail.com
-description: >- # this means to ignore newlines until "baseurl:"
-  该网站是本人依托MIT数学专业路线，进行数学各领域专业知识学习的汇总
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://Joker-of-Gotham.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: jekyllrb
-github_username:  Joker
+# 主题声明，必须在文件顶部
+theme: jekyll-theme-chirpy
 
-# Build settings
-theme: minima
+# 插件列表，必须紧随 theme 之后，这是 Jekyll 最早加载的部分
 plugins:
+  - jekyll-paginate
   - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-archives
+  - jekyll-include-cache
 
+# 网站基本信息
+lang: zh-CN
+timezone: Asia/Shanghai
+title: 数学领域学习整理
+tagline: 一个数学学习者的笔记
+description: 该网站是本人依托MIT数学专业路线，进行数学各领域专业知识学习的汇总。
+url: "https://Joker-of-Gotham.github.io"
+
+# 个人信息与社交链接
+github:
+  username: Joker-of-Gotham
+social:
+  name: Joker
+  email: jinitaimei22233@gmail.com
+  links:
+    - https://github.com/Joker-of-Gotham
+
+# 侧栏头像
+avatar: /assets/img/profile.png
+
+# 集合定义，这是关键，必须在 plugins 之后
 collections:
-  graph_theory:
+  tabs:
     output: true
-    permalink: /graph-theory/:path/
-# include:
-#   - docs
+    sort_by: order
+  graph_theory: # <--- 这个名字必须与文件夹名 "_graph_theory" 完全匹配
+    output: true
+    permalink: /collections/graph-theory/:path/ # <--- 确保路径正确
 
-# Exclude from processing.
-# The following items will not be processed, by default.
-# Any item listed under the `exclude:` key here will be automatically added to
-# the internal "default list".
-#
-# Excluded items can be processed by explicitly listing the directories or
-# their entries' file path in the `include:` list.
-#
-# exclude:
-#   - .sass-cache/
-#   - .jekyll-cache/
-#   - gemfiles/
-#   - Gemfile
-#   - Gemfile.lock
-#   - node_modules/
-#   - vendor/bundle/
-#   - vendor/cache/
-#   - vendor/gems/
-#   - vendor/ruby/
+# 默认值设置，确保为集合类型正确指定布局和侧栏导航
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      comments: true
+      toc: true
+      sidebar:
+        nav: posts
+  - scope:
+      path: ""
+      type: tabs
+    values:
+      layout: page
+      permalink: /:title/
+  - scope:
+      path: ""
+      type: graph_theory # <--- 这个类型必须与上面定义的集合名称完全匹配
+    values:
+      layout: post
+      comments: true
+      toc: true
+      sidebar:
+        nav: graph-theory-toc # <--- 侧栏导航的数据源文件名为 "_data/graph-theory-toc.yml"
+
+# Kramdown 和 Sass 的标准配置（通常无需修改）
+kramdown:
+  footnote_backlink: "↩︎"
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+sass:
+  style: compressed
+
+# Jekyll 构建的排除项，确保没有 "- docs"
+exclude:
+  - "*.gem"
+  - "*.gemspec"
+  - tools
+  - README.md
+  - LICENSE
+  - "*.config.js"
+  - "package*.json"
+
+# Jekyll Archives 插件配置
+jekyll-archives:
+  enabled: [categories, tags] # <--- 确保这两个 enabled
+  layouts:
+    category: category
+    tag: tag
+  permalinks:
+    tag: /tags/:name/
+    category: /categories/:name/
+
+# 其他 Chirpy 主题的默认配置（如果你没有特殊需求，可以暂时不加，等主功能正常再补充）
+# theme_mode: dark
+# cdn:
+# social_preview_image:
+# toc: true # 已经在 defaults 里为 posts 和 graph_theory 指定了
+# comments:
+# assets:
+# pwa:

@@ -1,0 +1,8 @@
+# docs/_data/graph-theory-toc.yml
+# 请确保文件内容与下面完全一致
+- title: 图论章节
+  children:
+    - title: "前言与导论"
+      url: /collections/graph-theory/00-introduction/
+    - title: "定义与案例"
+      url: /collections/graph-theory/01-definitions-and-examples/
