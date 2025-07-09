@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload the generated site from the _site directory in docs
-          path: './_site' # ★★★ 关键修改：指定上传路径
+          path: './docs/_site' # ★★★ 关键修改：指定上传路径
 
   # Deployment job
   deploy:
