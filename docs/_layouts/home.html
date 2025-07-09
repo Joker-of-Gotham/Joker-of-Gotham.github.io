@@ -5,13 +5,22 @@ refactor: true
 
 {% include lang.html %}
 
-{% assign all_pinned = site.posts | where: 'pin', 'true' %}
-{% assign all_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
+{% comment %}
+  STEP 1: Combine all desired content into a single array.
+  We are combining documents from '_posts' and '_graph_theory' collections.
+{% endcomment %}
+{%- assign all_content = site.posts | concat: site.graph_theory | sort: 'date' | reverse -%}
+
+{% comment %}
+  STEP 2: Separate the combined content into pinned and normal posts.
+  The rest of the logic will now work on this combined 'all_content' array.
+{% endcomment %}
+{% assign all_pinned = all_content | where: 'pin', 'true' %}
+{% assign all_normal = all_content | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
 
 {% assign posts = '' | split: '' %}
 
 <!-- Get pinned posts on current page -->
-
 {% assign visible_start = paginator.page | minus: 1 | times: paginator.per_page %}
 {% assign visible_end = visible_start | plus: paginator.per_page %}
 
@@ -30,8 +39,7 @@ refactor: true
 {% endif %}
 
 <!-- Get normal posts on current page -->
-
-{% assign normal_size = paginator.posts | size | minus: pinned_size %}
+{% assign normal_size = paginator.posts.size | minus: pinned_size %}
 
 {% if normal_size > 0 %}
   {% if pinned_size > 0 %}
