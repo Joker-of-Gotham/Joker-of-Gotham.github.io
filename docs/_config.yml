@@ -18,6 +18,7 @@ title: 数学领域学习整理
 tagline: 一个数学学习者的笔记
 description: 该网站是本人依托MIT数学专业路线，进行数学各领域专业知识学习的汇总。
 url: "https://Joker-of-Gotham.github.io"
+baseurl: ""
 
 # 个人信息与社交链接
 github:
