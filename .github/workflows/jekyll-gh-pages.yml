@@ -1,19 +1,25 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+# Workflow for building and deploying a Jekyll site to GitHub Pages
 name: Deploy Jekyll site to Pages
 
 on:
+  # Runs on pushes targeting the `gh-pages` branch.
   push:
-    branches: ["gh-pages"] # Set a branch that will trigger the workflow
+    branches: ["gh-pages"]
+  
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
-  group: "github-pages"
-  cancel-in-progress: true
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   # Build job
@@ -25,18 +31,21 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2' # You can change this to match your local Ruby version, e.g., '3.1'
+          ruby-version: '3.2' # We use Ruby 3.2 as required by the theme's dependencies
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - name: Setup Pages
+        id: pages
         uses: actions/configure-pages@v4
       - name: Build with Jekyll
-        run: bundle exec jekyll build --source ./docs # Specify your Jekyll source directory
+        # Specifies your Jekyll source directory and uses the baseurl from the pages-build-artifact
+        run: bundle exec jekyll build --source ./docs --destination ./_site --baseurl "${{ steps.pages.outputs.base_url }}"
         env:
           JEKYLL_ENV: production
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./_site
+          # Upload the entire contents of the ./_site directory
+          path: './_site'
 
   # Deployment job
   deploy:
