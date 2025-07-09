@@ -25,7 +25,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.1' # You can change this to match your local Ruby version, e.g., '3.1'
+          ruby-version: '3.2' # You can change this to match your local Ruby version, e.g., '3.1'
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
       - name: Setup Pages
         uses: actions/configure-pages@v4
