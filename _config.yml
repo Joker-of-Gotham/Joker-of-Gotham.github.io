@@ -3,6 +3,24 @@
 # 主题声明，必须在文件顶部
 theme: jekyll-theme-chirpy
 
+# _config.yml 顶部（theme: 之后）加入：
+markdown: kramdown
+
+kramdown:
+  input: GFM             # 识别 ```mermaid``` 等代码块
+  math_engine: mathjax   # 输出公式供 MathJax 渲染
+
+# （下面保留你原来的 kramdown 设置）
+  footnote_backlink: "↩︎"
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: highlight
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1
+
 timezone: Asia/Shanghai
 
 # 插件列表，必须紧随 theme 之后，这是 Jekyll 最早加载的部分
@@ -77,23 +95,6 @@ defaults:
 include:
   - search.json
 
-# Kramdown 和 Sass 的标准配置（通常无需修改）
-markdown: kramdown
-
-kramdown:
-  input: GFM             # 启用 GitHub-style Fenced Code
-  math_engine: mathjax   # 使用 MathJax 渲染公式
-
-# 下面是你原有的 kramdown 配置，保留即可
-  footnote_backlink: "↩︎"
-  syntax_highlighter: rouge
-  syntax_highlighter_opts:
-    css_class: highlight
-    span:
-      line_numbers: false
-    block:
-      line_numbers: true
-      start_line: 1
 
 # Jekyll 构建的排除项，确保没有 "- docs"
 exclude:
