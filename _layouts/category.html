@@ -1,0 +1,42 @@
+---
+layout: page
+# The Category layout
+---
+
+{% include lang.html %}
+
+{%- comment -%}
+  1. page.posts: jekyll-archives 生成的 _posts 下的文章  
+  2. graph_posts: 从 graph_theory 集合中筛出同分类的文档  
+  3. 合并后按日期 desc 排序
+{%- endcomment -%}
+
+{% assign posts_from_posts = page.posts %}
+{% if posts_from_posts == nil %}
+  {% assign posts_from_posts = "" | split: "" %}
+{% endif %}
+
+{% assign posts_from_graph = site.graph_theory | where_exp: "doc", "doc.categories contains page.title" %}
+{% if posts_from_graph == nil %}
+  {% assign posts_from_graph = "" | split: "" %}
+{% endif %}
+
+{% assign all_posts = posts_from_posts | concat: posts_from_graph | sort: "date" | reverse %}
+
+<div id="page-category">
+  <h1 class="ps-lg-2">
+    <i class="far fa-folder-open fa-fw text-muted"></i>
+    {{ page.title }}
+    <span class="lead text-muted ps-2">{{ all_posts | size }}</span>
+  </h1>
+
+  <ul class="content ps-0">
+    {% for post in all_posts %}
+      <li class="d-flex justify-content-between px-md-3">
+        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+        <span class="dash flex-grow-1"></span>
+        {% include datetime.html date=post.date class='text-muted small text-nowrap' lang=lang %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>

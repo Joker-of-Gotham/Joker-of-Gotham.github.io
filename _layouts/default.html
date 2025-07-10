@@ -12,8 +12,11 @@ layout: compress
   {% capture prefer_mode %}data-mode="{{ site.theme_mode }}"{% endcapture %}
 {% endif %}
 
+<!-- 定义 lang 变量，传递给所有 include -->
+{% assign lang = page.lang | default: site.alt_lang | default: site.lang %}
+
 <!-- `site.alt_lang` can specify a language different from the UI -->
-<html lang="{{ page.lang | default: site.alt_lang | default: site.lang }}" {{ prefer_mode }}>
+<html lang="{{ lang }}" {{ prefer_mode }}>
   {% include head.html %}
 
   <body>
@@ -35,8 +38,8 @@ layout: compress
           <!-- panel -->
           <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
             <div class="access">
-              {% include_cached update-list.html lang=lang %}
-              {% include_cached trending-tags.html lang=lang %}
+              {% include update-list.html lang=lang %}
+              {% include trending-tags.html lang=lang %}
             </div>
 
             {% for _include in layout.panel_includes %}
