@@ -30,9 +30,7 @@ jobs:
 
       - name: Build site with Jekyll
         run: |
-          bundle exec jekyll build \
-            --source . \         # ← 改成当前根目录
-            --destination ./_site
+          bundle exec jekyll build --source . --destination ./_site
         env:
           JEKYLL_ENV: production
 
