@@ -13,7 +13,7 @@ plugins:
 
 # 网站基本信息
 lang: zh-CN
-timezone: Asia/Shanghai
+timezone:
 title: 数学领域学习整理
 tagline: 一个数学学习者的笔记
 description: 该网站是本人依托MIT数学专业路线，进行数学各领域专业知识学习的汇总。
@@ -30,7 +30,7 @@ social:
     - https://github.com/Joker-of-Gotham
 
 # 侧栏头像
-avatar: /assets/img/profile.png
+avatar:
 
 # 集合定义，这是关键，必须在 plugins 之后
 collections:
