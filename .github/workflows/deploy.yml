@@ -1,21 +1,22 @@
-name: Jekyll site CI
+name: Build and Deploy Jekyll site
 
 on:
   push:
     branches:
-      - main
+      - main  # 监听 main 分支的推送
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1 # 你可以根据需要调整版本
+          ruby-version: 3.1
 
       - name: Install dependencies
         run: bundle install
@@ -26,5 +27,10 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PERSONAL_TOKEN }}   # 使用你的 PAT
           publish_dir: ./_site
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy Jekyll site via Actions'
