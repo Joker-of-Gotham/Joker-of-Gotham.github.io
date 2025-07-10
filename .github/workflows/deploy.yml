@@ -1,36 +1,50 @@
-name: Build and Deploy Jekyll site
+name: Deploy Jekyll site to GitHub Pages
 
 on:
   push:
     branches:
-      - main  # 监听 main 分支推送
+      - main  # 或你的主分支名称
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Setup Ruby
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1
+          ruby-version: '3.2'
+          bundler-cache: true
 
       - name: Install dependencies
-        run: bundle install
+        run: |
+          gem install jekyll bundler
+          bundle install
 
-      - name: Build site with Jekyll
-        run: bundle exec jekyll build
+      - name: Build the site
+        run: |
+          bundle exec jekyll build --source ./docs --destination ./_site
+        env:
+          JEKYLL_ENV: production
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.PERSONAL_TOKEN }}  # 你的PAT Secret
-          publish_dir: ./_site
-          publish_branch: gh-pages
-          force_orphan: true
-          user_name: github-actions[bot]
-          user_email: github-actions[bot]@users.noreply.github.com
-          commit_message: 'Deploy Jekyll site via Actions'
+          path: './_site'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
