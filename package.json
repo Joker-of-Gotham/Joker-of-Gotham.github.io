@@ -1,8 +1,0 @@
-{
-  "name": "Joker-of-Gotham.github.io",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "你的构建命令"
-  },
-  "dependencies": {}
-}
