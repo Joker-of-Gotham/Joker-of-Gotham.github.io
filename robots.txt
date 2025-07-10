@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /norobots/
+
+Sitemap: https://joker-of-gotham.github.io/sitemap.xml
