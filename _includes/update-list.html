@@ -1,21 +1,22 @@
-<!-- Get 5 last posted/updated posts -->
-
+{% assign lang = include.lang | default: site.lang %}
 {% assign MAX_SIZE = 5 %}
-
 {% assign all_list = '' | split: '' %}
+{% assign combined_posts = '' | split: '' %}
 
-{% for post in site.posts %}
+{% for coll_name in site.my_collections %}
+  {% assign coll = site[coll_name] %}
+  {% assign combined_posts = combined_posts | concat: coll %}
+{% endfor %}
+
+{% for post in combined_posts %}
   {% assign datetime = post.last_modified_at | default: post.date %}
-
   {% capture elem %}
-    {{- datetime | date: "%Y%m%d%H%M%S" -}}::{{- forloop.index0 -}}
+    {{ datetime | date: "%Y%m%d%H%M%S" }}::{{ forloop.index0 }}
   {% endcapture %}
-
   {% assign all_list = all_list | push: elem %}
 {% endfor %}
 
 {% assign all_list = all_list | sort | reverse %}
-
 {% assign update_list = '' | split: '' %}
 
 {% for entry in all_list limit: MAX_SIZE %}
@@ -24,17 +25,15 @@
 
 {% if update_list.size > 0 %}
   <section id="access-lastmod">
-    <h2 class="panel-heading">{{- site.data.locales[include.lang].panel.lastmod -}}</h2>
+    <h2 class="panel-heading">{{ site.data.locales[lang].panel.lastmod }}</h2>
     <ul class="content list-unstyled ps-0 pb-1 ms-1 mt-2">
       {% for item in update_list %}
         {% assign index = item | split: '::' | last | plus: 0 %}
-        {% assign post = site.posts[index] %}
-        {% assign url = post.url | relative_url %}
+        {% assign post = combined_posts[index] %}
         <li class="text-truncate lh-lg">
-          <a href="{{ url }}">{{ post.title }}</a>
+          <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
         </li>
       {% endfor %}
     </ul>
   </section>
-  <!-- #access-lastmod -->
 {% endif %}

@@ -1,0 +1,59 @@
+{% assign lang = include.lang | default: site.lang %}
+
+{%- comment -%}
+收集所有标签，无重复
+{%- endcomment -%}
+{% assign all_tags = '' | split: '' %}
+
+{% for coll_name in site.my_collections %}
+  {% assign collection = site[coll_name] %}
+  {% for doc in collection %}
+    {% if doc.tags %}
+      {% for tag in doc.tags %}
+        {% unless all_tags contains tag %}
+          {% assign all_tags = all_tags | push: tag %}
+        {% endunless %}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+
+{%- comment -%}
+为每个标签统计出现次数
+{%- endcomment -%}
+{% assign tags_with_counts = '' | split: '' %}
+
+{% for tag_name in all_tags %}
+  {% assign count = 0 %}
+  {% for coll_name in site.my_collections %}
+    {% assign collection = site[coll_name] %}
+    {% for doc in collection %}
+      {% if doc.tags and doc.tags contains tag_name %}
+        {% assign count = count | plus: 1 %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+  {% assign pair = tag_name | append: "::" | append: count %}
+  {% assign tags_with_counts = tags_with_counts | push: pair %}
+{% endfor %}
+
+{%- comment -%}
+按次数降序排列
+{%- endcomment -%}
+{% assign sorted_tags = tags_with_counts | sort_natural | reverse %}
+
+<section>
+  <h2 class="panel-heading">{{ site.data.locales[lang].panel.trending_tags }}</h2>
+  <div class="d-flex flex-wrap mt-3 mb-1 me-3">
+    {% for item in sorted_tags %}
+      {% assign parts = item | split: "::" %}
+      {% assign tag_name = parts[0] %}
+      {% assign count = parts[1] %}
+      {% assign tag_slug = tag_name | slugify %}
+      {% assign url = '/tags/' | append: tag_slug | append: '/' %}
+      <a class="post-tag btn btn-outline-primary" href="{{ url | relative_url }}">
+        {{ tag_name }} ({{ count }})
+      </a>
+    {% endfor %}
+  </div>
+</section>

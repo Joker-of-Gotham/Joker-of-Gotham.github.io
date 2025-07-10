@@ -3,6 +3,8 @@
 # 主题声明，必须在文件顶部
 theme: jekyll-theme-chirpy
 
+timezone: Asia/Shanghai
+
 # 插件列表，必须紧随 theme 之后，这是 Jekyll 最早加载的部分
 plugins:
   - jekyll-paginate
@@ -30,7 +32,7 @@ social:
     - https://github.com/Joker-of-Gotham
 
 # 侧栏头像
-avatar:
+avatar: /assets/img/profile.png
 
 # 集合定义，这是关键，必须在 plugins 之后
 collections:
@@ -40,6 +42,10 @@ collections:
   graph_theory: # <--- 这个名字必须与文件夹名 "_graph_theory" 完全匹配
     output: true
     permalink: /collections/graph-theory/:path/ # <--- 确保路径正确
+
+my_collections:
+  - posts
+  - graph_theory
 
 # 默认值设置，确保为集合类型正确指定布局和侧栏导航
 defaults:
@@ -68,6 +74,9 @@ defaults:
       sidebar:
         nav: graph-theory-toc # <--- 侧栏导航的数据源文件名为 "_data/graph-theory-toc.yml"
 
+include:
+  - search.json
+
 # Kramdown 和 Sass 的标准配置（通常无需修改）
 kramdown:
   footnote_backlink: "↩︎"
@@ -91,16 +100,20 @@ exclude:
   - LICENSE
   - "*.config.js"
   - "package*.json"
+  - assets/feed.xml
 
 # Jekyll Archives 插件配置
 jekyll-archives:
-  enabled: [categories, tags] # <--- 确保这两个 enabled
+  enabled:
+    - categories
+    - tags
   layouts:
     category: category
     tag: tag
   permalinks:
-    tag: /tags/:name/
     category: /categories/:name/
+    tag: /tags/:name/
+  collections: ['graph_theory']  # 你的自定义集合名
 
 # 其他 Chirpy 主题的默认配置（如果你没有特殊需求，可以暂时不加，等主功能正常再补充）
 # theme_mode: dark

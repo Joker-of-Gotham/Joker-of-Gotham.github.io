@@ -1,0 +1,18 @@
+---
+layout: null
+permalink: /assets/js/data/search.json
+---
+
+[
+{% assign docs = site.posts | concat: site.graph_theory %}
+{% for doc in docs %}
+  {
+    "title":    {{ doc.title      | jsonify }},
+    "url":      {{ doc.url        | relative_url | jsonify }},
+    "date":     {{ doc.date       | date: "%Y-%m-%d" | jsonify }},
+    "content":  {{ doc.content    | strip_html | strip_newlines | normalize_whitespace | jsonify }},
+    "categories": {{ doc.categories | jsonify }},
+    "tags":       {{ doc.tags       | jsonify }}
+  }{% unless forloop.last %},{% endunless %}
+{% endfor %}
+]

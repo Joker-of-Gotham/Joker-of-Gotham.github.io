@@ -1,0 +1,36 @@
+---
+layout: page
+title: "所有标签"
+permalink: /tags/
+---
+
+<div id="tags" class="d-flex flex-wrap mx-xl-2">
+  {% assign all_docs = site.posts | concat: site.graph_theory %}
+  {% assign all_tags = "" | split: "" %}
+  {% for doc in all_docs %}
+    {% for tag in doc.tags %}
+      {% unless all_tags contains tag %}
+        {% assign all_tags = all_tags | push: tag %}
+      {% endunless %}
+    {% endfor %}
+  {% endfor %}
+  {% assign sorted_tags = all_tags | sort_natural %}
+
+  {% for t in sorted_tags %}
+    <div>
+      {% assign tag_slug = t | slugify: 'pretty' | url_encode %}
+      <a class="tag" href="{{ '/tags/' | append: tag_slug | append: '/' | relative_url }}">
+        {{ t }}
+        <span class="text-muted">
+          {% assign count = 0 %}
+          {% for doc in all_docs %}
+            {% if doc.tags contains t %}
+              {% assign count = count | plus: 1 %}
+            {% endif %}
+          {% endfor %}
+          {{ count }}
+        </span>
+      </a>
+    </div>
+  {% endfor %}
+</div>

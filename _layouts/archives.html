@@ -1,0 +1,64 @@
+---
+layout: page
+# The Archives of posts.
+---
+
+{% include lang.html %}
+
+{% comment %}
+  先合并 site.posts 和所有存在的集合内容到 all_docs
+  避免 concat 报错，先初始化为 site.posts（数组）
+{% endcomment %}
+{% assign all_docs = site.posts %}
+
+{% comment %}
+  你这里定义所有你想包含的集合名
+  如果未来添加新集合只需改这里即可
+{% endcomment %}
+{% assign collections_to_include = "graph_theory,statistics" | split: "," %}
+
+{% for coll_name in collections_to_include %}
+  {% assign coll_docs = site[coll_name] %}
+  {% if coll_docs %}
+    {% assign all_docs = all_docs | concat: coll_docs %}
+  {% endif %}
+{% endfor %}
+
+{% comment %}
+  按日期降序排序所有文档
+{% endcomment %}
+{% assign all_docs = all_docs | sort: "date" | reverse %}
+
+{% assign last_year = nil %}
+
+<div id="archives" class="pl-xl-3">
+
+  {% for post in all_docs %}
+    {% assign cur_year = post.date | date: "%Y" %}
+
+    {% if cur_year != last_year %}
+      {% unless forloop.first %}
+        </ul>
+      {% endunless %}
+
+      <time class="year lead d-block">{{ cur_year }}</time>
+      <ul class="list-unstyled">
+
+      {% assign last_year = cur_year %}
+    {% endif %}
+
+    <li>
+      {% assign ts = post.date | date: "%s" %}
+      <span class="date day" data-ts="{{ ts }}" data-df="DD">{{ post.date | date: "%d" }}</span>
+      <span class="date month small text-muted ms-1" data-ts="{{ ts }}" data-df="/ MM">
+        {{ post.date | date: "/ %m" }}
+      </span>
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    </li>
+
+    {% if forloop.last %}
+      </ul>
+    {% endif %}
+  {% endfor %}
+
+</div>
