@@ -34,7 +34,7 @@ plugins:
 # 网站基本信息
 lang: zh-CN
 timezone:
-title: 数学领域学习整理
+title: Chika Komari
 tagline: 一个数学学习者的笔记
 description: 该网站是本人依托MIT数学专业路线，进行数学各领域专业知识学习的汇总。
 url: "https://Joker-of-Gotham.github.io"
@@ -60,10 +60,14 @@ collections:
   graph_theory: # <--- 这个名字必须与文件夹名 "_graph_theory" 完全匹配
     output: true
     permalink: /collections/graph-theory/:path/ # <--- 确保路径正确
+  logic:
+    output: true
+    permalink: /collections/logic/:path/
 
 my_collections:
   - posts
   - graph_theory
+  - logic
 
 # 默认值设置，确保为集合类型正确指定布局和侧栏导航
 defaults:
@@ -91,6 +95,14 @@ defaults:
       toc: true
       sidebar:
         nav: graph-theory-toc # <--- 侧栏导航的数据源文件名为 "_data/graph-theory-toc.yml"
+  - scope:
+      path: ""
+      type: logic
+    values:
+      layout: post
+      toc: true
+      sidebar:
+        nav: logic-toc  
 
 include:
   - search.json
@@ -118,7 +130,7 @@ jekyll-archives:
   permalinks:
     category: /categories/:name/
     tag: /tags/:name/
-  collections: ['graph_theory']  # 你的自定义集合名
+  collections: ['graph_theory','logic']  # 你的自定义集合名
 
 # 其他 Chirpy 主题的默认配置（如果你没有特殊需求，可以暂时不加，等主功能正常再补充）
 # theme_mode: dark

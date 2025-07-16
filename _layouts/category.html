@@ -21,7 +21,12 @@ layout: page
   {% assign posts_from_graph = "" | split: "" %}
 {% endif %}
 
-{% assign all_posts = posts_from_posts | concat: posts_from_graph | sort: "date" | reverse %}
+{% assign posts_from_logic = site.logic | where_exp: "doc", "doc.categories contains page.title" %}
+{% if posts_from_logic == nil %}
+  {% assign posts_from_logic = "" | split: "" %}
+{% endif %}
+
+{% assign all_posts = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | sort: "date" | reverse %}
 
 <div id="page-category">
   <h1 class="ps-lg-2">
