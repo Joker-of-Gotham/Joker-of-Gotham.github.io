@@ -5,7 +5,7 @@ module Jekyll
     safe true
 
     def generate(site)
-      collections = ['graph_theory', 'posts'] # 自定义集合和_posts都加上
+      collections = ['graph_theory', 'posts', 'logic'] # 自定义集合和_posts都加上
       collections.each do |coll|
         next unless site.collections[coll]
 

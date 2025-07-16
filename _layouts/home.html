@@ -14,6 +14,9 @@ refactor: true
 {% if site.graph_theory %}
   {% assign all_content = all_content | concat: site.graph_theory %}
 {% endif %}
+{% if site.logic %}
+  {% assign all_content = all_content | concat: site.logic %}
+{% endif %}
 {% assign all_content = all_content | sort: 'date' | reverse %}
 {% assign valid_content = all_content | where_exp: "item", "item.title and item.url" %}
 
