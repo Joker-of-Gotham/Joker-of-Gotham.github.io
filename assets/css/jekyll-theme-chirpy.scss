@@ -9,3 +9,21 @@
 ';
 
 /* append your custom style below */
+
+// 创建一个名为 'prompt-idea' 的新提示框
+.prompt-info {
+  border-left: 0.2rem solid #a179f0; /* 紫色边框 */
+  background-color: rgba(159, 122, 234, 0.1);
+  padding: 1rem 1.25rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+// 为新提示框添加 FontAwesome 图标
+.prompt-idea::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f0eb"; /* 灯泡图标 */
+  color: #9f7aea;
+  margin-right: 0.8rem;
+}
