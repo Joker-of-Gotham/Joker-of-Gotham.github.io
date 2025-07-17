@@ -9,7 +9,7 @@
 ';
 
 /* append your custom style below */
-
+// --------------------------------------------------------------------
 // 创建一个名为 'prompt-idea' 的新提示框
 .prompt-info {
   border-left: 0.2rem solid #ba65f3; /* 紫色边框 */
@@ -28,6 +28,7 @@
   margin-right: 0.8rem;
 }
 
+// --------------------------------------------------------------------
 // 创建一个名为 'prompt-proof' 的新提示框
 .prompt-proof {
   border-left: 0.2rem solid #e7ff7e; /* 黄色边框 */
@@ -43,5 +44,24 @@
   font-weight: 900;
   content: "\f08d"; /* 图钉图标 */
   color: #f74040;
+  margin-right: 0.8rem;
+}
+
+// --------------------------------------------------------------------
+// 创建一个名为 'prompt-example' 的新提示框
+.prompt-example {
+  border-left: 0.2rem solid #75ff81; /* 绿色边框 */
+  background-color: rgba(126, 241, 132, 0.281);
+  padding: 1rem 1.25rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+// 为新提示框添加 FontAwesome 图标
+.prompt-example::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f5cb"; /* 四方格图标 */
+  color: #6240f7;
   margin-right: 0.8rem;
 }
