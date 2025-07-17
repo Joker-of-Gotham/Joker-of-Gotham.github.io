@@ -10,7 +10,7 @@
 
 /* append your custom style below */
 // --------------------------------------------------------------------
-// 创建一个名为 'prompt-idea' 的新提示框
+// 创建一个名为 'prompt-info' 的新提示框
 .prompt-info {
   border-left: 0.2rem solid #ba65f3; /* 紫色边框 */
   background-color: rgba(159, 122, 234, 0.281);
@@ -82,5 +82,24 @@
   font-weight: 900;
   content: "\f02f"; /* 打印机图标 */
   color: #bb007d;
+  margin-right: 0.8rem;
+}
+
+// --------------------------------------------------------------------
+// 创建一个名为 'prompt-attention' 的新提示框
+.prompt-attention {
+  border-left: 0.2rem solid #ff7575; /* 粉色边框 */
+  background-color: rgba(241, 126, 126, 0.342);
+  padding: 1rem 1.25rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+// 为新提示框添加 FontAwesome 图标
+.prompt-attention::before {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  content: "\f124"; /* 导航标图标 */
+  color: #e1fa00;
   margin-right: 0.8rem;
 }
