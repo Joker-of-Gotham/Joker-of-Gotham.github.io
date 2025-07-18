@@ -15,7 +15,7 @@ layout: page
   你这里定义所有你想包含的集合名
   如果未来添加新集合只需改这里即可
 {% endcomment %}
-{% assign collections_to_include = "graph_theory,statistics,logic" | split: "," %}
+{% assign collections_to_include = "graph_theory,statistics,logic,llm_learning" | split: "," %}
 
 {% for coll_name in collections_to_include %}
   {% assign coll_docs = site[coll_name] %}

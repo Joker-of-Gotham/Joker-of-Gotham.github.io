@@ -3,7 +3,7 @@ layout: page
 ---
 {% include lang.html %}
 
-{% assign all_docs = site.posts | concat: site.graph_theory | concat: site.logic %}
+{% assign all_docs = site.posts | concat: site.graph_theory | concat: site.logic | concat: site.llm_learning %}
 {% assign tagged_posts = "" | split: "" %}
 
 {% for doc in all_docs %}

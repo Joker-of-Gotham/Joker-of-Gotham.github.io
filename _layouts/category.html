@@ -26,7 +26,12 @@ layout: page
   {% assign posts_from_logic = "" | split: "" %}
 {% endif %}
 
-{% assign all_posts = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | sort: "date" | reverse %}
+{% assign posts_from_llm = site.llm_learning | where_exp: "doc", "doc.categories contains page.title" %}
+{% if posts_from_llm == nil %}
+  {% assign posts_from_llm = "" | split: "" %}
+{% endif %}
+
+{% assign all_posts = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | concat: posts_from_llm | sort: "date" | reverse %}
 
 <div id="page-category">
   <h1 class="ps-lg-2">

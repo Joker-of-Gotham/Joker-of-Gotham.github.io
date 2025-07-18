@@ -17,6 +17,9 @@ refactor: true
 {% if site.logic %}
   {% assign all_content = all_content | concat: site.logic %}
 {% endif %}
+{% if site.llm_learning %}
+  {% assign all_content = all_content | concat: site.llm_learning %}
+{% endif %}
 {% assign all_content = all_content | sort: 'date' | reverse %}
 {% assign valid_content = all_content | where_exp: "item", "item.title and item.url" %}
 
