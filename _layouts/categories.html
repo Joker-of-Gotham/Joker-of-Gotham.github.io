@@ -13,7 +13,7 @@ layout: page
   收集所有文章（posts、graph_theory 和 logic 集合）
   只提取一级分类，避免二级分类重复作为顶级分类出现
 {%- endcomment -%}
-{% assign all_docs = site.posts | concat: site.graph_theory | concat: site.logic %}
+{% assign all_docs = site.posts | concat: site.graph_theory | concat: site.logic | concat: site.llm_learning %}
 {% assign primary_categories = "" | split: "" %}
 {% for doc in all_docs %}
   {% assign cat = doc.categories[0] %}
@@ -44,8 +44,14 @@ layout: page
     {% assign posts_from_logic = "" | split: "" %}
   {% endif %}
 
+  {%- comment -%} 收集 llm_learning 集合中带有该分类的文档 {%- endcomment -%}
+  {% assign posts_from_llm = site.llm_learning | where_exp: "doc", "doc.categories contains category_name" %}
+  {% if posts_from_llm == nil %}
+    {% assign posts_from_llm = "" | split: "" %}
+  {% endif %}
+
   {%- comment -%} 合并并按日期倒序 {%- endcomment -%}
-  {% assign posts_of_category = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | sort: "date" | reverse %}
+  {% assign posts_of_category = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | concat: posts_from_llm | sort: "date" | reverse %}
 
   {% if posts_of_category.size > 0 %}
     {%- comment -%} 计算二级子分类列表 {%- endcomment -%}

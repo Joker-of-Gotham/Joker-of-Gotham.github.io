@@ -5,7 +5,7 @@ permalink: /tags/
 ---
 
 <div id="tags" class="d-flex flex-wrap mx-xl-2">
-  {% assign all_docs = site.posts | concat: site.graph_theory | concat: site.logic %}
+  {% assign all_docs = site.posts | concat: site.graph_theory | concat: site.logic | concat: site.llm_learning %}
   {% assign all_tags = "" | split: "" %}
   {% for doc in all_docs %}
     {% for tag in doc.tags %}
