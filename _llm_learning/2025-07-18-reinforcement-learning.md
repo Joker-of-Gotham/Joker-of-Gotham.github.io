@@ -58,7 +58,7 @@ $$=\int_{\mathcal{S}}ds_{t+1} \int_{\mathcal{S}}da_{t+1}\cdots \int_{\mathcal{S}
 
 其中最优动作价值函数能排除策略的影响，通俗理解为其作为一个先知执行尽量高收益的动作；表示为：
 
-$$Q_{*} (s_t,a_t)=\max_{\pi} \ Q_{\pi} (s_t,a_t) \to \pi * =argmax_{\pi} \  Q_{\pi} (s_t,a_t)$$
+$$Q_{*} (s_t,a_t)=\max_{\pi} \ Q_{\pi} (s_t,a_t) \to \pi * =arg \max_{\pi} \  Q_{\pi} (s_t,a_t)$$
 
 状态价值函数则用于量化双方胜算，表示为：
 
@@ -86,6 +86,6 @@ $$Trajectory:s_t \stackrel{\pi(\cdot \| s_t)}{\longrightarrow} a_t \stackrel{p(\
 
 **价值学习(Value-Based Learning)**指学习最优价值函数$Q_{*}(s,a)$，使智能体通过$Q_{*}$做决策选出最好的动作，即每观测到一个状态$s_t$，把其输入至$Q_{*}$函数，让$Q_{*}$对所有动作做评价，选出得到最优评价的动作；该过程用公式表示为：
 
-$$a_t=\argmax\limits_{a \in \mathcal{A}} Q_{*}(s_t,a)$$
+$$a_t=arg \max_{a \in \mathcal{A}} Q_{*}(s_t,a)$$
 
 **策略学习(Policy-Based Learn)**指学习策略函数$\pi(a \| s)$；即将观测状态$s_t$输入到$\pi$函数中，让其对所有动作作评价，进而得到概率值$\pi(* \| s_t)$；然后智能体作随机抽样，执行选中动作
