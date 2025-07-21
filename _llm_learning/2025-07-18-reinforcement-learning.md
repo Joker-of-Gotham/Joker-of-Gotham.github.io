@@ -58,7 +58,7 @@ $$=\int_{\mathcal{S}}ds_{t+1} \int_{\mathcal{S}}da_{t+1}\cdots \int_{\mathcal{S}
 
 其中最优动作价值函数能排除策略的影响，通俗理解为其作为一个先知执行尽量高收益的动作；表示为：
 
-$$Q_{*}(s_t,a_t)=\max\limits_{\pi} Q_{\pi}(s_t,a_t),具体表示为\pi* =\argmax\limits_{\pi} Q_{\pi}(s_t,a_t)$$
+$$Q_{*} (s_t,a_t)=\max\limits_{\pi} Q_{\pi} (s_t,a_t) \to \pi * =\argmax\limits_{\pi} Q_{\pi} (s_t,a_t)$$
 
 状态价值函数则用于量化双方胜算，表示为：
 
@@ -66,7 +66,7 @@ $$V_{\pi}(s_t)=\mathbb{E}_{A_t \sim \pi(\cdot \| s_t)} \left[
  \begin{matrix}
    Q_{\pi}(s_t,A_t)
   \end{matrix}
-  \right] = \sum\limits_{a \in \mathcal{A}}\pi(a \| s_t) \cdot Q_{\pi}(s_t,a)=mathbb{E}_{A_t,S_{t+1},A_{t+1},\cdots,S_{n},A_{n}} \left[
+  \right] = \sum\limits_{a \in \mathcal{A}}\pi(a \| s_t) \cdot Q_{\pi}(s_t,a)=\mathbb{E}_{A_t,S_{t+1},A_{t+1},\cdots,S_{n},A_{n}} \left[
  \begin{matrix}
    U_{t} \| S_t=s_t
   \end{matrix}
