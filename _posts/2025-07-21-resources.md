@@ -1,9 +1,9 @@
 ---
 layout: post
 title: "资源整理"
-date: 2025-07-18
-categories: [人工智能, 强化学习]
-tags: [综述笔记]
+date: 2025-07-21
+categories: [资源整理]
+tags: [资源， 技术]
 published: true
 mermaid: true
 math: true
