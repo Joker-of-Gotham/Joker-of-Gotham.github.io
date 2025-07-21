@@ -58,7 +58,7 @@ $$=\int_{\mathcal{S}}ds_{t+1} \int_{\mathcal{S}}da_{t+1}\cdots \int_{\mathcal{S}
 
 其中最优动作价值函数能排除策略的影响，通俗理解为其作为一个先知执行尽量高收益的动作；表示为：
 
-$$Q_{*} (s_t,a_t)=\max\limits_{\pi} Q_{\pi} (s_t,a_t) \to \pi * =\argmax\limits_{\pi} Q_{\pi} (s_t,a_t)$$
+$$Q_{*} (s_t,a_t)=\max_{\pi} Q_{\pi} (s_t,a_t) \to \pi * =\argmax_{\pi} Q_{\pi} (s_t,a_t)$$
 
 状态价值函数则用于量化双方胜算，表示为：
 
