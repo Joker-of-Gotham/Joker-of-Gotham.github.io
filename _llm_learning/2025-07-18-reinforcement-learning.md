@@ -136,7 +136,7 @@ $$Q_{*}(s_t,a_t)=\max_{\pi} \mathbb{E} \left[
 
 $$\underbrace{Q_{*}(s_t,a_t)}_{U_t的期望}=\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \underbrace{\max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A)}_{U_{t+1}的期望}\| S_t=s_t,A_t=a_t ]$$
 
-当智能体执行动作$a_t$，则可以利用$p(s_{t+1} \| s_t,a_t)$计算出$s_{t+1}$，使得$s_t,a_t,s_{t+1}$都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出$r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{*}(s_{t+1},a)$，以此看作项$\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$的近似；然后将$Q_{*}(s,a)$替换为$Q(s,a;{\bf{w}})$得到：
+当智能体执行动作$a_t$，则可以利用 $p(s_{t+1} \| s_t,a_t)$ 计算出$s_{t+1}$，使得$s_t,a_t,s_{t+1}$都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出 $r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{*}(s_{t+1},a)$ ，以此看作项 $\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$ 的近似；然后将 $Q_{*}(s,a)$ 替换为 $Q(s,a;{\bf{w}})$ 得到：
 
 $$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma \cdot Q_{*}(s_{t+1},a;\bf{w})}_{TD目标\hat{y_t}} $$
 
@@ -155,9 +155,9 @@ $$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma 
 - 更新参数${\bf{w}}$
     随机从经验回放数组中取一个四元组记作$(s_j,a_j,r_j,s_{j+1})$，设当前DQN参数为$w_{now}$；执行下面步骤对参数做更新得到新参数$\bf{w}_{new}$：
 
-    - 对DQN作正向传播，得到Q值：$\hat{q}_j=Q(s_j,a_j,{\bf{w}}_{now})$和$\hat{q}_{j+1}=\max\limits_{a \in \mathcal{A}} Q(s_{j+1},a_j,{\bf{w}}_{now})$
-    - 计算TD目标和TD误差：$\hat{y}_j=r_j+\gamma \cdot \hat{q}_{j+1}$和$\delta=\hat{q}_j-\hat{y}_j$
-    - 对DQN作反向传播得到梯度：${\bf{g}}_j=\bigtriangledown_{\bf{w}} Q(s_j,a_j;{\bf{w}}_{now})$
-    - 做梯度下降更新参数：${\bf{w}}_{now}-\alpha \cdot \delta_j \cdot {\bf{g}}_j \to {\bf{w}}_{new}$
+    - 对DQN作正向传播，得到Q值： $\hat{q}_j=Q(s_j,a_j,{\bf{w}}_{now})$和$\hat{q}_{j+1}=\max\limits_{a \in \mathcal{A}} Q(s_{j+1},a_j,{\bf{w}}_{now})$
+    - 计算TD目标和TD误差： $\hat{y}_j=r_j+\gamma \cdot \hat{q}_{j+1}$和$\delta=\hat{q}_j-\hat{y}_j$
+    - 对DQN作反向传播得到梯度： ${\bf{g}}_j=\bigtriangledown_{\bf{w}} Q(s_j,a_j;{\bf{w}}_{now})$
+    - 做梯度下降更新参数： ${\bf{w}}_{now}-\alpha \cdot \delta_j \cdot {\bf{g}}_j \to {\bf{w}}_{new}$
 
 因为两者是独立的；因此训练数据收集和参数更新可以同步进行，也可以异步进行。
