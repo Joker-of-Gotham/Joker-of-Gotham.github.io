@@ -89,3 +89,29 @@ $$Trajectory:s_t \stackrel{\pi(\cdot \| s_t)}{\longrightarrow} a_t \stackrel{p(\
 $$a_t=arg \max_{a \in \mathcal{A}} Q_{*}(s_t,a)$$
 
 **策略学习(Policy-Based Learn)**指学习策略函数$\pi(a \| s)$；即将观测状态$s_t$输入到$\pi$函数中，让其对所有动作作评价，进而得到概率值$\pi(* \| s_t)$；然后智能体作随机抽样，执行选中动作
+
+# 价值学习
+
+## DQN网络
+
+### DQN网络基本概念
+
+构造DQN网络的目的是通过重复训练得到最优价值函数$Q_{*}$，其的逼近记为$Q(s,a;\bf{w})$，其中$w$为神经网络参数；在训练DQN时则需要对$w$求参数，具体表达为：
+
+$$\bigtriangledown_w Q(s,a;{\bf{w}})=\frac{\partial Q(s,a;{\bf{w}})}{\partial {\bf{w}}}$$
+
+<img src="/assets/images/强化学习/DQN网络.webp" alt="描述文字" width="680" height="360">
+
+### DQN训练方法：时间差分算法(Temporal Difference)
+
+- **步骤一**：确定起始点$s$和终止点$d$，随机取$\bf{w}$作预测$\hat{q}=Q(s,a;{\bf{w}})$
+- **步骤二**：统计实际值$y$，然后利用预测值和实际值求导：
+
+    $${\bf{w}}'={\bf{w}}-\alpha \cdot \bigtriangledown_w L({\bf{w}})={\bf{w}}-\alpha \cdot (\hat{q}-y)\bigtriangledown_w Q(s,d;{\bf{w}}),L({\bf{w}})=\frac{1}{2} \left[
+ \begin{matrix}
+   Q(s,d;{\bf{w}})-y
+  \end{matrix}
+  \right]^2$$
+- **步骤三**：重复该过程至预测与实际用时一致
+
+在实际过程中途，可以对预测作修正，得到TD目标(TD Targe)记为$\hat{y}$；将$\hat{y}$取代上式的$y$，记TD误差(TD error) $\delta=\hat{q}-\hat{y}$；进一步不断更新参数即可
