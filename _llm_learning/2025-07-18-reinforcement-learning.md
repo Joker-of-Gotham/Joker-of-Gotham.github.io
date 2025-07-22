@@ -58,7 +58,7 @@ $$=\int_{\mathcal{S}}ds_{t+1} \int_{\mathcal{S}}da_{t+1}\cdots \int_{\mathcal{S}
 
 其中最优动作价值函数能排除策略的影响，通俗理解为其作为一个先知执行尽量高收益的动作；表示为：
 
-$$Q_{*} (s_t,a_t)=\max_{\pi} \ Q_{\pi} (s_t,a_t) \to \pi * =arg \max_{\pi} \  Q_{\pi} (s_t,a_t)$$
+$$Q_{\ast} (s_t,a_t)=\max_{\pi} \ Q_{\pi} (s_t,a_t) \to \pi * =arg \max_{\pi} \  Q_{\pi} (s_t,a_t)$$
 
 状态价值函数则用于量化双方胜算，表示为：
 
@@ -84,9 +84,9 @@ $$Trajectory:s_t \stackrel{\pi(\cdot \| s_t)}{\longrightarrow} a_t \stackrel{p(\
 
 强化学习方法主要分为两类：一类是基于模型的方法(Model-Based)，另一类是无模型方法(Model-Free)；无模型方法又可以分为价值学习和策略学习。
 
-**价值学习(Value-Based Learning)**指学习最优价值函数$Q_{*}(s,a)$，使智能体通过$Q_{*}$做决策选出最好的动作，即每观测到一个状态$s_t$，把其输入至$Q_{*}$函数，让$Q_{*}$对所有动作做评价，选出得到最优评价的动作；该过程用公式表示为：
+**价值学习(Value-Based Learning)**指学习最优价值函数$Q_{\ast}(s,a)$，使智能体通过$Q_{\ast}$做决策选出最好的动作，即每观测到一个状态$s_t$，把其输入至$Q_{\ast}$函数，让$Q_{\ast}$对所有动作做评价，选出得到最优评价的动作；该过程用公式表示为：
 
-$$a_t=arg \max_{a \in \mathcal{A}} Q_{*}(s_t,a)$$
+$$a_t=arg \max_{a \in \mathcal{A}} Q_{\ast}(s_t,a)$$
 
 **策略学习(Policy-Based Learn)**指学习策略函数$\pi(a \| s)$；即将观测状态$s_t$输入到$\pi$函数中，让其对所有动作作评价，进而得到概率值$\pi(* \| s_t)$；然后智能体作随机抽样，执行选中动作
 
@@ -96,7 +96,7 @@ $$a_t=arg \max_{a \in \mathcal{A}} Q_{*}(s_t,a)$$
 
 ### DQN网络基本概念
 
-构造DQN网络的目的是通过重复训练得到最优价值函数$Q_{*}$，其的逼近记为$Q(s,a;\bf{w})$，其中$w$为神经网络参数；在训练DQN时则需要对$w$求参数，具体表达为：
+构造DQN网络的目的是通过重复训练得到最优价值函数$Q_{\ast}$，其的逼近记为$Q(s,a;\bf{w})$，其中$w$为神经网络参数；在训练DQN时则需要对$w$求参数，具体表达为：
 
 $$\bigtriangledown_w Q(s,a;{\bf{w}})=\frac{\partial Q(s,a;{\bf{w}})}{\partial {\bf{w}}}$$
 
@@ -126,7 +126,7 @@ $$U_t=\sum\limits_{k=t}^{n}\gamma^{k-t} \cdot R_k=R_t+U_{t+1}=R_t+\sum\limits_{k
 
 最优价值函数写作：
 
-$$Q_{*}(s_t,a_t)=\max_{\pi} \mathbb{E} \left[
+$$Q_{\ast}(s_t,a_t)=\max_{\pi} \mathbb{E} \left[
  \begin{matrix}
    U_{t} \| S_t=s_t,A_t=a_t
   \end{matrix}
@@ -134,11 +134,11 @@ $$Q_{*}(s_t,a_t)=\max_{\pi} \mathbb{E} \left[
 
 从上述两式可推导出最优贝尔曼方程：
 
-$$\underbrace{Q_{*}(s_t,a_t)}_{U_t的期望}=\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \underbrace{\max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A)}_{U_{t+1}的期望}\| S_t=s_t,A_t=a_t ]$$
+$$\underbrace{Q_{\ast}(s_t,a_t)}_{U_t的期望}=\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \underbrace{\max\limits_{A \in \mathcal{A}} Q_{\ast}(S_{t+1},A)}_{U_{t+1}的期望}\| S_t=s_t,A_t=a_t ]$$
 
-当智能体执行动作$a_t$，则可以利用 $p(s_{t+1} \| s_t,a_t)$ 计算出 $s_{t+1}$ ，使得 $s_t,a_t,s_{t+1}$ 都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出 $r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{*}(s_{t+1},a)$ ，以此看作项 $\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$ 的近似；然后将 $Q_{*}(s,a)$ 替换为 $Q(s,a;{\bf{w}})$ 得到：
+当智能体执行动作$a_t$，则可以利用 $p(s_{t+1} \| s_t,a_t)$ 计算出 $s_{t+1}$ ，使得 $s_t,a_t,s_{t+1}$ 都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出 $r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{\ast}(s_{t+1},a)$ ，以此看作项 $\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{\ast}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$ 的近似；然后将 $Q_{\ast}(s,a)$ 替换为 $Q(s,a;{\bf{w}})$ 得到：
 
-$$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma \cdot Q_{*}(s_{t+1},a;\bf{w})}_{TD目标\hat{y_t}} $$
+$$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma \cdot Q_{\ast}(s_{t+1},a;\bf{w})}_{TD目标\hat{y_t}} $$
 
 然后重复DQN基本流程中的步骤即可。
 
