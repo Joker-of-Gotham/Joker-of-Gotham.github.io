@@ -136,7 +136,7 @@ $$Q_{\ast}(s_t,a_t)=\max_{\pi} \mathbb{E} \left[
 
 $$\underbrace{Q_{\ast}(s_t,a_t)}_{U_t的期望}=\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \underbrace{\max\limits_{A \in \mathcal{A}} Q_{\ast}(S_{t+1},A)}_{U_{t+1}的期望}\| S_t=s_t,A_t=a_t ]$$
 
-当智能体执行动作$a_t$，则可以利用 $p(s_{t+1} \| s_t,a_t)$ 计算出 $s_{t+1}$ ，使得 $s_t,a_t,s_{t+1}$ 都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出 $r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{\ast}(s_{t+1},a)$ ，以此看作项 ${{\mathbb{E}}_{S_{t+1} \sim p(\cdot \| s_t,a_t)}} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{\ast}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$ 的近似；然后将 ${Q_{\ast}} (s,a)$ 替换为 ${Q(s,a;{\bf{w}})}$ 得到：
+当智能体执行动作$a_t$，则可以利用 $p(s_{t+1} \| s_t,a_t)$ 计算出 $s_{t+1}$ ，使得 $s_t,a_t,s_{t+1}$ 都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出 $r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{\ast}(s_{t+1},a)$ ，以此看作项$${{\mathbb{E}}_{S_{t+1} \sim p(\cdot \| s_t,a_t)}} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{\ast}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$$的近似；然后$$将{Q_{\ast}} (s,a)替换为{Q(s,a;{\bf{w}})}$$得到：
 
 $$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma \cdot Q_{\ast}(s_{t+1},a;\bf{w})}_{TD目标\hat{y_t}} $$
 
