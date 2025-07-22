@@ -136,7 +136,7 @@ $$Q_{*}(s_t,a_t)=\max_{\pi} \mathbb{E} \left[
 
 $$\underbrace{Q_{*}(s_t,a_t)}_{U_t的期望}=\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \underbrace{\max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A)}_{U_{t+1}的期望}\| S_t=s_t,A_t=a_t ]$$
 
-当智能体执行动作$a_t$，则可以利用 $p(s_{t+1} \| s_t,a_t)$ 计算出$s_{t+1}$，使得$s_t,a_t,s_{t+1}$都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出 $r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{*}(s_{t+1},a)$ ，以此看作项 $\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$ 的近似；然后将 $Q_{*}(s,a)$ 替换为 $Q(s,a;{\bf{w}})$ 得到：
+当智能体执行动作$a_t$，则可以利用 $p(s_{t+1} \| s_t,a_t)$ 计算出 $s_{t+1}$ ，使得 $s_t,a_t,s_{t+1}$ 都被观测到；进而观测到$r_t$，从而拥有四元组$(s_T,a_t,r_t,s_{t+1})$，进而计算出 $r_t+\max\limits_{a \in \mathcal{A}} \gamma \cdot Q_{*}(s_{t+1},a)$ ，以此看作项 $\mathbb{E}_{S_{t+1} \sim p(\cdot \| s_t,a_t)} [R_t + \gamma \cdot \max\limits_{A \in \mathcal{A}} Q_{*}(S_{t+1},A) \| S_t=s_t,A_t=a_t ]$ 的近似；然后将 $Q_{*}(s,a)$ 替换为 $Q(s,a;{\bf{w}})$ 得到：
 
 $$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma \cdot Q_{*}(s_{t+1},a;\bf{w})}_{TD目标\hat{y_t}} $$
 
@@ -144,19 +144,19 @@ $$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma 
 
 **训练流程**
 
-根据四元组$(s_T,a_t,r_t,s_{t+1})$可以求出DQN的观测值，以及TD目标和TD误差；由于算法所需数据为四元组，与控制智能体运动的策略$\pi$无关，因此可以用任何策略控制智能体与环境交互，并记录算法轨迹作为训练数据。因此**DQN的训练可以分为两个独立部分**：
+根据四元组 $(s_T,a_t,r_t,s_{t+1})$ 可以求出DQN的观测值，以及TD目标和TD误差；由于算法所需数据为四元组，与控制智能体运动的策略 $\pi$ 无关，因此可以用任何策略控制智能体与环境交互，并记录算法轨迹作为训练数据。因此**DQN的训练可以分为两个独立部分**：
 
-- 收集训练数据：可以用任何策略$\pi$与环境交互，该策略被称作**行为策略(Behavior Policy)**，常用的是$\epsilon -greedy$策略：
+- 收集训练数据：可以用任何策略 $\pi$ 与环境交互，该策略被称作**行为策略(Behavior Policy)**，常用的是$\epsilon -greedy$策略：
     
     $$ a_t=\left\{ \begin{aligned} & arg \max_{a} Q(s,a;{\bf{w}})\ \ \ \ \ \ 以概率(1-\epsilon) \\ & 均匀抽取\mathcal{A}中的一个动作 \ \ \ \ 以概率\epsilon \end{aligned} \right.$$
 
-    智能体在整个过程中的轨迹记作$\{ s_i,a_i,r_i \| i=1,2,\cdots,n \}$，把一条轨迹划为$n$个四元组$(s_T,a_t,r_t,s_{t+1})$存入数组，从而得到经验回放数组(Reply Buffer)
+    智能体在整个过程中的轨迹记作 $\{ s_i,a_i,r_i \| i=1,2,\cdots,n \}$ ，把一条轨迹划为$n$个四元组 $(s_T,a_t,r_t,s_{t+1})$ 存入数组，从而得到经验回放数组(Reply Buffer)
 
 - 更新参数${\bf{w}}$
-    随机从经验回放数组中取一个四元组记作$(s_j,a_j,r_j,s_{j+1})$，设当前DQN参数为$w_{now}$；执行下面步骤对参数做更新得到新参数$\bf{w}_{new}$：
+    随机从经验回放数组中取一个四元组记作 $(s_j,a_j,r_j,s_{j+1})$ ，设当前DQN参数为$w_{now}$；执行下面步骤对参数做更新得到新参数 $\bf{w}_{new}$ ：
 
-    - 对DQN作正向传播，得到Q值： $\hat{q}_j=Q(s_j,a_j,{\bf{w}}_{now})$和$\hat{q}_{j+1}=\max\limits_{a \in \mathcal{A}} Q(s_{j+1},a_j,{\bf{w}}_{now})$
-    - 计算TD目标和TD误差： $\hat{y}_j=r_j+\gamma \cdot \hat{q}_{j+1}$和$\delta=\hat{q}_j-\hat{y}_j$
+    - 对DQN作正向传播，得到Q值： $\hat{q}_j=Q(s_j,a_j,{\bf{w}}_{now})$和 $\hat{q}_{j+1}=\max\limits_{a \in \mathcal{A}} Q(s_{j+1},a_j,{\bf{w}}_{now})$
+    - 计算TD目标和TD误差： $\hat{y}_j=r_j+\gamma \cdot \hat{q}_{j+1}$ 和 $\delta=\hat{q}_j-\hat{y}_j$
     - 对DQN作反向传播得到梯度： ${\bf{g}}_j=\bigtriangledown_{\bf{w}} Q(s_j,a_j;{\bf{w}}_{now})$
     - 做梯度下降更新参数： ${\bf{w}}_{now}-\alpha \cdot \delta_j \cdot {\bf{g}}_j \to {\bf{w}}_{new}$
 
