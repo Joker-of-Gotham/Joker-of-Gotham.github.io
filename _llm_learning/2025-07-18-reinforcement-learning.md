@@ -161,3 +161,45 @@ $$\underbrace{Q(s,a;{\bf{w}})}_{预测\hat{q_t}} \approx \underbrace{r_t+\gamma 
     - 做梯度下降更新参数： $${\bf{w}}_{now}-\alpha \cdot \delta_j \cdot {\bf{g}}_j \to {\bf{w}}_{new}$$
 
 因为两者是独立的；因此训练数据收集和参数更新可以同步进行，也可以异步进行。
+
+#### 利用Q学习算法训练DQN
+
+Q学习最初以表格形式出现，参照表格作出决策；该种情况下$\mathcal{S}$和$\mathcal{A}$为有限集，它们的组合有限；从这些组合中，针对每个状态选择回报最大的动作，从而实现最优决策；数学表示为：
+
+$$a_t=arg \max_{a \in \mathcal{A}} Q_{\ast} (s_t,a)$$ 
+
+如果要让智能体的轨迹学习这样一个表格，则可用一个表格$\tilde{Q}$近似$Q_{\ast}$：
+
+- 首先初始化 $\tilde{Q}$，如使其为全0的表格
+- 然后用表格形式的Q学习算法更新 $\tilde{Q}$
+- 每次更新表格的一个元素，使其最终收敛到 $Q_{\ast}$
+
+**训练流程**
+
+根据四元组 $(s_T,a_t,r_t,s_{t+1})$ 可以求出DQN的观测值，以及TD目标和TD误差；由于算法所需数据为四元组，与控制智能体运动的策略 $\pi$ 无关，因此可以用任何策略控制智能体与环境交互，并记录算法轨迹作为训练数据。因此**DQN的训练可以分为两个独立部分**：
+
+- 收集训练数据：可以用任何策略 $\pi$ 与环境交互，该策略被称作**行为策略(Behavior Policy)**，常用的是$\epsilon -greedy$策略：
+    
+    $$ a_t=\left\{ \begin{aligned} & arg \max_{a} \tilde{Q}(s_{t},a)\ \ \ \ \ \ 以概率(1-\epsilon) \\ & 均匀抽取\mathcal{A}中的一个动作 \ \ \ \ 以概率\epsilon \end{aligned} \right.$$
+
+    智能体在整个过程中的轨迹记作 $\{ s_i,a_i,r_i \| i=1,2,\cdots,n \}$ ，把一条轨迹划为$n$个四元组 $(s_T,a_t,r_t,s_{t+1})$ 存入数组，从而得到经验回放数组(Reply Buffer)；事后通过经验回访更新表格 $\tilde{Q}$
+
+- 更新参数${\bf{w}}$
+    随机从经验回放数组中取一个四元组记作 $(s_j,a_j,r_j,s_{j+1})$ ，设当前DQN参数为$w_{now}$；执行下面步骤对参数做更新得到新参数 $\bf{w}_{new}$ ：
+
+    - 对DQN作正向传播，得到Q值： $$\hat{q}_{j}=\tilde{Q}_{now} (s_{j},a_{j})和\hat{q}_{j+1}=\max\limits_{a \in \mathcal{A}} \tilde{Q}_{now} (s_{j+1},a)$$
+    - 计算TD目标和TD误差： $$\hat{y}_{j}=r_j+\gamma \cdot \hat{q}_{j+1}和\delta=\hat{q}_j-\hat{y}_j$$
+    - 更新表格中 $(s_{j},a_{j})$ 位置上的元素：$$\tilde{Q}_{now} (s_{j},a_{j})-\alpha \cdot \delta_{j} \to \tilde{Q}_{new} (s_{j},a_{j})$$
+
+同理，因为两者是独立的;因此训练数据收集和参数更新可以同步进行，也可以异步进行。
+
+## 同策略(On-policy)与异策略(Off-policy)
+
+行为策略是控制智能体与环境交互的策略，作用是收集经验(即观测的环境、动作、奖励)；目标策略是结束训练后得到的用于控制目标智能体的策略函数，该策略函数暂时作为一个确定性策略，用于控制智能体：
+
+$$a_{t}=arg \max_{a} Q(s_{t},a_{t};\bf{w})$$
+
+同策略指用相同的行为策略和目标策略，异策略指用不同的行为策略和目标策略；DQN则是经典的异策略，通过经验回放的形式建立目标策略。
+
+<img src="/assets/images/强化学习/同策略和异策略.png" alt="描述文字" width="980" height="360">
+
