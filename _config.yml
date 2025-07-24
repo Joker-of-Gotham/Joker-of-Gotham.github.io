@@ -66,12 +66,16 @@ collections:
   llm_learning:
     output: true
     permalink: /collections/llm-learning/:path/
+  technical_talk:
+    output: true
+    permalink: /collections/technical-talk/:path/
 
 my_collections:
   - posts
   - graph_theory
   - logic
   - llm_learning
+  - technical_talk
 
 # 默认值设置，确保为集合类型正确指定布局和侧栏导航
 defaults:
@@ -115,6 +119,14 @@ defaults:
       toc: true
       sidebar:
         nav: llm-learning-toc 
+  - scope:
+      path: ""
+      type: technical_talk
+    values:
+      layout: post
+      toc: true
+      sidebar:
+        nav: technical-talk-toc 
 
 include:
   - search.json
@@ -142,7 +154,7 @@ jekyll-archives:
   permalinks:
     category: /categories/:name/
     tag: /tags/:name/
-  collections: ['graph_theory','logic','llm_learning']  # 你的自定义集合名
+  collections: ['graph_theory','logic','llm_learning','technical_talk']  # 你的自定义集合名
 
 # 其他 Chirpy 主题的默认配置（如果你没有特殊需求，可以暂时不加，等主功能正常再补充）
 # theme_mode: dark

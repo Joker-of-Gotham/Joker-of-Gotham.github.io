@@ -20,6 +20,9 @@ refactor: true
 {% if site.llm_learning %}
   {% assign all_content = all_content | concat: site.llm_learning %}
 {% endif %}
+{% if site.llm_learning %}
+  {% assign all_content = all_content | concat: site.technical_talk %}
+{% endif %}
 {% assign all_content = all_content | sort: 'date' | reverse %}
 {% assign valid_content = all_content | where_exp: "item", "item.title and item.url" %}
 
