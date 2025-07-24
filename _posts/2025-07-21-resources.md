@@ -20,6 +20,7 @@ math: true
 | 名称       | 功能描述          | 链接             | 拓展部分            |
 | :--------------: | :----------------: | :-----------------: | ----------------- |
 | wxauto | 自动化微信收发消息开源库 | https://github.com/cluic/wxauto | 暂无 |
+| wxapkg | 微信小程序逆向，基于网络自动扫描 | https://github.com/wux1an/wxapkg?tab=readme-ov-file | 暂无 |
 
 ## markdown参考帖
 
