@@ -31,7 +31,12 @@ layout: page
   {% assign posts_from_llm = "" | split: "" %}
 {% endif %}
 
-{% assign all_posts = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | concat: posts_from_llm | sort: "date" | reverse %}
+{% assign posts_from_talk = site.technical_talk | where_exp: "doc", "doc.categories contains page.title" %}
+{% if posts_from_talk == nil %}
+  {% assign posts_from_talk = "" | split: "" %}
+{% endif %}
+
+{% assign all_posts = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | concat: posts_from_llm | concat: posts_from_talk | sort: "date" | reverse %}
 
 <div id="page-category">
   <h1 class="ps-lg-2">

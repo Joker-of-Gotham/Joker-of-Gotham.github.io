@@ -5,7 +5,7 @@ module Jekyll
     safe true
 
     def generate(site)
-      collections = ['graph_theory','logic','llm_learning'] # 你的集合名称
+      collections = ['graph_theory','logic','llm_learning','technical_talk'] # 你的集合名称
       collections.each do |coll|
         if site.collections[coll]
           categories = site.collections[coll].docs.flat_map { |doc| doc.data['categories'] || [] }.uniq
