@@ -240,9 +240,9 @@ $$(1-\alpha) \cdot q(s_{t},a_{t}) + \alpha \cdot \hat{y_{t}} \to q(s_{t},a_{t})$
 - **步骤一**：观测到当前状态$s_{t}$，根据当前策略抽样：$a_{t} \sim \pi_{now} (\cdot \| s_{t})$
 - **步骤二**：把表格$q_{now}$中第$(s_{t},a_{t})$位置上的元素记为：$\hat{q_{t}}=q_{now}(s_{t},a_{t})$
 - **步骤三**：智能体执行动作$a_{t}$，观测到奖励$r_{t}$和新状态$s_{t+1}$
-- **步骤四**：根据当前策略抽样 $\tilde{a}_{t+1} \sim \pi_{now} (\cdot \| s_{t})$ ，其中$\tilde{a_{t+1}}$为假想动作，智能体不予执行
-- **步骤五**：记 $\hat{q}_{t+1} =q_{now} (s_{t+1},\tilde{a}_{t+1})$，计算TD目标和TD误差 $\hat{y_{t}}=r_{t}+ \gamma \cdot \hat{q}_{t+1},\delta_{t}=\hat{q}_{t}-\hat{y}_{t}$
-- **步骤六**：更新表格中(s_{t},a_{t})位置上的元素：$q_{now} (s_{t},a_{t})-\alpha \cdot \delta_{t} \to q_{new} (s_{t},a_{t})$
+- **步骤四**：根据当前策略抽样 $$\tilde{a}_{t+1} \sim \pi_{now} (\cdot \| s_{t})$$ ，其中 $\tilde{a_{t+1}}$ 为假想动作，智能体不予执行
+- **步骤五**：记 $$\hat{q}_{t+1} =q_{now} (s_{t+1}, \tilde{a}_{t+1})$$，计算TD目标和TD误差 $$\hat{y_{t}}=r_{t}+ \gamma \cdot \hat{q}_{t+1},\delta_{t}=\hat{q}_{t}-\hat{y}_{t}$$
+- **步骤六**：更新表格中$(s_{t},a_{t})$位置上的元素：$$q_{now} (s_{t},a_{t}) -\alpha \cdot \delta_{t} \to q_{new} (s_{t},a_{t})$$
 
 > **Q学习与SARSA对比**
 > - Q学习属于异策略，可以用经验回放，目标是学到表格$\tilde{Q}$作为$Q_{\ast}$的近似而与$\pi$无关，所以无论$\pi$是什么都不影响Q学习结果  
