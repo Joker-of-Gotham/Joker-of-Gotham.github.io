@@ -203,7 +203,7 @@ $$a_{t}=arg \max_{a} Q(s_{t},a_{t};\bf{w})$$
 
 <img src="/assets/images/强化学习/同策略和异策略.png" alt="描述文字" width="980" height="360">
 
-### SARSA算法
+### SARSA(State-Action-Reward-State-Action)算法
 
 针对强化学习，$Q_{\pi}$常常和策略函数$\pi$结合使用，被称作Actor-Critic方法，而SARSA算法则就是被用来训练该方法$Q_{\pi}$的工具。
 
@@ -227,4 +227,24 @@ SARSA算法的推导
 
   其被称作TD目标，是表格在$t+1$时刻对$Q_{\pi} (s_{t},a_{t})$做出的估计
 
-$q(s_{t},a_{t})$和$\hat{y_{t}}$都是对动作价值$Q_{\pi} (s_{t},a_{t})$的估计，而$\hat{y_{t}}$部分基于真实观测到的奖励
+$q(s_{t},a_{t})$和$\hat{y_{t}}$都是对动作价值$Q_{\pi} (s_{t},a_{t})$的估计，而$\hat{y_{t}}$部分基于真实观测到的奖励$r_{t}$；由于$\hat{y_{t}}$更可靠，因此鼓励$q(s_{t},a_{t})$趋近$\hat{y_{t}}$，即：
+
+$$(1-\alpha) \cdot q(s_{t},a_{t}) + \alpha \cdot \hat{y_{t}} \to q(s_{t},a_{t})$$
+
+#### SARSA的训练流程
+
+**前提假设**：设当前表格为$q_{now}$，当前策略为$\pi_{now}$，每轮更新表格中的一个元素，把更新后的表格记作$q_{new}$
+
+**具体步骤**
+
+- **步骤一**：观测到当前状态$s_{t}$，根据当前策略抽样：$a_{t} \sim \pi_{now} (\cdot \| s_{t})$
+- **步骤二**：把表格$q_{now}$中第$(s_{t},a_{t})$位置上的元素记为：$\hat{q_{t}}=q_{now}(s_{t},a_{t})$
+- **步骤三**：智能体执行动作$a_{t}$，观测到奖励$r_{t}$和新状态$s_{t+1}$
+- **步骤四**：根据当前策略抽样 $\tilde{a}_{t+1} \sim \pi_{now} (\cdot \| s_{t})$ ，其中$\tilde{a_{t+1}}$为假想动作，智能体不予执行
+- **步骤五**：记 $\hat{q}_{t+1} =q_{now} (s_{t+1},\tilde{a}_{t+1})$，计算TD目标和TD误差 $\hat{y_{t}}=r_{t}+ \gamma \cdot \hat{q}_{t+1},\delta_{t}=\hat{q}_{t}-\hat{y}_{t}$
+- **步骤六**：更新表格中(s_{t},a_{t})位置上的元素：$q_{now} (s_{t},a_{t})-\alpha \cdot \delta_{t} \to q_{new} (s_{t},a_{t})$
+
+> **Q学习与SARSA对比**
+> - Q学习属于异策略，可以用经验回放，目标是学到表格$\tilde{Q}$作为$Q_{\ast}$的近似而与$\pi$无关，所以无论$\pi$是什么都不影响Q学习结果  
+> - SARSA属于同策略，不能用经验回放，目标是学到表格$q$作为动作价值函数$Q_{\pi}$的近似吗，必须通过收集当前策略$\pi_{now}$学习$Q_{\pi}$
+{: .prompt-attention } 
