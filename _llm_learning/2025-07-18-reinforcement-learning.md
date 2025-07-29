@@ -262,7 +262,7 @@ $$q(s,a;{\bf{w}})=Q_{\pi}, \forall s \in \mathcal{S},a \in \mathcal{A}$$
 
 **算法推导**
 
-给定当前状态$s_{t}$，智能体执行动作$a_{t}$，环境给出奖励$r_{t}$和新状态$s_{t+1}$，然后基于$s_{t+1}$作随机抽样，得到新动作$\tilde{a}_{t+1} \sim \pi (\cdot \| s_{t+1})$，定义TD目标：
+给定当前状态$s_{t}$，智能体执行动作$a_{t}$，环境给出奖励$r_{t}$和新状态$s_{t+1}$，然后基于$s_{t+1}$作随机抽样，得到新动作$$\tilde{a}_{t+1} \sim \pi (\cdot \| s_{t+1})$$，定义TD目标：
 
 $$\hat{y}_{t}=r_{t}+ \gamma \cdot q (s_{t+1},\tilde{a}_{t+1};{\bf{w}})$$
 
