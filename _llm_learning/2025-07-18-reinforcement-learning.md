@@ -26,7 +26,10 @@ math: true
 - **状态转移(State Transition)**：指由当前状态$s$变为$s'$的过程，该过程执行动作$a$
 - **状态转移函数(State-Transition Function)**：产生新状态$s'$时用到的函数，可以是确定或随机的，如随机状态转移函数记为$p(s' \| s,a)=\mathbb{P}(S'=s' \| S=s,A=a)$
 - **智能体与环境交互 (Agent Environment Interaction)**：是上述所有参量组成的一整个循环系统
+
+    <div style="text-align: center;">
     <img src="/assets/images/强化学习/强化学习智能体环境交互示意图.png" alt="描述文字" width="480" height="350">
+    </div>
 
 ### 强化学习中的回报(Return)
 
@@ -207,7 +210,7 @@ $$a_{t}=arg \max_{a} Q(s_{t},a_{t};\bf{w})$$
 
 针对强化学习，$Q_{\pi}$常常和策略函数$\pi$结合使用，被称作Actor-Critic方法，而SARSA算法则就是被用来训练该方法$Q_{\pi}$的工具。
 
-SARSA算法的推导
+**SARSA算法的推导**
 
 - 首先根据贝尔曼方程可知：
 
@@ -248,3 +251,49 @@ $$(1-\alpha) \cdot q(s_{t},a_{t}) + \alpha \cdot \hat{y_{t}} \to q(s_{t},a_{t})$
 > - Q学习属于异策略，可以用经验回放，目标是学到表格$\tilde{Q}$作为$Q_{\ast}$的近似而与$\pi$无关，所以无论$\pi$是什么都不影响Q学习结果  
 > - SARSA属于同策略，不能用经验回放，目标是学到表格$q$作为动作价值函数$Q_{\pi}$的近似吗，必须通过收集当前策略$\pi_{now}$学习$Q_{\pi}$
 {: .prompt-attention } 
+
+#### 神经网络形式训练SARSA
+
+若状态空间$\mathcal{S}$为无限集，则无法用表格表示$Q_{\pi}$，而是用神经网络$q(s,a;\bf{w})$近似：
+
+$$q(s,a;{\bf{w}})=Q_{\pi}, \forall s \in \mathcal{S},a \in \mathcal{A}$$
+
+神经网络的结构被预先设定，参数通过智能体与环境的交互确定
+
+**算法推导**
+
+给定当前状态$s_{t}$，智能体执行动作$a_{t}$，环境给出奖励$r_{t}$和新状态$s_{t+1}$，然后基于$s_{t+1}$作随机抽样，得到新动作$\tilde{a}_{t+1} \sim \pi (\cdot \| s_{t+1})$，定义TD目标：
+
+$$\hat{y}_{t}=r_{t}+ \gamma \cdot q (s_{t+1},\tilde{a}_{t+1};{\bf{w}})$$
+
+进而定义损失函数：
+
+$$L({\bf{w}}) \triangleq \frac{1}{2} [q(s_{t},a_{t};{\bf{w}})-\hat{y}_{t}]^{2}$$
+
+进一步利用梯度下降计算损失函数：
+
+$$\bigtriangledown_{\bf{w}} L({\bf{w}})=\underbrace{(\hat{q}_{t}-\hat{y}_{t})}_{TD误差 \delta_{t}} \cdot \bigtriangledown_{\bf{w}} q(s_{t},a_{t};{\bf{w}})$$
+
+然后作梯度下降更新：
+
+$$w-\alpha \cdot \delta_{t} \cdot \bigtriangledown_{\bf{w}} q(s_{t},a_{t};{\bf{w}})$$
+
+利用神经网络训练和上面一节的训练流程类似，只是把相应参数替换为了含$\bf{w}$的内容，此处省略
+
+#### 多步TD目标和蒙特卡洛与自举
+
+多步TD目标实质上就是对贝尔曼方程做了一些修改：
+
+  $$\underbrace{Q_{\pi} (s_{t},a_{t})}_{U_{t}的期望} = {\mathbb{E}} [(\sum\limits_{i=0}^{m-1} r^{i} R_{t+i}) + \gamma^{m} \cdot \underbrace{Q_{\pi}(S_{t+m},A_{t+m})}_{U_{t+m}的期望} \| S_t=s_t,A_t=a_t ]$$
+
+即用策略$\pi$控制智能体与环境交互$m$次得到轨迹后，再作近似得到近似结果；其它内容和传统训练方式差距不大
+
+蒙特卡洛和自举可以看作是多步TD朝两个相反方向的延申。
+
+<img src="/assets/images/强化学习/自举解释.png" alt="描述文字" width="780" height="140">
+
+前者依赖完整经历完一轮交互后的所有显式状态，无偏但方差大；后者仅依赖后一步交互，方差小但有偏差。
+
+<div style="text-align: center;">
+<img src="/assets/images/强化学习/自举图.png" alt="描述文字" width="380" height="300">
+</div>
