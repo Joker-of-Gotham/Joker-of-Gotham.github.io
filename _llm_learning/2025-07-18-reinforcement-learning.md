@@ -297,3 +297,13 @@ $$w-\alpha \cdot \delta_{t} \cdot \bigtriangledown_{\bf{w}} q(s_{t},a_{t};{\bf{w
 <div style="text-align: center;">
 <img src="/assets/images/强化学习/自举图.png" alt="描述文字" width="380" height="300">
 </div>
+
+## 价值学习高级技巧
+
+该部分主要包含两个技巧：经验回放(Experience Replay)、高估问题的解决方案
+
+### 经验回放
+
+**概念**：把智能体与环境交互的记录(即经验)储存到一个数组里，事后反复利用这些经验训练智能体；该数组被称为**经验回放数组(Replay Buffer)**，一般智能体轨迹被划分为四元组$(s_{t},a_{t},r_{t},s_{t+1})$，大小为最近保留的$b$条数据(一般被设置为$10^{5} \sim 10^{6}$)；在实践中，要等回放数组中有足够多四元组，才开始经验回放更新DQN。
+
+
