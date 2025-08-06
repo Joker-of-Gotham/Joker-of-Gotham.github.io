@@ -7,6 +7,7 @@ tags: [综述笔记]
 published: true
 mermaid: true
 math: true
+toc: true
 ---
 
 # 强化学习的数学基础

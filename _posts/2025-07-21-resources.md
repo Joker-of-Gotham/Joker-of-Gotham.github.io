@@ -7,6 +7,7 @@ tags: [资源, 技术]
 published: true
 mermaid: true
 math: true
+toc: true
 ---
 
 # LLM与数据科学领域

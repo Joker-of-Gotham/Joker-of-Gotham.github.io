@@ -30,6 +30,7 @@ plugins:
   - jekyll-seo-tag
   - jekyll-archives
   - jekyll-include-cache
+  - jekyll-toc
 
 # 网站基本信息
 lang: zh-CN
@@ -164,3 +165,9 @@ jekyll-archives:
 # comments:
 # assets:
 # pwa:
+
+toc:
+  min_level: 2  # 例如，从 H2 标题开始生成目录
+  max_level: 4
+  ul_class: "nav flex-column" # 给 <ul> 标签加上 Bootstrap 的 class
+  li_class: "nav-item"        # 给 <li> 标签加上 Bootstrap 的 class

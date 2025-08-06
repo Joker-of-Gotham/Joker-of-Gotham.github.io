@@ -7,6 +7,7 @@ tags: [综述笔记, 金融量化]
 published: true
 mermaid: true
 math: true
+toc: true
 ---
 
 # 机器学习在算法交易中的发展潮流

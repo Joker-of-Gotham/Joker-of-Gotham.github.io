@@ -42,6 +42,17 @@ layout: compress
               {% include trending-tags.html lang=lang %}
             </div>
 
+            <!-- [BEGIN] Add Table of Contents -->
+            {% if page.toc %}
+              <div class="access">
+                <h2 class="panel-title">目录</h2>
+                <div id="toc-wrapper" class="ps-3 pt-2">
+                  {% toc %}
+                </div>
+              </div>
+            {% endif %}
+            <!-- [END] Add Table of Contents -->
+
             {% for _include in layout.panel_includes %}
               {% assign _include_path = _include | append: '.html' %}
               {% include {{ _include_path }} lang=lang %}
