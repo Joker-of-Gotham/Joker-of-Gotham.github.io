@@ -9,6 +9,112 @@
 ';
 
 /* append your custom style below */
+
+/* --- Final Custom Styles for Panel and Table of Contents (v19 - Final Fix) --- */
+
+/* 1. 解除父容器对 sticky 定位的限制 */
+#main-wrapper,
+#main-wrapper > .container,
+#main-wrapper > .container > .row {
+  overflow: visible !important;
+}
+
+/* 2. 使用 max-height 让整个侧边栏面板粘性定位 */
+#panel-wrapper {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 1rem !important;
+  max-height: calc(100vh - 1rem);
+  display: flex !important;
+  flex-direction: column !important;
+  align-self: flex-start !important;
+  z-index: 10;
+}
+
+/* 3. [核心修复] 统一所有模块的左内边距，以对齐主题自带的竖线 */
+#panel-wrapper .access {
+  padding-left: 0.75rem !important; /* 只统一 padding-left */
+  /* border-left: 1px solid #3c3f41 !important;  <-- 删除了导致重复的那条线 */
+}
+
+/* 4. 统一所有模块标题的样式 */
+#panel-wrapper .access > h2.panel-title {
+  margin-bottom: 0.75rem !important;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* 5. “最近更新”和“热门标签”模块，只占据所需空间 */
+#panel-wrapper .access:not(:has(#toc-wrapper)) {
+  flex-shrink: 0;
+}
+
+/* 6. 目录模块的容器 */
+#panel-wrapper .access:has(#toc-wrapper) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: none !important; /* [关键] 强制移除我们这个模块的边框，只保留padding */
+}
+
+/* 7. 目录滚动容器 */
+#toc-wrapper {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* 8. 彻底禁用主题自带的、可能导致问题的 ::before 伪元素 */
+#toc-wrapper::before {
+  display: none !important;
+}
+
+/* 9. 目录列表基础样式 */
+#toc-wrapper ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0 6px 0.5rem 0;
+}
+
+/* 10. 目录层级缩进 */
+#toc-wrapper ul ul {
+  margin-top: 0.1rem;
+  padding-left: 1.2rem !important;
+}
+
+/* 11. 目录项（链接）样式 */
+#toc-wrapper li a {
+  display: block;
+  padding: 3px 10px;
+  color: #868e96;
+  text-decoration: none;
+  border-radius: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.2s ease;
+}
+
+#toc-wrapper li a:hover {
+  color: #dee2e6;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* 12. 当前章节高亮样式 */
+#toc-wrapper li.toc-active > a {
+  color: #fff !important;
+  font-weight: 500;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 13. 自定义滚动条样式 */
+#toc-wrapper::-webkit-scrollbar { width: 6px; }
+#toc-wrapper::-webkit-scrollbar-track { background: transparent; }
+#toc-wrapper::-webkit-scrollbar-thumb { background-color: #4f4f4f; border-radius: 3px; }
+#toc-wrapper::-webkit-scrollbar-thumb:hover { background-color: #6c6c6c; }
+/* --- End of Custom Styles --- */
+
 // --------------------------------------------------------------------
 // 创建一个名为 'prompt-info' 的新提示框
 .prompt-info {

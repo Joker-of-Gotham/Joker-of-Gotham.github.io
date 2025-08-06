@@ -167,7 +167,7 @@ jekyll-archives:
 # pwa:
 
 toc:
-  min_level: 2  # 例如，从 H2 标题开始生成目录
-  max_level: 4
+  min_level: 1  # 例如，从 H2 标题开始生成目录
+  max_level: 6
   ul_class: "nav flex-column" # 给 <ul> 标签加上 Bootstrap 的 class
   li_class: "nav-item"        # 给 <li> 标签加上 Bootstrap 的 class
