@@ -108,6 +108,15 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
+/* 11. Tocbot Scrollspy 高亮样式 */
+#toc-wrapper .is-active-li > a {
+  color: #fff !important;
+  background-color: rgba(86, 91, 238, 0.25); /* 您可以换成喜欢的颜色 */
+}
+#toc-wrapper .is-active-li .is-active-link::before {
+  background-color: #fff !important; /* 确保小圆点也是亮的 */
+}
+
 /* 13. 自定义滚动条样式 */
 #toc-wrapper::-webkit-scrollbar { width: 6px; }
 #toc-wrapper::-webkit-scrollbar-track { background: transparent; }
