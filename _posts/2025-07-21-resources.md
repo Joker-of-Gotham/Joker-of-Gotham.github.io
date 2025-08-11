@@ -57,6 +57,12 @@ toc: true
 | 这些UI设计指南(知乎) |  这些UI设计指南，作为前端开发你应该要知道(一) | https://zhuanlan.zhihu.com/p/664783228 | 这些UI设计指南，作为前端开发你应该要知道（二） |
 | 前端工程化: 基于Vue.js的设计实践 |  前端工程化、Vue.js 3.0书籍 | https://vue3.chengpeiquan.com/ | 暂无 |
 
+## 前端开发
+
+| 名称       | 功能描述          | 链接             | 拓展部分            |
+| :--------------: | :----------------: | :-----------------: | ----------------- |
+| TypeScript指南 |  针对TypeScript的教程 | https://basarat.gitbook.io/typescript | 暂无 |
+
 
 # 文本编辑
 
