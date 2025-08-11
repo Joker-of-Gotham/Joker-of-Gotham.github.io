@@ -334,7 +334,12 @@ $$E(R_{i})=R_{f}+ \beta_{i} [E(R_{m})-R_{f}]$$
 
         则多资产的凯利准则目标函数为：
 
-        $$\max\limits_{{\bf{f}}} \mathbb{E}[ln(1+{\bf{f}}^{T}{\bf{r}})] \approx {\bf{f}}^{T} {\bf{\mu}} - \frac{1}{2}{\bf{f}}^{T}\Sigma {\bf{f}} \to \mu-\Sigma{\bf{f}}=0 \to {\bf{f}}^{*}= \Sigma^{-1}\mu $$
+        $$
+\max\limits_{\mathbf{f}} \; \mathbb{E}\!\left[ \ln\!\left(1+\mathbf{f}^{\mathsf{T}}\mathbf{r}\right) \right]
+\approx \mathbf{f}^{\mathsf{T}} \boldsymbol{\mu} - \frac{1}{2}\mathbf{f}^{\mathsf{T}}\Sigma \mathbf{f}
+\;\;\Rightarrow\;\; \boldsymbol{\mu} - \Sigma\mathbf{f} = 0
+\;\;\Rightarrow\;\; \mathbf{f}^{*} = \Sigma^{-1}\boldsymbol{\mu}
+$$
 
 ### ⻛险平价
 
