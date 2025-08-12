@@ -61,7 +61,7 @@ toc: true
 
 | 名称       | 功能描述          | 链接             | 拓展部分            |
 | :--------------: | :----------------: | :-----------------: | ----------------- |
-| TypeScript指南 |  针对TypeScript的教程 | https://basarat.gitbook.io/typescript | [中文版指南](https://jkchao.github.io/typescript-book-chinese/#why) |
+| TypeScript指南 |  针对TypeScript的教程 | https://basarat.gitbook.io/typescript | [中文版指南](https://jkchao.github.io/typescript-book-chinese/#why),[另一份参考TS指南](https://ts.xcatliu.com/) |
 
 
 # 文本编辑
