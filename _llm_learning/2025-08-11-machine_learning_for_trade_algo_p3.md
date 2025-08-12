@@ -229,7 +229,7 @@ $$\begin{aligned} & 对于给定的多元回归模型： y_{i}=\sum\limits_{k=1}
 
 ### 从资本资产定价模型到法⻢-弗伦奇因⼦模型
 
-[资本资产定价模型](/_llm_learning/2025-08-07-machine_learning_for_trade_algo_p2.md/#资本资产定价模型capm)的内容在之前的部分有讲，在此不再赘述。
+[资本资产定价模型](/collections/llm-learning/2025-08-07-machine_learning_for_trade_algo_p2/#资本资产定价模型capm)的内容在之前的部分有讲，在此不再赘述。
 
 1993 年，法玛-弗伦奇三因⼦模型在 CAPM 的单⼀⻛险来源基础上，增加了公司的相对规模和价值因⼦。2015 年，五因⼦模型进⼀步扩展，将公司的盈利能⼒和投资⽔平也纳⼊其中，因为在这期间的研究已证明这两个因⼦具有显著影响。此外，许多因⼦模型还包含⼀个价格动量因⼦。
 
@@ -282,7 +282,7 @@ $$t=\frac{\lambda_{j}}{\frac{\sigma(\lambda_{j})}{\sqrt{T}}}$$
 
 增加的惩罚项将线性回归系数转化为⼀个约束最⼩化问题的解，该问题通常采⽤以下拉格朗⽇形式：
 
-$$\hat{\boldsymbol{\beta}}^{S}=arg \min\limits_{{\boldsymbol{\beta}}^{S}} \sum\limits_{i=1}^{N} [(y_{i}-\beta_{0}-\sum\limits_{j=1}^{p}\beta_{j}x_{j})^{2}+\lambda S(\boldsymbol{\beta})]= arg \min\limits_{{\boldsymbol{\beta}}^{S}}({\bf{y}}-{\bf{X}}\boldsymbol{\beta}-\lambda S(\boldsymbol{\beta})) $$
+$$\hat{\boldsymbol{\beta}}^{(S)} = \arg\min_{\boldsymbol{\beta}} \sum_{i=1}^N \left[ \left(y_i - \beta_0 - \sum_{j=1}^p \beta_j x_{ij} \right)^2 + \lambda S(\boldsymbol{\beta}) \right] $$
 
 正则化参数$\lambda$决定了惩罚效应的⼤⼩，即正则化的强度。⼀旦$\lambda$为正，系数就会与⽆约束的最⼩⼆乘参数不同，这意味着估计是有偏的。你应该通过交叉验证⾃适应地选择超参数$\lambda$，以最⼩化预期预测误差的估计值。
 
