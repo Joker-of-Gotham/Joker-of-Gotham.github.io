@@ -2,7 +2,8 @@
 layout: post
 title: "机器学习与算法交易(四): 更复杂的机器学习与量化模型"
 date: 2025-08-13
-categories: [金融分析, 人工智能, 机器学习]
+category: 金融分析
+categories: [人工智能, 机器学习]
 tags: [综述笔记, 金融量化]
 published: true
 mermaid: true
