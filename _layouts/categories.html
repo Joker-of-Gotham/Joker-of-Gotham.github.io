@@ -1,6 +1,6 @@
 ---
 layout: page
-# All the Categories of posts
+title: 全部分类
 ---
 
 {% include lang.html %}
@@ -9,155 +9,143 @@ layout: page
 {% assign LIST_PREFIX = 'l_' %}
 {% assign group_index = 0 %}
 
-{%- comment -%}
-  收集所有文章（posts、graph_theory 和 logic 集合）
-  只提取一级分类，避免二级分类重复作为顶级分类出现
-{%- endcomment -%}
 {% assign all_docs = site.posts | concat: site.graph_theory | concat: site.logic | concat: site.llm_learning | concat: site.technical_talk %}
-{% assign primary_categories = "" | split: "" %}
+{% assign primary_candidates = "" | split: "" %}
+
+{%- comment -%}
+  先收集每篇文档的 categories[0]（若存在），这些被视为“曾被作者放在首位”的分类 -> 父级候选
+{%- endcomment -%}
 {% for doc in all_docs %}
-  {% assign cat = doc.categories[0] %}
-  {% unless primary_categories contains cat %}
-    {% assign primary_categories = primary_categories | push: cat %}
-  {% endunless %}
+  {% if doc.categories and doc.categories.size > 0 %}
+    {% assign first_cat = doc.categories[0] %}
+    {% unless primary_candidates contains first_cat %}
+      {% assign primary_candidates = primary_candidates | push: first_cat %}
+    {% endunless %}
+  {% endif %}
 {% endfor %}
 
-{% assign sort_categories = primary_categories | sort %}
+{%- comment -%}
+  收集出现过的所有分类（去重、排序）
+{%- endcomment -%}
+{% assign all_categories = "" | split: "" %}
+{% for doc in all_docs %}
+  {% if doc.categories %}
+    {% for c in doc.categories %}
+      {% unless all_categories contains c %}
+        {% assign all_categories = all_categories | push: c %}
+      {% endunless %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+{% assign sort_categories = all_categories | sort %}
 
 {% for category_name in sort_categories %}
-
-  {%- comment -%} 收集 _posts 下的文章 {%- endcomment -%}
-  {% assign posts_from_posts = site.categories[category_name] %}
-  {% if posts_from_posts == nil %}
-    {% assign posts_from_posts = "" | split: "" %}
-  {% endif %}
-
-  {%- comment -%} 收集 graph_theory 集合中带有该分类的文档 {%- endcomment -%}
-  {% assign posts_from_graph = site.graph_theory | where_exp: "doc", "doc.categories contains category_name" %}
-  {% if posts_from_graph == nil %}
-    {% assign posts_from_graph = "" | split: "" %}
-  {% endif %}
-
-  {%- comment -%} 收集 logic 集合中带有该分类的文档 {%- endcomment -%}
-  {% assign posts_from_logic = site.logic | where_exp: "doc", "doc.categories contains category_name" %}
-  {% if posts_from_logic == nil %}
-    {% assign posts_from_logic = "" | split: "" %}
-  {% endif %}
-
-  {%- comment -%} 收集 llm_learning 集合中带有该分类的文档 {%- endcomment -%}
-  {% assign posts_from_llm = site.llm_learning | where_exp: "doc", "doc.categories contains category_name" %}
-  {% if posts_from_llm == nil %}
-    {% assign posts_from_llm = "" | split: "" %}
-  {% endif %}
-
-  {%- comment -%} 收集 technical_talk 集合中带有该分类的文档 {%- endcomment -%}
-  {% assign posts_from_talk = site.technical_talk | where_exp: "doc", "doc.categories contains category_name" %}
-  {% if posts_from_talk == nil %}
-    {% assign posts_from_talk = "" | split: "" %}
-  {% endif %}
-
-  {%- comment -%} 合并并按日期倒序 {%- endcomment -%}
-  {% assign posts_of_category = posts_from_posts | concat: posts_from_graph | concat: posts_from_logic | concat: posts_from_llm | concat: posts_from_talk | sort: "date" | reverse %}
-
-  {% if posts_of_category.size > 0 %}
-    {%- comment -%} 计算二级子分类列表 {%- endcomment -%}
+  {% assign posts_of_category = all_docs | where_exp: "d", "d.categories contains category_name" | sort: "date" | reverse %}
+  {% if posts_of_category and posts_of_category.size > 0 %}
+    {%- comment -%} 计算与该分类共现的其他分类（作为子分类） {%- endcomment -%}
     {% assign sub_categories = "" | split: "" %}
     {% for post in posts_of_category %}
-      {% assign second_category = post.categories[1] %}
-      {% if second_category %}
-        {% unless sub_categories contains second_category %}
-          {% assign sub_categories = sub_categories | push: second_category %}
-        {% endunless %}
+      {% if post.categories %}
+        {% for co in post.categories %}
+          {% if co != category_name %}
+            {% unless sub_categories contains co %}
+              {% assign sub_categories = sub_categories | push: co %}
+            {% endunless %}
+          {% endif %}
+        {% endfor %}
       {% endif %}
     {% endfor %}
     {% assign sub_categories = sub_categories | sort %}
     {% assign sub_categories_size = sub_categories | size %}
 
-    <div class="card categories">
-      <!-- 顶级分类 -->
-      <div
-        id="{{ HEAD_PREFIX }}{{ group_index }}"
-        class="card-header d-flex justify-content-between hide-border-bottom"
-      >
-        <span class="ms-2">
-          <i class="far fa-folder{% if sub_categories_size > 0 %}-open{% endif %} fa-fw"></i>
+    {%- comment -%}
+      决定是否把这个分类当作“顶级”渲染：
+        - 如果它曾在某篇文章的 categories[0]（primary_candidates contains），则渲染为顶级；
+        - 否则，如果它与其它分类共现（sub_categories_size > 0），则**跳过顶级渲染**（会在父级下显示为子类）；
+        - 否则（孤立分类），仍渲染为顶级。
+    {%- endcomment -%}
+    {% assign is_primary = false %}
+    {% if primary_candidates contains category_name %}
+      {% assign is_primary = true %}
+    {% elsif sub_categories_size == 0 %}
+      {% assign is_primary = true %}
+    {% endif %}
 
-          {% capture _category_url %}/categories/{{ category_name | url_encode }}/{% endcapture %}
-          <a href="{{ _category_url | relative_url }}" class="mx-2">{{ category_name }}</a>
+    {% if is_primary %}
+      <div class="card categories">
+        <div id="{{ HEAD_PREFIX }}{{ group_index }}" class="card-header d-flex justify-content-between hide-border-bottom">
+          <span class="ms-2">
+            <i class="far fa-folder{% if sub_categories_size > 0 %}-open{% endif %} fa-fw"></i>
 
-          <span class="text-muted small font-weight-light">
-            {{ posts_of_category.size }}
-            {% if posts_of_category.size > 1 %}
-              {{ site.data.locales[lang].categories.post_measure.plural
-                 | default: site.data.locales[lang].categories.post_measure }}
-            {% else %}
-              {{ site.data.locales[lang].categories.post_measure.singular
-                 | default: site.data.locales[lang].categories.post_measure }}
-            {% endif %}
+            {% capture _category_url %}/categories/{{ category_name | url_encode }}/{% endcapture %}
+            <a href="{{ _category_url | relative_url }}" class="mx-2">{{ category_name }}</a>
+
+            <span class="text-muted small font-weight-light">
+              {{ posts_of_category.size }}
+              {% if posts_of_category.size > 1 %}
+                {{ site.data.locales[lang].categories.post_measure.plural
+                   | default: site.data.locales[lang].categories.post_measure }}
+              {% else %}
+                {{ site.data.locales[lang].categories.post_measure.singular
+                   | default: site.data.locales[lang].categories.post_measure }}
+              {% endif %}
+            </span>
           </span>
-        </span>
 
-        <!-- 折叠箭头 -->
+          {% if sub_categories_size > 0 %}
+            <a href="#{{ LIST_PREFIX }}{{ group_index }}" data-bs-toggle="collapse" aria-expanded="true"
+               aria-label="{{ HEAD_PREFIX }}{{ group_index }}-trigger" class="category-trigger hide-border-bottom">
+              <i class="fas fa-fw fa-angle-down"></i>
+            </a>
+          {% else %}
+            <span class="category-trigger hide-border-bottom disabled"><i class="fas fa-fw fa-angle-right"></i></span>
+          {% endif %}
+        </div>
+
         {% if sub_categories_size > 0 %}
-          <a
-            href="#{{ LIST_PREFIX }}{{ group_index }}"
-            data-bs-toggle="collapse"
-            aria-expanded="true"
-            aria-label="{{ HEAD_PREFIX }}{{ group_index }}-trigger"
-            class="category-trigger hide-border-bottom"
-          >
-            <i class="fas fa-fw fa-angle-down"></i>
-          </a>
-        {% else %}
-          <span class="category-trigger hide-border-bottom disabled">
-            <i class="fas fa-fw fa-angle-right"></i>
-          </span>
+          <div id="{{ LIST_PREFIX }}{{ group_index }}" class="collapse show" aria-expanded="true">
+            <ul class="list-group">
+              {% for sub_category in sub_categories %}
+                {% assign posts_in_sub = posts_of_category | where_exp: "p", "p.categories contains sub_category" %}
+                <li class="list-group-item d-flex justify-content-between">
+                  <div>
+                    <i class="far fa-folder fa-fw"></i>
+                    {% capture _sub_ctg_url %}/categories/{{ sub_category | url_encode }}/{% endcapture %}
+                    <a href="{{ _sub_ctg_url | relative_url }}" class="mx-2">{{ sub_category }}</a>
+                  </div>
+                  <span class="text-muted small">{{ posts_in_sub.size }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
         {% endif %}
+
+        <ul class="list-group list-group-flush">
+          {% for post in posts_of_category %}
+            {%- comment -%}
+              若文章还属于其它分类且你不想在父级重复显示（可按需去掉这段），则跳过：
+            {%- endcomment -%}
+            {% assign co_count = 0 %}
+            {% if post.categories %}
+              {% for c in post.categories %}
+                {% if c != category_name %}
+                  {% assign co_count = co_count | plus: 1 %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+            {% if co_count > 0 %}
+              {% continue %}
+            {% endif %}
+
+            <li class="list-group-item d-flex justify-content-between">
+              <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+              <span class="text-muted small">{% include datetime.html date=post.date class="text-nowrap" lang=lang %}</span>
+            </li>
+          {% endfor %}
+        </ul>
       </div>
 
-      <!-- 子分类列表（若存在） -->
-      {% if sub_categories_size > 0 %}
-        <div id="{{ LIST_PREFIX }}{{ group_index }}" class="collapse show" aria-expanded="true">
-          <ul class="list-group">
-            {% for sub_category in sub_categories %}
-              {% assign posts_in_sub = posts_of_category | where_exp: "p", "p.categories contains sub_category" %}
-              <li class="list-group-item d-flex justify-content-between">
-                <div>
-                  <i class="far fa-folder fa-fw"></i>
-                  {% capture _sub_ctg_url %}/categories/{{ sub_category | url_encode }}/{% endcapture %}
-                  <a href="{{ _sub_ctg_url | relative_url }}" class="mx-2">{{ sub_category }}</a>
-                </div>
-                <span class="text-muted small">{{ posts_in_sub.size }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-
-      <!-- 当前顶级分类下的所有文章列表 -->
-      <ul class="list-group list-group-flush">
-        {% for post in posts_of_category %}
-          {% assign post_categories = post.categories %}
-          {% assign first_category = post_categories[0] %}
-          {% assign second_category = post_categories[1] %}
-          
-          {%- comment -%}
-            如果当前分类是顶级分类，并且该文章还有第二层分类，就跳过这篇文章，避免重复显示。
-          {%- endcomment -%}
-          {% if category_name == first_category and second_category %}
-            {% continue %}
-          {% endif %}
-
-          <li class="list-group-item d-flex justify-content-between">
-            <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-            <span class="text-muted small">
-              {% include datetime.html date=post.date class="text-nowrap" lang=lang %}
-            </span>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    {% assign group_index = group_index | plus: 1 %}
+      {% assign group_index = group_index | plus: 1 %}
+    {% endif %}
   {% endif %}
 {% endfor %}

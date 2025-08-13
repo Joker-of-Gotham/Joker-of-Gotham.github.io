@@ -1,14 +1,12 @@
 ---
 layout: page
-# The Category layout
 ---
 
 {% include lang.html %}
 
 {%- comment -%}
-  1. page.posts: jekyll-archives 生成的 _posts 下的文章  
-  2. graph_posts: 从 graph_theory 集合中筛出同分类的文档  
-  3. 合并后按日期 desc 排序
+  展示某个分类下的所有文章（来自 _posts 与若干 collection）
+  page.title 由 jekyll-archives / categories 生成时通常是分类名
 {%- endcomment -%}
 
 {% assign posts_from_posts = page.posts %}
