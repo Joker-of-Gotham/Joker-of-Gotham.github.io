@@ -35,9 +35,9 @@ plugins:
 # 网站基本信息
 lang: zh-CN
 timezone:
-title: Chika Komari
-tagline: 一个数学学习者的笔记
-description: 该网站是本人依托MIT数学专业路线，进行数学各领域专业知识学习的汇总。
+title: Chika Komari's Learning Blog
+tagline: 小鞠卡哇伊🥰🥰
+description: 该网站收集了本人在LLM、CS、金融等不同领域的学习记录。
 url: "https://Joker-of-Gotham.github.io"
 baseurl: ""
 
