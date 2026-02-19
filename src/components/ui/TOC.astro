@@ -1,0 +1,18 @@
+﻿---
+interface HeadingItem {
+  slug: string;
+  text: string;
+}
+
+export interface Props {
+  headings: HeadingItem[];
+}
+
+const { headings } = Astro.props;
+---
+
+<nav aria-label="TOC">
+  <ul class="list-clean">
+    {headings.map((heading) => <li><a href={`#${heading.slug}`}>{heading.text}</a></li>)}
+  </ul>
+</nav>

@@ -1,0 +1,143 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Card from "@/components/ui/Card.astro";
+import type { CollectionEntry } from "astro:content";
+import { getArtifacts, getRoadmapNodes, getPublishedBlogPosts, normalizeSlug, formatDate } from "@/lib/content/queries";
+
+export async function getStaticPaths() {
+  const artifacts = await getArtifacts();
+  return artifacts.map((entry) => ({ params: { slug: normalizeSlug(entry) }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<"artifacts"> };
+const { Content } = await entry.render();
+
+const [nodes, posts] = await Promise.all([getRoadmapNodes(), getPublishedBlogPosts()]);
+const currentSlug = normalizeSlug(entry);
+
+const relatedNodes = nodes.filter((node) => {
+  const nodeSlug = normalizeSlug(node);
+  return entry.data.related_nodes.includes(nodeSlug) || node.data.related_artifacts.includes(currentSlug);
+});
+
+const nodeSlugSet = new Set(relatedNodes.map((node) => normalizeSlug(node)));
+const relatedPosts = posts.filter((post) => {
+  const explicit = post.data.related_artifacts.includes(currentSlug);
+  const viaNode = post.data.related_nodes.some((nodeSlug: string) => nodeSlugSet.has(nodeSlug));
+  return explicit || viaNode;
+});
+
+function normalizeContentLink(rawUrl: string) {
+  const rewriteLegacyPath = (pathname: string) => {
+    const normalizedPath = pathname.replace(/\/index\.html$/i, "/").replace(/\.html$/i, "/");
+    const decodedPath = decodeURIComponent(normalizedPath);
+
+    const datedSlug = decodedPath.match(/\/(\d{4}-\d{2}-\d{2}-[^/]+)\/?$/u);
+    if (datedSlug) {
+      return `/blog/${datedSlug[1]}/`;
+    }
+
+    const legacyCollectionPath = decodedPath.match(/\/_(?:graph_theory|llm_learning|technical_talk|posts)\/([^/]+?)(?:\.md)?\/?$/iu);
+    if (legacyCollectionPath) {
+      return `/blog/${legacyCollectionPath[1]}/`;
+    }
+
+    if (/\/roadmap\/?$/i.test(decodedPath)) return "/roadmap/";
+    if (/\/blog\/?$/i.test(decodedPath)) return "/blog/";
+    if (/\/about\/?$/i.test(decodedPath)) return "/about/";
+
+    return normalizedPath;
+  };
+
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.hostname === "joker-of-gotham.github.io") {
+      const pathname = rewriteLegacyPath(parsed.pathname);
+      return `${pathname}${parsed.search}${parsed.hash}`;
+    }
+  } catch {
+    if (rawUrl.startsWith("/")) {
+      return rewriteLegacyPath(rawUrl);
+    }
+  }
+  return rawUrl;
+}
+
+const normalizedLinks: Array<{ label: string; url: string; isInternal: boolean }> = entry.data.links.map((link: (typeof entry.data.links)[number]) => {
+  const url = normalizeContentLink(link.url);
+  const isInternal = url.startsWith("/");
+  return {
+    ...link,
+    url,
+    isInternal
+  };
+});
+---
+
+<BaseLayout
+  title={entry.data.title}
+  crumbs={[{ label: "Home", href: "/" }, { label: "Artifacts", href: "/artifacts/" }, { label: entry.data.title }]}
+  pagefindFilters={{
+    kind: entry.data.type === "project" ? "project" : entry.data.type === "paper" ? "paper" : "artifact",
+    type: entry.data.type,
+    year: entry.data.date.getFullYear(),
+    tags: entry.data.tags
+  }}
+>
+  <section class="section-stack">
+    <header class="section-stack" style="gap:var(--space-4);">
+      <h1>{entry.data.title}</h1>
+      <div class="meta-row">
+        <span>{entry.data.type.toUpperCase()}</span>
+        <span>{formatDate(entry.data.date)}</span>
+        {entry.data.venue && <span>{entry.data.venue}</span>}
+      </div>
+      <p>{entry.data.summary}</p>
+      <div class="meta-row">
+        {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
+      </div>
+    </header>
+
+    <Card title="Links">
+      <ul class="list-clean">
+        {
+          normalizedLinks.map((link: (typeof normalizedLinks)[number]) => (
+            <li>
+              <a href={link.url} target={link.isInternal ? undefined : "_blank"} rel={link.isInternal ? undefined : "noreferrer"}>
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Card>
+
+    <div class="card">
+      <div class="card-body content">
+        <Content />
+      </div>
+    </div>
+
+    <section class="section-stack">
+      <h2>关联路线图节点</h2>
+      {relatedNodes.length > 0 ? (
+        <div class="card-grid">
+          {relatedNodes.map((node) => <Card href={`/roadmap/${normalizeSlug(node)}/`} title={node.data.title} subtitle={node.data.track} />)}
+        </div>
+      ) : (
+        <Card title="暂无关联路线图节点" />
+      )}
+    </section>
+
+    <section class="section-stack">
+      <h2>关联博客</h2>
+      {relatedPosts.length > 0 ? (
+        <div class="card-grid">
+          {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+        </div>
+      ) : (
+        <Card title="暂无关联博客" />
+      )}
+    </section>
+  </section>
+</BaseLayout>

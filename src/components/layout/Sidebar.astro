@@ -1,0 +1,112 @@
+﻿---
+import Icon from "@/components/ui/Icon.astro";
+
+interface QuickLink {
+  label: string;
+  url: string;
+  external?: boolean;
+}
+
+interface Props {
+  pathname: string;
+  quickLinks: QuickLink[];
+  pinnedTracks: string[];
+}
+
+const { pathname, quickLinks, pinnedTracks } = Astro.props;
+
+const navItems = [
+  { label: "Home", href: "/", icon: "home" as const },
+  { label: "Roadmap", href: "/roadmap/", icon: "roadmap" as const },
+  { label: "Blog", href: "/blog/", icon: "blog" as const },
+  { label: "Artifacts", href: "/artifacts/", icon: "artifact" as const },
+  { label: "About", href: "/about/", icon: "about" as const }
+];
+
+const activePath = pathname.endsWith("/") ? pathname : `${pathname}/`;
+
+function iconForQuickLink(label: string) {
+  const key = label.toLowerCase();
+  if (key.includes("github")) return "github" as const;
+  if (key.includes("kaggle")) return "kaggle" as const;
+  if (key.includes("hugging")) return "huggingface" as const;
+  if (key.includes("linkedin")) return "linkedin" as const;
+  if (key.includes("mail") || key.includes("email")) return "mail" as const;
+  if (key.includes("openreview")) return "openreview" as const;
+  return "external" as const;
+}
+---
+
+<aside class="sidebar" id="site-sidebar">
+  <a class="sidebar-profile" href="/">
+    <img src="/assets/img/profile.png" alt="Joker avatar" width="64" height="64" class="sidebar-avatar" loading="eager" />
+    <div>
+      <h3 class="sidebar-name">Joker</h3>
+      <p class="meta-row">研究 x 工程 x 写作</p>
+    </div>
+  </a>
+
+  <section class="sidebar-section">
+    <p class="sidebar-title">Navigation</p>
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+      {
+        navItems.map((item) => (
+          <a class={`sidebar-link ${activePath === item.href ? "active" : ""}`} href={item.href}>
+            <Icon name={item.icon} size={16} />
+            <span>{item.label}</span>
+          </a>
+        ))
+      }
+    </nav>
+  </section>
+
+  <section class="sidebar-section">
+    <p class="sidebar-title">Quick Links</p>
+    <nav class="sidebar-nav" aria-label="Quick links">
+      {
+        quickLinks.length > 0 ? (
+          quickLinks.map((item) => (
+            <a class="sidebar-link" href={item.url} target={item.external ? "_blank" : undefined} rel={item.external ? "noopener noreferrer" : undefined}>
+              <Icon name={iconForQuickLink(item.label)} size={16} />
+              <span>{item.label}</span>
+              {item.external && <Icon name="external" size={14} class="link-end" />}
+            </a>
+          ))
+        ) : (
+          <p class="meta-row">No quick links</p>
+        )
+      }
+    </nav>
+  </section>
+
+  <section class="sidebar-section">
+    <p class="sidebar-title">Pinned Tracks</p>
+    {
+      pinnedTracks.length > 0 ? (
+        <div class="filter-bar">
+          {
+            pinnedTracks.map((track) => (
+              <a class="tag-chip" href={`/roadmap/?track=${encodeURIComponent(track)}`}>
+                <Icon name="track" size={12} />
+                <span>{track}</span>
+              </a>
+            ))
+          }
+        </div>
+      ) : (
+        <p class="meta-row">No pinned track</p>
+      )
+    }
+  </section>
+
+  <section class="sidebar-section">
+    <p class="sidebar-title">Search</p>
+    <a class="button sidebar-search-button" href="/search/">
+      <Icon name="search" size={16} />
+      <span class="sidebar-search-copy">
+        <span>Open Search</span>
+        <span>(Ctrl/Cmd + K)</span>
+      </span>
+    </a>
+  </section>
+</aside>

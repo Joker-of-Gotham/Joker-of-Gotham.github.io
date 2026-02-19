@@ -1,0 +1,240 @@
+﻿---
+import Icon from "@/components/ui/Icon.astro";
+
+interface BlogItem {
+  title: string;
+  slug: string;
+  summaryText: string;
+  summaryHtml: string;
+  dateLabel: string;
+  dateISO: string;
+  year: string;
+  tags: string[];
+  categories: string[];
+  collection: string;
+  readingTime: number;
+  cover?: string;
+}
+
+interface Props {
+  items: BlogItem[];
+}
+
+const { items } = Astro.props;
+const tags = ["all", ...new Set(items.flatMap((item) => item.tags))];
+const collections = ["all", ...new Set(items.map((item) => item.collection))];
+const years = ["all", ...new Set(items.map((item) => item.year))];
+
+const queryText = (item: BlogItem) => `${item.title} ${item.summaryText} ${item.categories.join(" ")} ${item.tags.join(" ")} ${item.collection}`.toLowerCase();
+const normalizedTags = (item: BlogItem) => item.tags.map((tag) => tag.toLowerCase()).join("|");
+const normalizedCategories = (item: BlogItem) => item.categories.map((category) => category.toLowerCase()).join("|");
+---
+
+<section class="section-stack blog-explorer" id="blog-explorer">
+  <header class="roadmap-toolbar">
+    <label class="sr-only" for="blog-query">搜索文章</label>
+    <div class="input icon-input-wrap">
+      <Icon name="search" size={15} />
+      <input id="blog-query" class="unstyled-input" placeholder="搜索文章" data-blog-control="query" />
+    </div>
+
+    <label class="sr-only" for="blog-tag">标签</label>
+    <select id="blog-tag" data-blog-control="tag">
+      {tags.map((item) => <option value={item}>{item === "all" ? "全部标签" : item}</option>)}
+    </select>
+
+    <label class="sr-only" for="blog-collection">集合</label>
+    <select id="blog-collection" data-blog-control="collection">
+      {collections.map((item) => <option value={item}>{item === "all" ? "全部集合" : item}</option>)}
+    </select>
+
+    <label class="sr-only" for="blog-year">年份</label>
+    <select id="blog-year" data-blog-control="year">
+      {years.map((item) => <option value={item}>{item === "all" ? "全部年份" : item}</option>)}
+    </select>
+
+    <label class="sr-only" for="blog-sort">排序</label>
+    <select id="blog-sort" data-blog-control="sort">
+      <option value="latest">最新</option>
+      <option value="oldest">最早</option>
+    </select>
+  </header>
+
+  <div class="card-grid grid-3" data-blog-grid>
+    {
+      items.map((item) => (
+        <a
+          class="card blog-entry"
+          href={`/blog/${item.slug}/`}
+          data-blog-item
+          data-slug={item.slug}
+          data-query={queryText(item)}
+          data-tags={normalizedTags(item)}
+          data-categories={normalizedCategories(item)}
+          data-collection={item.collection}
+          data-year={item.year}
+          data-date={item.dateISO}
+        >
+          {
+            item.cover ? (
+              <img class="card-cover" src={item.cover} alt={item.title} loading="lazy" />
+            ) : (
+              <div class="card-cover placeholder-cover"><Icon name="blog" size={20} /></div>
+            )
+          }
+          <div class="card-body">
+            <h3>{item.title}</h3>
+            <div class="blog-summary content" set:html={item.summaryHtml || item.summaryText}></div>
+            <div class="meta-row">
+              <span>{item.dateLabel}</span>
+              <span>{item.readingTime} 分钟</span>
+            </div>
+            <div class="meta-row blog-chip-row">
+              <span class="tag-chip chip-collection">{item.collection}</span>
+            </div>
+            {item.categories.length > 0 && (
+              <div class="meta-row blog-chip-row">
+                {item.categories.slice(0, 3).map((category) => <span class="tag-chip chip-category">{category}</span>)}
+              </div>
+            )}
+            <div class="meta-row">
+              {item.tags.slice(0, 3).map((tagName) => <span class="tag-chip">{tagName}</span>)}
+            </div>
+          </div>
+        </a>
+      ))
+    }
+  </div>
+
+  <p class="meta-row" data-blog-empty hidden>
+    <Icon name="search" size={14} />
+    <span>没有匹配的文章，尝试清空筛选条件。</span>
+  </p>
+</section>
+
+<script>
+  // @ts-nocheck
+  const root = document.getElementById("blog-explorer");
+  if (root) {
+    const queryInput = root.querySelector('[data-blog-control="query"]');
+    const tagSelect = root.querySelector('[data-blog-control="tag"]');
+    const collectionSelect = root.querySelector('[data-blog-control="collection"]');
+    const yearSelect = root.querySelector('[data-blog-control="year"]');
+    const sortSelect = root.querySelector('[data-blog-control="sort"]');
+    const grid = root.querySelector("[data-blog-grid]");
+    const emptyHint = root.querySelector("[data-blog-empty]");
+
+    if (queryInput && tagSelect && collectionSelect && yearSelect && sortSelect && grid && emptyHint) {
+      const items = Array.from(root.querySelectorAll("[data-blog-item]"));
+      const itemBySlug = new Map(items.map((element) => [element.dataset.slug, element]));
+      const metadata = items.map((element) => ({
+        slug: element.dataset.slug || "",
+        query: element.dataset.query || "",
+        tags: (element.dataset.tags || "").split("|").filter(Boolean),
+        categories: (element.dataset.categories || "").split("|").filter(Boolean),
+        collection: element.dataset.collection || "",
+        year: element.dataset.year || "",
+        date: element.dataset.date || ""
+      }));
+
+      const state = {
+        query: "",
+        tag: "all",
+        collection: "all",
+        year: "all",
+        sort: "latest"
+      };
+
+      const compareBySort = (a, b) => {
+        const delta = Date.parse(b.date) - Date.parse(a.date);
+        return state.sort === "latest" ? delta : -delta;
+      };
+
+      const writeUrlState = () => {
+        const params = new URLSearchParams(window.location.search);
+        state.query ? params.set("q", state.query) : params.delete("q");
+        state.tag !== "all" ? params.set("tag", state.tag) : params.delete("tag");
+        state.collection !== "all" ? params.set("collection", state.collection) : params.delete("collection");
+        state.year !== "all" ? params.set("year", state.year) : params.delete("year");
+        params.set("sort", state.sort);
+        const next = params.toString();
+        window.history.replaceState({}, "", next ? `${window.location.pathname}?${next}` : window.location.pathname);
+      };
+
+      const apply = () => {
+        const keyword = state.query.trim().toLowerCase();
+
+        const filtered = metadata
+          .filter((item) => {
+            const queryMatched = keyword.length === 0 || item.query.includes(keyword);
+            const tagMatched = state.tag === "all" || item.tags.includes(state.tag.toLowerCase());
+            const collectionMatched = state.collection === "all" || item.collection === state.collection;
+            const yearMatched = state.year === "all" || item.year === state.year;
+            return queryMatched && tagMatched && collectionMatched && yearMatched;
+          })
+          .sort(compareBySort);
+
+        const visible = new Set(filtered.map((item) => item.slug));
+
+        items.forEach((item) => {
+          item.hidden = !visible.has(item.dataset.slug || "");
+        });
+
+        filtered.forEach((item) => {
+          const node = itemBySlug.get(item.slug);
+          if (node) grid.appendChild(node);
+        });
+
+        emptyHint.hidden = filtered.length > 0;
+      };
+
+      const readInitialState = () => {
+        const params = new URLSearchParams(window.location.search);
+        state.query = params.get("q") || "";
+        state.tag = params.get("tag") || "all";
+        state.collection = params.get("collection") || "all";
+        state.year = params.get("year") || "all";
+        state.sort = params.get("sort") === "oldest" ? "oldest" : "latest";
+
+        queryInput.value = state.query;
+        tagSelect.value = state.tag;
+        collectionSelect.value = state.collection;
+        yearSelect.value = state.year;
+        sortSelect.value = state.sort;
+      };
+
+      queryInput.addEventListener("input", (event) => {
+        state.query = event.target.value;
+        apply();
+        writeUrlState();
+      });
+
+      tagSelect.addEventListener("change", (event) => {
+        state.tag = event.target.value;
+        apply();
+        writeUrlState();
+      });
+
+      collectionSelect.addEventListener("change", (event) => {
+        state.collection = event.target.value;
+        apply();
+        writeUrlState();
+      });
+
+      yearSelect.addEventListener("change", (event) => {
+        state.year = event.target.value;
+        apply();
+        writeUrlState();
+      });
+
+      sortSelect.addEventListener("change", (event) => {
+        state.sort = event.target.value === "oldest" ? "oldest" : "latest";
+        apply();
+        writeUrlState();
+      });
+
+      readInitialState();
+      apply();
+    }
+  }
+</script>

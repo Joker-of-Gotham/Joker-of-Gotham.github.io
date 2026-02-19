@@ -1,0 +1,235 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Badge from "@/components/ui/Badge.astro";
+import Icon from "@/components/ui/Icon.astro";
+import { getArtifacts, getPublishedBlogPosts, getRoadmapNodes, getSiteConfig, normalizeSlug, formatDate } from "@/lib/content/queries";
+import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
+
+const [{ home }, posts, nodes, artifacts] = await Promise.all([
+  getSiteConfig(),
+  getPublishedBlogPosts(),
+  getRoadmapNodes(),
+  getArtifacts()
+]);
+
+const featuredArtifacts = artifacts.filter((entry) => home?.featured_artifacts.includes(normalizeSlug(entry))).slice(0, 6);
+const latestPosts = (home?.featured_posts?.length
+  ? posts.filter((entry) => home.featured_posts.includes(normalizeSlug(entry)))
+  : posts
+).slice(0, 5);
+
+const summary = computeRoadmapPointSummary(nodes);
+const rootSlugSet = summary.rootSlugs;
+
+const normalizeCardSummary = (input: string) =>
+  input
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\{:\s*\.([a-zA-Z0-9_-]+)\s*\}/g, " ")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/\$\$[\s\S]*?\$\$/g, " ")
+    .replace(/\$\$[^$]*$/g, " ")
+    .replace(/\$[^$\n]+\$/g, " ")
+    .replace(/\$[^\n]*$/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const toCardSummary = (source: string, limit = 120) => {
+  const normalized = normalizeCardSummary(source);
+  if (normalized.length <= limit) return normalized;
+  return `${normalized.slice(0, limit).trim()}…`;
+};
+const fallbackHero = {
+  system_label: "Personal Knowledge and Blog System",
+  name: "Joker",
+  tagline: "研究 x 工程 x 写作的长期实践者",
+  intro: "我把学习、实验和项目统一到一条可验证的成长路径，用结构化内容持续迭代。",
+  now: ["持续完善路线图与博客联动系统"]
+};
+const hero = home?.hero
+  ? {
+      ...fallbackHero,
+      ...home.hero
+    }
+  : fallbackHero;
+const fallbackHeroMetrics = [
+  { label: "Papers Published", value: "2", detail: "持续投稿与公开整理", icon: "paper" },
+  { label: "Kaggle Medals", value: "Gold 0 · Silver 1 · Bronze 2", detail: "竞赛奖牌累计", icon: "medal" },
+  { label: "GitHub Repositories", value: "84", detail: "公开仓库数量", icon: "repo" },
+  { label: "GitHub Commits", value: "2,350", detail: "主仓库累计提交", icon: "commit" }
+];
+const heroMetrics = home?.hero?.metrics?.length ? home.hero.metrics : fallbackHeroMetrics;
+
+const trackRows = Array.from(
+  nodes.reduce((map, node) => {
+    const list = map.get(node.data.track) ?? [];
+    list.push(node);
+    map.set(node.data.track, list);
+    return map;
+  }, new Map<string, typeof nodes>()).entries()
+)
+  .map(([track, list]) => {
+    const trackMetric = summary.trackMetrics.get(track);
+    const progress = trackMetric?.progress ?? 0;
+
+    return {
+      track,
+      progress,
+      totalNodes: trackMetric?.nodeCount ?? list.length,
+      rootCount: trackMetric?.rootCount ?? 0,
+      nodes: list
+        .filter((node: (typeof list)[number]) => rootSlugSet.has(normalizeSlug(node)))
+        .sort((a: (typeof list)[number], b: (typeof list)[number]) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0))
+    };
+  })
+  .filter((row) => row.nodes.length > 0)
+  .sort((a, b) => a.track.localeCompare(b.track, "zh-CN"));
+---
+
+<BaseLayout title="Home">
+  <section class="hero hero-grid hero-modern">
+    <div class="hero-copy">
+      <div class="hero-kicker">
+        <Icon name="spark" size={14} />
+        <span>{hero.system_label}</span>
+      </div>
+      <h1 class="hero-title">{hero.name}</h1>
+      <p class="hero-subtitle">{hero.tagline}</p>
+      <p class="hero-intro">{hero.intro}</p>
+
+      <div class="meta-row">
+        {(hero.now ?? []).map((item: string) => (
+          <span class="tag-chip">
+            <Icon name="status-now" size={12} />
+            <span>{item}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <aside class="hero-metrics-grid">
+      {heroMetrics.map((metric, index: number) => (
+        <article class="card hero-metric" style={`animation-delay:${index * 70}ms`}>
+          <div class="card-body">
+            <div class="hero-metric-head">
+              <span class="hero-metric-icon"><Icon name={metric.icon ?? "spark"} size={16} /></span>
+              <p class="meta-row">{metric.label}</p>
+            </div>
+            <strong class="hero-metric-value">{metric.value}</strong>
+            {metric.detail && <p class="meta-row">{metric.detail}</p>}
+          </div>
+        </article>
+      ))}
+    </aside>
+  </section>
+
+  <section class="section-stack">
+    <div class="section-heading-row">
+      <h2>Roadmap Snapshot</h2>
+      <a class="text-link" href="/roadmap/">
+        查看完整路线图
+        <Icon name="arrow-right" size={14} />
+      </a>
+    </div>
+
+    <div class="roadmap-snapshot-list">
+      {trackRows.map((row) => (
+        <section class="snapshot-track">
+          <div class="snapshot-head">
+            <h3>{row.track}</h3>
+            <span class="meta-row">平均进度 {row.progress}% · {row.rootCount} roots / {row.totalNodes} nodes</span>
+          </div>
+          <div class="progress-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={row.progress}>
+            <span style={`width:${row.progress}%`} />
+          </div>
+          <div class="snapshot-node-row">
+            {row.nodes.map((node: (typeof row.nodes)[number]) => (
+              <a class="snapshot-node" href={`/roadmap/${normalizeSlug(node)}/`}>
+                <Badge status={node.data.status} />
+                <span>{node.data.title}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </section>
+
+  <section class="section-stack">
+    <div class="section-heading-row">
+      <h2>Featured Artifacts</h2>
+      <a class="text-link" href="/artifacts/">
+        浏览全部成果
+        <Icon name="arrow-right" size={14} />
+      </a>
+    </div>
+
+    <div class="card-grid grid-3">
+      {
+        featuredArtifacts.map((entry) => (
+          <a class="card" href={`/artifacts/${normalizeSlug(entry)}/`}>
+            {
+              entry.data.cover ? (
+                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading="lazy" />
+              ) : (
+                <div class="card-cover placeholder-cover"><Icon name="repo" size={20} /></div>
+              )
+            }
+            <div class="card-body">
+              <h3>{entry.data.title}</h3>
+              <p>{toCardSummary(entry.data.summary)}</p>
+              <div class="meta-row">
+                <span class="tag-chip">{entry.data.type}</span>
+                {entry.data.tags.slice(0, 2).map((tag: string) => <span class="tag-chip">{tag}</span>)}
+              </div>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section-stack">
+    <div class="section-heading-row">
+      <h2>Latest Updates</h2>
+      <a class="text-link" href="/blog/">
+        进入博客
+        <Icon name="arrow-right" size={14} />
+      </a>
+    </div>
+
+    <div class="card-grid">
+      {
+        latestPosts.map((entry) => (
+          <a class="card" href={`/blog/${normalizeSlug(entry)}/`}>
+            {
+              entry.data.cover ? (
+                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading="lazy" />
+              ) : (
+                <div class="card-cover placeholder-cover"><Icon name="blog" size={20} /></div>
+              )
+            }
+            <div class="card-body">
+              <h3>{entry.data.title}</h3>
+              <p>{toCardSummary(entry.data.summary?.trim().length ? entry.data.summary : entry.body.slice(0, 800), 132)}</p>
+              <div class="meta-row">
+                <span>{formatDate(entry.data.date)}</span>
+                <span class="tag-chip">{entry.data.collection}</span>
+              </div>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+
+    <ul class="line-list">
+      {(home?.changelog ?? []).map((item: string) => (
+        <li>
+          <Icon name="spark" size={14} />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>

@@ -1,0 +1,246 @@
+﻿backend:
+  name: github
+  repo: Joker-of-Gotham/Joker-of-Gotham.github.io
+  branch: main
+  base_url: https://REPLACE_WITH_YOUR_OAUTH_PROXY_DOMAIN
+  auth_endpoint: /auth
+
+local_backend: true
+
+publish_mode: editorial_workflow
+media_folder: public/assets/images/uploads
+public_folder: /assets/images/uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  - name: blog
+    label: Blog
+    folder: src/content/blog
+    create: true
+    path: "{{fields.collection}}/{{fields.slug}}"
+    nested:
+      depth: 4
+    extension: md
+    format: frontmatter
+    summary: "{{title}} · {{date}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Date, name: date, widget: datetime, format: "YYYY-MM-DD" }
+      - label: Tags
+        name: tags
+        widget: list
+        default: []
+      - label: Categories
+        name: categories
+        widget: list
+        default: []
+      - { label: Summary, name: summary, widget: text }
+      - { label: Cover, name: cover, widget: image, required: false }
+      - {
+          label: Collection,
+          name: collection,
+          widget: select,
+          options: [posts, graph_theory, logic, llm_learning, technical_talk],
+          default: posts
+        }
+      - label: Related Roadmap Nodes
+        name: related_nodes
+        widget: relation
+        collection: roadmap
+        search_fields: [title, track]
+        value_field: slug
+        display_fields: [title]
+        multiple: true
+        required: false
+      - label: Related Artifacts
+        name: related_artifacts
+        widget: relation
+        collection: artifacts
+        search_fields: [title, type]
+        value_field: slug
+        display_fields: [title]
+        multiple: true
+        required: false
+      - { label: Body, name: body, widget: markdown }
+
+  - name: roadmap
+    label: Roadmap
+    folder: src/content/roadmap
+    create: true
+    path: "{{fields.node_level}}/{{fields.slug}}"
+    nested:
+      depth: 4
+    extension: md
+    format: frontmatter
+    summary: "{{title}} · {{status}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - { label: Track, name: track, widget: string }
+      - label: Node Level
+        name: node_level
+        widget: select
+        options: [domain, pillar, initiative, task]
+        default: initiative
+      - label: Parent Node
+        name: parent
+        widget: relation
+        collection: roadmap
+        search_fields: [title, slug, track]
+        value_field: slug
+        display_fields: [title, track]
+        multiple: false
+        required: false
+      - { label: Sort Order, name: sort_order, widget: number, value_type: int, default: 0, required: false }
+      - label: Status
+        name: status
+        widget: select
+        options: [now, blocked, next, later, done]
+      - { label: Summary, name: summary, widget: text }
+      - { label: Cover, name: cover, widget: image, required: false }
+      - label: Highlights
+        name: highlights
+        widget: list
+        default: []
+      - label: Tags
+        name: tags
+        widget: list
+        default: []
+      - { label: Progress, name: progress, widget: number, required: false, min: 0, max: 100, value_type: int }
+      - { label: Last Updated, name: last_updated, widget: datetime, format: "YYYY-MM-DD" }
+      - label: Milestones
+        name: milestones
+        widget: list
+        summary: "{{fields.date}} · {{fields.status}}"
+        fields:
+          - { label: Date, name: date, widget: datetime, format: "YYYY-MM-DD" }
+          - { label: Status, name: status, widget: select, options: [now, blocked, next, later, done] }
+          - { label: Note, name: note, widget: text, required: false }
+          - { label: Evidence URL, name: evidence, widget: string, required: false }
+      - label: Related Posts
+        name: related_posts
+        widget: relation
+        collection: blog
+        search_fields: [title, tags]
+        value_field: slug
+        display_fields: [title]
+        multiple: true
+        required: false
+      - label: Related Artifacts
+        name: related_artifacts
+        widget: relation
+        collection: artifacts
+        search_fields: [title, type]
+        value_field: slug
+        display_fields: [title]
+        multiple: true
+        required: false
+      - { label: Body, name: body, widget: markdown, required: false }
+
+  - name: artifacts
+    label: Artifacts
+    folder: src/content/artifacts
+    create: true
+    path: "{{fields.type}}/{{fields.slug}}"
+    nested:
+      depth: 4
+    extension: md
+    format: frontmatter
+    summary: "{{title}} · {{type}}"
+    fields:
+      - { label: Title, name: title, widget: string }
+      - { label: Slug, name: slug, widget: string }
+      - label: Type
+        name: type
+        widget: select
+        options: [project, paper, competition, talk, award, dataset]
+      - { label: Date, name: date, widget: datetime, format: "YYYY-MM-DD" }
+      - { label: Venue, name: venue, widget: string, required: false }
+      - { label: Summary, name: summary, widget: text }
+      - { label: Cover, name: cover, widget: image, required: false }
+      - label: Tags
+        name: tags
+        widget: list
+        default: []
+      - label: Links
+        name: links
+        widget: list
+        fields:
+          - { label: Label, name: label, widget: string }
+          - { label: URL, name: url, widget: string }
+      - label: Related Nodes
+        name: related_nodes
+        widget: relation
+        collection: roadmap
+        search_fields: [title, track]
+        value_field: slug
+        display_fields: [title]
+        multiple: true
+        required: false
+      - { label: Body, name: body, widget: markdown, required: false }
+
+  - name: site
+    label: Site Config
+    files:
+      - label: Home Config
+        name: home
+        file: src/content/site/home.yml
+        fields:
+          - label: Hero
+            name: hero
+            widget: object
+            fields:
+              - { label: Name, name: name, widget: string }
+              - { label: System Label, name: system_label, widget: string }
+              - { label: Tagline, name: tagline, widget: string }
+              - { label: Intro, name: intro, widget: text }
+              - label: Now
+                name: now
+                widget: list
+              - label: Metrics
+                name: metrics
+                widget: list
+                fields:
+                  - { label: Label, name: label, widget: string }
+                  - { label: Value, name: value, widget: string }
+                  - { label: Detail, name: detail, widget: string, required: false }
+                  - { label: Icon, name: icon, widget: string, required: false }
+              - { label: Primary CTA Label, name: cta_primary_label, widget: string }
+              - { label: Primary CTA URL, name: cta_primary_url, widget: string }
+              - { label: Secondary CTA Label, name: cta_secondary_label, widget: string }
+              - { label: Secondary CTA URL, name: cta_secondary_url, widget: string }
+          - label: Quick Links
+            name: quick_links
+            widget: list
+            fields:
+              - { label: Label, name: label, widget: string }
+              - { label: URL, name: url, widget: string }
+              - { label: External, name: external, widget: boolean, default: true }
+          - { label: Pinned Tracks, name: pinned_tracks, widget: list }
+          - {
+              label: Featured Artifacts,
+              name: featured_artifacts,
+              widget: relation,
+              collection: artifacts,
+              search_fields: [title],
+              value_field: slug,
+              display_fields: [title],
+              multiple: true
+            }
+          - {
+              label: Featured Posts,
+              name: featured_posts,
+              widget: relation,
+              collection: blog,
+              search_fields: [title],
+              value_field: slug,
+              display_fields: [title],
+              multiple: true
+            }
+          - { label: Changelog, name: changelog, widget: list }
+

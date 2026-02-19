@@ -1,0 +1,96 @@
+﻿<div class="command-root" id="command-root" hidden>
+  <button class="command-mask" id="command-mask" aria-label="Close quick find"></button>
+  <section class="command-panel" role="dialog" aria-modal="true" aria-label="Quick Find">
+    <header class="command-header">
+      <input id="command-input" class="input command-input" placeholder="Quick Find..." autocomplete="off" />
+      <span class="meta-row">Esc</span>
+    </header>
+    <ul class="command-results list-clean" id="command-results"></ul>
+  </section>
+</div>
+
+<script is:inline>
+  const root = document.getElementById("command-root");
+  const mask = document.getElementById("command-mask");
+  const input = document.getElementById("command-input");
+  const results = document.getElementById("command-results");
+
+  let loaded = false;
+  let items = [];
+  let query = "";
+
+  const render = () => {
+    if (!results) return;
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? items.filter((item) => item.title.toLowerCase().includes(q) || item.kind.toLowerCase().includes(q)).slice(0, 18)
+      : items.slice(0, 12);
+
+    results.innerHTML = filtered
+      .map(
+        (item) =>
+          `<li><a class="command-item" href="${item.url}"><span>${item.title}</span><span class="tag-chip">${item.kind}</span></a></li>`
+      )
+      .join("");
+
+    if (filtered.length === 0) {
+      results.innerHTML = '<li class="meta-row">没有匹配结果</li>';
+    }
+  };
+
+  const loadItems = async () => {
+    if (loaded) return;
+    loaded = true;
+    try {
+      const response = await fetch("/command-items.json");
+      const payload = await response.json();
+      if (Array.isArray(payload)) {
+        items = payload;
+      }
+    } catch {
+      items = [];
+    }
+    render();
+  };
+
+  const open = async () => {
+    if (!root) return;
+    root.hidden = false;
+    await loadItems();
+    if (input instanceof HTMLInputElement) {
+      input.focus();
+      input.select();
+    }
+  };
+
+  const close = () => {
+    if (!root) return;
+    root.hidden = true;
+  };
+
+  document.addEventListener("keydown", (event) => {
+    const trigger = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+    if (trigger) {
+      event.preventDefault();
+      if (root?.hidden) {
+        void open();
+      } else {
+        close();
+      }
+      return;
+    }
+
+    if (event.key === "Escape") {
+      close();
+    }
+  });
+
+  mask?.addEventListener("click", close);
+
+  input?.addEventListener("input", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    query = target.value;
+    render();
+  });
+</script>

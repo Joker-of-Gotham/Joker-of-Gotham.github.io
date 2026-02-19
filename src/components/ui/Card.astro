@@ -1,0 +1,19 @@
+﻿---
+export interface Props {
+  title?: string;
+  href?: string;
+  subtitle?: string;
+  className?: string;
+}
+
+const { title, href, subtitle, className = "" } = Astro.props;
+const Wrapper = href ? "a" : "article";
+---
+
+<Wrapper class={`card ${className}`} href={href}>
+  <div class="card-body">
+    {title && <h3>{title}</h3>}
+    {subtitle && <p class="meta-row">{subtitle}</p>}
+    <slot />
+  </div>
+</Wrapper>

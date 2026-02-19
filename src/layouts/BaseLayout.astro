@@ -1,0 +1,246 @@
+﻿---
+import "@/styles/main.css";
+import Sidebar from "@/components/layout/Sidebar.astro";
+import Topbar from "@/components/layout/Topbar.astro";
+import CommandPalette from "@/components/search/CommandPalette.astro";
+import PagefindFilters from "@/components/search/PagefindFilters.astro";
+import { getSiteConfig } from "@/lib/content/queries";
+
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  crumbs?: Crumb[];
+  pagefindFilters?: Record<string, string | number | Array<string | number> | null | undefined>;
+}
+
+const { title, description = "Joker 的结构化学习与工程实践站点", crumbs = [], pagefindFilters = {} } = Astro.props;
+const { home, taxonomy } = await getSiteConfig();
+
+const quickLinks = home?.quick_links?.length
+  ? home.quick_links
+  : [
+      { label: "GitHub", url: "https://github.com/Joker-of-Gotham", external: true },
+      { label: "Kaggle", url: "https://www.kaggle.com/gothamjocker", external: true }
+    ];
+const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy?.tracks ?? [];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} | Joker</title>
+    <meta name="description" content={description} />
+    <slot name="head" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
+
+      <div class="main-area">
+        <Topbar title={title} crumbs={crumbs} />
+        <main class="main-container" data-pagefind-body>
+          <PagefindFilters filters={pagefindFilters} />
+          <slot />
+        </main>
+      </div>
+    </div>
+
+    <CommandPalette />
+
+    <script>
+      const sidebar = document.getElementById("site-sidebar");
+      const toggle = document.getElementById("drawer-toggle");
+
+      function closeSidebar() {
+        sidebar?.classList.remove("open");
+        document.querySelector(".mobile-mask")?.remove();
+      }
+
+      function openSidebar() {
+        sidebar?.classList.add("open");
+
+        if (!document.querySelector(".mobile-mask")) {
+          const mask = document.createElement("button");
+          mask.className = "mobile-mask";
+          mask.setAttribute("aria-label", "Close sidebar");
+          mask.addEventListener("click", closeSidebar);
+          document.body.appendChild(mask);
+        }
+      }
+
+      toggle?.addEventListener("click", () => {
+        if (sidebar?.classList.contains("open")) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      });
+
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 1023) {
+          closeSidebar();
+        }
+      });
+    </script>
+
+    <script>
+      // @ts-nocheck
+      const rootWindow = window;
+
+      if (!rootWindow["__jokerEnhancers"]) {
+        rootWindow["__jokerEnhancers"] = {
+          mermaidPromise: null,
+          bound: false
+        };
+      }
+
+      const extractLanguage = (codeElement) => {
+        const className = Array.from(codeElement.classList).find((token) => token.startsWith("language-"));
+        return className ? className.replace("language-", "") : "";
+      };
+
+      const decorateCodeBlocks = (scope = document) => {
+        scope.querySelectorAll("pre").forEach((pre) => {
+          if (!(pre instanceof HTMLElement)) return;
+          if (pre.dataset.codeDecorated === "1") return;
+
+          const code = pre.querySelector("code");
+          if (!(code instanceof HTMLElement)) return;
+
+          const language = extractLanguage(code) || pre.dataset.language || "text";
+          pre.dataset.lang = String(language).toUpperCase();
+          pre.dataset.codeDecorated = "1";
+        });
+      };
+
+      const markerPattern = /^\s*\{:\s*((?:\.[a-zA-Z0-9_-]+\s*)+)\}\s*$/;
+      const parseMarkerClasses = (raw) =>
+        raw
+          .split(/\s+/)
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .map((item) => (item.startsWith(".") ? item.slice(1) : item))
+          .filter(Boolean);
+
+      const cleanupLegacyMarkers = (scope = document) => {
+        const candidates = scope.querySelectorAll(".content p, .content li");
+        candidates.forEach((node) => {
+          if (!(node instanceof HTMLElement)) return;
+          const text = (node.textContent ?? "").trim();
+          const marker = text.match(markerPattern);
+          if (!marker) return;
+
+          const classes = parseMarkerClasses(marker[1]);
+          if (classes.length === 0) {
+            node.remove();
+            return;
+          }
+
+          let target = node.previousElementSibling;
+          const parent = node.parentElement;
+
+          if (!target && parent?.tagName.toLowerCase() === "blockquote") {
+            target = parent;
+          }
+
+          if (target instanceof HTMLElement) {
+            target.classList.add("callout");
+            classes.forEach((name) => target.classList.add(name));
+          }
+
+          node.remove();
+        });
+      };
+
+      const isMermaidPre = (node) => {
+        if (!(node instanceof HTMLElement)) return false;
+        const preLanguage = node.dataset.language?.toLowerCase();
+        if (preLanguage === "mermaid") return true;
+        const code = node.querySelector("code");
+        if (!(code instanceof HTMLElement)) return false;
+        return Array.from(code.classList).some((item) => item.toLowerCase() === "language-mermaid");
+      };
+
+      const loadMermaid = async () => {
+        if (!rootWindow["__jokerEnhancers"].mermaidPromise) {
+          rootWindow["__jokerEnhancers"].mermaidPromise = import("mermaid")
+            .then((module) => {
+              const mermaid = module.default ?? module;
+              mermaid.initialize({
+                startOnLoad: false,
+                securityLevel: "loose",
+                theme: "dark"
+              });
+              return mermaid;
+            })
+            .catch(() => null);
+        }
+
+        return rootWindow["__jokerEnhancers"].mermaidPromise;
+      };
+
+      const renderMermaidBlocks = async (scope = document) => {
+        const codeBlocks = Array.from(scope.querySelectorAll("pre")).filter((node) => isMermaidPre(node));
+        if (codeBlocks.length === 0) return;
+
+        const mermaid = await loadMermaid();
+        if (!mermaid) return;
+
+        codeBlocks.forEach((preBlock, index) => {
+          if (!(preBlock instanceof HTMLElement)) return;
+          if (preBlock.dataset.mermaidRendered === "1") return;
+
+          const codeBlock = preBlock.querySelector("code");
+          if (!(codeBlock instanceof HTMLElement)) return;
+          const source = (codeBlock.textContent ?? "").trim();
+          if (!source) return;
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "mermaid-block card";
+
+          const body = document.createElement("div");
+          body.className = "card-body";
+
+          const mermaidNode = document.createElement("div");
+          mermaidNode.className = "mermaid";
+          mermaidNode.dataset.key = `${Date.now()}-${index}`;
+          mermaidNode.textContent = source;
+
+          body.appendChild(mermaidNode);
+          wrapper.appendChild(body);
+          preBlock.dataset.mermaidRendered = "1";
+          preBlock.replaceWith(wrapper);
+        });
+
+        try {
+          await mermaid.run({
+            querySelector: ".mermaid-block .mermaid"
+          });
+        } catch (_error) {
+          return;
+        }
+      };
+
+      const applyEnhancements = () => {
+        decorateCodeBlocks(document);
+        cleanupLegacyMarkers(document);
+        void renderMermaidBlocks(document);
+      };
+
+      if (!rootWindow["__jokerEnhancers"].bound) {
+        rootWindow["__jokerEnhancers"].bound = true;
+        document.addEventListener("astro:page-load", applyEnhancements);
+        document.addEventListener("astro:after-swap", applyEnhancements);
+      }
+
+      applyEnhancements();
+    </script>
+  </body>
+</html>

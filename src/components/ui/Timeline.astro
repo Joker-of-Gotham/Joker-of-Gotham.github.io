@@ -1,0 +1,26 @@
+﻿---
+interface EventItem {
+  date: string;
+  title: string;
+  note?: string;
+  href?: string;
+}
+
+export interface Props {
+  events: EventItem[];
+}
+
+const { events } = Astro.props;
+---
+
+<div class="timeline">
+  {
+    events.map((event) => (
+      <article class="timeline-item">
+        <div class="meta-row">{event.date}</div>
+        <strong>{event.href ? <a href={event.href}>{event.title}</a> : event.title}</strong>
+        {event.note && <p>{event.note}</p>}
+      </article>
+    ))
+  }
+</div>

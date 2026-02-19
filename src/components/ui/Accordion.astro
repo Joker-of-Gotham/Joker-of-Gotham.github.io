@@ -1,0 +1,30 @@
+﻿---
+interface Section {
+  title: string;
+  summary?: string;
+  content: string;
+  open?: boolean;
+}
+
+export interface Props {
+  sections: Section[];
+}
+
+const { sections } = Astro.props;
+---
+
+<div class="list-clean">
+  {
+    sections.map((section) => (
+      <details class="card" open={section.open}>
+        <summary class="card-body" style="cursor:pointer;">
+          <strong>{section.title}</strong>
+          {section.summary && <p class="meta-row">{section.summary}</p>}
+        </summary>
+        <div class="card-body" style="padding-top:0;">
+          <p>{section.content}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>

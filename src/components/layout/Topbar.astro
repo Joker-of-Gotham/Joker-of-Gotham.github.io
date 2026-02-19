@@ -1,0 +1,199 @@
+﻿---
+import Icon from "@/components/ui/Icon.astro";
+
+interface Crumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  title: string;
+  crumbs?: Crumb[];
+}
+
+const { title, crumbs = [] } = Astro.props;
+const lastCrumbLabel = crumbs.length > 0 ? crumbs[crumbs.length - 1].label : null;
+const showTitle = title !== lastCrumbLabel;
+---
+
+<header class="topbar">
+  <button class="button drawer-toggle" id="drawer-toggle" type="button" aria-label="Open sidebar">
+    <Icon name="menu" size={16} />
+    <span>Menu</span>
+  </button>
+
+  <div class="topbar-title-wrap">
+    {
+      crumbs.length > 0 && (
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          {crumbs.map((crumb) => <span>{crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <strong>{crumb.label}</strong>}</span>)}
+        </nav>
+      )
+    }
+    {showTitle && <strong>{title}</strong>}
+  </div>
+
+  <div class="top-search" id="top-search">
+    <Icon name="search" size={14} />
+    <input id="top-search-input" class="unstyled-input" placeholder="Search everything..." autocomplete="off" />
+    <div class="top-search-results" id="top-search-results" hidden></div>
+  </div>
+</header>
+
+<script is:inline>
+  const topSearchRoot = document.getElementById("top-search");
+  if (topSearchRoot) {
+    const input = document.getElementById("top-search-input");
+    const resultPanel = document.getElementById("top-search-results");
+    let loaded = false;
+    let items = [];
+    let hovering = false;
+    let focused = false;
+
+    const escapeHtml = (str) => str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/\"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+    const hasQuery = () => input instanceof HTMLInputElement && input.value.trim().length > 0;
+    const shouldKeepOpen = () => hasQuery() || hovering || focused;
+
+    const closePanel = () => {
+      if (!resultPanel) return;
+      resultPanel.hidden = true;
+      resultPanel.innerHTML = "";
+    };
+
+    const openPanel = () => {
+      if (resultPanel) resultPanel.hidden = false;
+    };
+
+    const loadItems = async () => {
+      if (loaded) return;
+      loaded = true;
+      const response = await fetch("/search-index.json", { cache: "no-store" });
+      if (!response.ok) throw new Error("failed");
+      items = await response.json();
+    };
+
+    const render = (query) => {
+      if (!resultPanel) return;
+
+      const keyword = query.trim().toLowerCase();
+      if (!keyword && !hovering && !focused) {
+        closePanel();
+        return;
+      }
+
+      const filtered = (keyword
+        ? items.filter((item) => (`${item.title} ${item.summary || ""} ${(item.tags || []).join(" ")}`).toLowerCase().includes(keyword))
+        : items
+      ).slice(0, 8);
+
+      if (filtered.length === 0) {
+        if (keyword) {
+          resultPanel.innerHTML = '<p class="meta-row top-search-empty">No match. Press Enter for full search.</p>';
+          openPanel();
+        } else {
+          closePanel();
+        }
+        return;
+      }
+
+      resultPanel.innerHTML = filtered
+        .map(
+          (item) =>
+            `<a class="top-search-item" href="${item.url}"><span>${escapeHtml(item.title)}</span><span class="tag-chip">${escapeHtml(item.kind)}</span></a>`
+        )
+        .join("");
+
+      openPanel();
+    };
+
+    const openWithCurrentValue = async () => {
+      try {
+        await loadItems();
+        const value = input instanceof HTMLInputElement ? input.value : "";
+        if (!shouldKeepOpen() && value.trim().length === 0) {
+          closePanel();
+          return;
+        }
+        render(value);
+      } catch {
+        closePanel();
+      }
+    };
+
+    topSearchRoot.addEventListener("mouseenter", () => {
+      hovering = true;
+      openWithCurrentValue();
+    });
+
+    topSearchRoot.addEventListener("mouseleave", () => {
+      hovering = false;
+      if (!hasQuery() && !focused) {
+        closePanel();
+      }
+    });
+
+    input?.addEventListener("focus", () => {
+      focused = true;
+      openWithCurrentValue();
+    });
+
+    input?.addEventListener("blur", () => {
+      focused = false;
+      window.setTimeout(() => {
+        if (!hasQuery() && !hovering) {
+          closePanel();
+        }
+      }, 20);
+    });
+
+    input?.addEventListener("input", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      try {
+        await loadItems();
+        render(target.value);
+        if (!target.value.trim() && !hovering) {
+          closePanel();
+        }
+      } catch {
+        closePanel();
+      }
+    });
+
+    input?.addEventListener("keydown", (event) => {
+      if (!(input instanceof HTMLInputElement)) return;
+
+      if (event.key === "Enter") {
+        event.preventDefault();
+        const q = input.value.trim();
+        window.location.href = q ? `/search/?q=${encodeURIComponent(q)}` : "/search/";
+      }
+
+      if (event.key === "Escape") {
+        if (input instanceof HTMLInputElement) {
+          input.value = "";
+        }
+        closePanel();
+      }
+    });
+
+    document.addEventListener("pointerdown", (event) => {
+      if (!(event.target instanceof Node)) return;
+      if (!topSearchRoot.contains(event.target)) {
+        hovering = false;
+        focused = false;
+        if (!hasQuery()) {
+          closePanel();
+        }
+      }
+    });
+
+    closePanel();
+  }
+</script>

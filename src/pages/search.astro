@@ -1,0 +1,270 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Icon from "@/components/ui/Icon.astro";
+
+const quickKindTabs = [
+  { label: "All", kind: "all" },
+  { label: "Roadmap", kind: "roadmap" },
+  { label: "Blog", kind: "blog" },
+  { label: "Projects", kind: "project" },
+  { label: "Papers", kind: "paper" },
+  { label: "Artifacts", kind: "artifact" }
+];
+---
+
+<BaseLayout title="Search" crumbs={[{ label: "Home", href: "/" }, { label: "Search" }]}> 
+  <section class="section-stack" id="search-page">
+    <div class="section-heading-row">
+      <h1>Search</h1>
+      <span class="meta-row">实时检索路线图 / 博客 / 成果</span>
+    </div>
+
+    <div class="card search-shell">
+      <div class="card-body section-stack" style="gap:var(--space-4)">
+        <label class="sr-only" for="search-query-input">Search query</label>
+        <div class="input icon-input-wrap search-input-wrap">
+          <Icon name="search" size={16} />
+          <input id="search-query-input" class="unstyled-input" placeholder="输入关键词，按 Enter 搜索..." autocomplete="off" />
+        </div>
+
+        <div class="filter-bar" id="search-kind-tabs">
+          {
+            quickKindTabs.map((tab) => (
+              <button class="tag-chip" type="button" data-kind={tab.kind}>{tab.label}</button>
+            ))
+          }
+        </div>
+
+        <div class="filter-bar">
+          <label class="sr-only" for="search-year">Year</label>
+          <select id="search-year">
+            <option value="all">All year</option>
+          </select>
+
+          <label class="sr-only" for="search-track">Track</label>
+          <select id="search-track">
+            <option value="all">All track</option>
+          </select>
+
+          <label class="sr-only" for="search-status">Status</label>
+          <select id="search-status">
+            <option value="all">All status</option>
+            <option value="done">Completed</option>
+            <option value="now">Ongoing</option>
+            <option value="blocked">Blocked</option>
+            <option value="next">Planned</option>
+            <option value="later">Pending</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-result-list" id="search-result-list"></div>
+    <p class="meta-row" id="search-empty" hidden>没有匹配结果，尝试更换关键词或筛选条件。</p>
+  </section>
+
+  <script is:inline>
+    const root = document.getElementById("search-page");
+
+    if (root) {
+      const queryInput = document.getElementById("search-query-input");
+      const tabs = document.getElementById("search-kind-tabs");
+      const yearSelect = document.getElementById("search-year");
+      const trackSelect = document.getElementById("search-track");
+      const statusSelect = document.getElementById("search-status");
+      const list = document.getElementById("search-result-list");
+      const empty = document.getElementById("search-empty");
+
+      const STATUS_LABEL = {
+        done: "Completed",
+        now: "Ongoing",
+        blocked: "Blocked",
+        next: "Planned",
+        later: "Pending"
+      };
+
+      const state = {
+        q: "",
+        kind: "all",
+        year: "all",
+        track: "all",
+        status: "all"
+      };
+
+      let items = [];
+
+      const escapeHtml = (str) => str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+      const updateUrl = () => {
+        const params = new URLSearchParams();
+        if (state.q) params.set("q", state.q);
+        if (state.kind !== "all") params.set("kind", state.kind);
+        if (state.year !== "all") params.set("year", state.year);
+        if (state.track !== "all") params.set("track", state.track);
+        if (state.status !== "all") params.set("status", state.status);
+        const next = params.toString();
+        window.history.replaceState({}, "", next ? `/search/?${next}` : "/search/");
+      };
+
+      const syncFromUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        state.q = params.get("q") || "";
+        state.kind = params.get("kind") || "all";
+        state.year = params.get("year") || "all";
+        state.track = params.get("track") || "all";
+        state.status = params.get("status") || "all";
+      };
+
+      const hydrateFilterOptions = () => {
+        const years = new Set();
+        const tracks = new Set();
+
+        items.forEach((item) => {
+          if (item.year) years.add(String(item.year));
+          if (item.track) tracks.add(item.track);
+        });
+
+        Array.from(years).sort((a, b) => Number(b) - Number(a)).forEach((year) => {
+          const option = document.createElement("option");
+          option.value = year;
+          option.textContent = year;
+          yearSelect?.appendChild(option);
+        });
+
+        Array.from(tracks).sort((a, b) => a.localeCompare(b, "zh-CN")).forEach((track) => {
+          const option = document.createElement("option");
+          option.value = track;
+          option.textContent = track;
+          trackSelect?.appendChild(option);
+        });
+      };
+
+      const matches = (item) => {
+        const q = state.q.trim().toLowerCase();
+        const haystack = `${item.title} ${item.summary} ${(item.tags || []).join(" ")} ${item.track || ""} ${item.type || ""}`.toLowerCase();
+
+        const queryMatched = q.length === 0 || haystack.includes(q);
+        const kindMatched = state.kind === "all" || item.kind === state.kind;
+        const yearMatched = state.year === "all" || String(item.year || "") === state.year;
+        const trackMatched = state.track === "all" || item.track === state.track;
+        const statusMatched = state.status === "all" || item.status === state.status;
+
+        return queryMatched && kindMatched && yearMatched && trackMatched && statusMatched;
+      };
+
+      const render = () => {
+        if (!list) return;
+
+        const filtered = items
+          .filter(matches)
+          .sort((a, b) => {
+            const yearDelta = Number(b.year || 0) - Number(a.year || 0);
+            if (yearDelta !== 0) return yearDelta;
+            return a.title.localeCompare(b.title, "zh-CN");
+          })
+          .slice(0, 120);
+
+        list.innerHTML = filtered
+          .map((item) => {
+            const status = item.status ? STATUS_LABEL[item.status] || item.status : "";
+            const meta = [item.kind, item.track, item.type, item.year, status].filter(Boolean).join(" · ");
+            const tags = (item.tags || []).slice(0, 4);
+
+            return `
+              <article class="card">
+                <a class="card-body search-result-item" href="${item.url}">
+                  <div class="search-result-head">
+                    <h3>${escapeHtml(item.title)}</h3>
+                    <span class="tag-chip">${escapeHtml(item.kind)}</span>
+                  </div>
+                  ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
+                  ${meta ? `<p class="meta-row">${escapeHtml(meta)}</p>` : ""}
+                  ${tags.length > 0 ? `<div class="meta-row">${tags.map((tag) => `<span class=\"tag-chip\">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+                </a>
+              </article>
+            `;
+          })
+          .join("");
+
+        if (empty) {
+          empty.hidden = filtered.length > 0;
+        }
+      };
+
+      const bindEvents = () => {
+        queryInput?.addEventListener("input", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLInputElement)) return;
+          state.q = target.value;
+          updateUrl();
+          render();
+        });
+
+        yearSelect?.addEventListener("change", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLSelectElement)) return;
+          state.year = target.value;
+          updateUrl();
+          render();
+        });
+
+        trackSelect?.addEventListener("change", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLSelectElement)) return;
+          state.track = target.value;
+          updateUrl();
+          render();
+        });
+
+        statusSelect?.addEventListener("change", (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLSelectElement)) return;
+          state.status = target.value;
+          updateUrl();
+          render();
+        });
+
+        tabs?.addEventListener("click", (event) => {
+          const target = event.target.closest("[data-kind]");
+          if (!(target instanceof HTMLButtonElement)) return;
+          state.kind = target.dataset.kind || "all";
+          updateUrl();
+          render();
+          tabs.querySelectorAll("[data-kind]").forEach((tab) => tab.classList.toggle("active", tab === target));
+        });
+      };
+
+      const applyControls = () => {
+        if (queryInput instanceof HTMLInputElement) queryInput.value = state.q;
+        if (yearSelect instanceof HTMLSelectElement) yearSelect.value = state.year;
+        if (trackSelect instanceof HTMLSelectElement) trackSelect.value = state.track;
+        if (statusSelect instanceof HTMLSelectElement) statusSelect.value = state.status;
+        tabs?.querySelectorAll("[data-kind]").forEach((tab) => {
+          tab.classList.toggle("active", tab.getAttribute("data-kind") === state.kind);
+        });
+      };
+
+      const boot = async () => {
+        const response = await fetch("/search-index.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("failed");
+        items = await response.json();
+        hydrateFilterOptions();
+        syncFromUrl();
+        applyControls();
+        render();
+        bindEvents();
+      };
+
+      boot().catch(() => {
+        if (list) {
+          list.innerHTML = '<article class="card"><div class="card-body"><p>搜索索引加载失败，请刷新页面重试。</p></div></article>';
+        }
+      });
+    }
+  </script>
+</BaseLayout>

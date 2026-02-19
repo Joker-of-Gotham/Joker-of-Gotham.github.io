@@ -1,0 +1,184 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Card from "@/components/ui/Card.astro";
+import type { CollectionEntry } from "astro:content";
+import { getPublishedBlogPosts, getRoadmapNodes, getArtifacts, normalizeSlug, formatDate, readingTimeFromBody } from "@/lib/content/queries";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedBlogPosts();
+  return posts.map((entry) => ({ params: { slug: normalizeSlug(entry) }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<"blog"> };
+const { Content, headings } = await entry.render();
+type RenderHeading = (typeof headings)[number];
+const tocHeadings = headings.filter((heading: RenderHeading) => heading.depth <= 3);
+const [posts, nodes, artifacts] = await Promise.all([getPublishedBlogPosts(), getRoadmapNodes(), getArtifacts()]);
+
+const currentSlug = normalizeSlug(entry);
+const currentNodeSlugSet = new Set(entry.data.related_nodes);
+
+for (const node of nodes) {
+  if (node.data.related_posts.includes(currentSlug)) {
+    currentNodeSlugSet.add(normalizeSlug(node));
+  }
+}
+
+const relatedNodes = nodes.filter((node) => currentNodeSlugSet.has(normalizeSlug(node)));
+
+const relatedArtifacts = artifacts.filter((artifact) => {
+  const artifactSlug = normalizeSlug(artifact);
+  const explicit = entry.data.related_artifacts.includes(artifactSlug);
+  const viaNode = artifact.data.related_nodes.some((nodeSlug: string) => currentNodeSlugSet.has(nodeSlug));
+  return explicit || viaNode;
+});
+
+const relatedPosts = posts
+  .filter((post) => post.id !== entry.id && post.data.tags.some((tag: string) => entry.data.tags.includes(tag)))
+  .slice(0, 4);
+
+const currentIndex = posts.findIndex((post) => post.id === entry.id);
+const newerPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+const olderPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+
+const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  crumbs={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog/" }, { label: entry.data.title }]}
+  pagefindFilters={{
+    kind: "blog",
+    collection: entry.data.collection,
+    year: entry.data.date.getFullYear(),
+    tags: entry.data.tags
+  }}
+>
+  <article class="section-stack">
+    <header class="section-stack" style="gap:var(--space-4);">
+      <h1>{entry.data.title}</h1>
+      <div class="meta-row">
+        <span>{formatDate(entry.data.date)}</span>
+        <span>{entry.data.collection}</span>
+        <span>{readMinutes} 分钟阅读</span>
+      </div>
+      <div class="meta-row">
+        {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
+      </div>
+    </header>
+
+    {tocHeadings.length > 0 && (
+      <aside class="toc-dock" data-toc-dock>
+        <button class="toc-dock-handle" type="button" aria-label="Toggle table of contents">
+          <span class="toc-dock-bars">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+        <nav class="toc-dock-panel" aria-label="Table of contents">
+          <p class="sidebar-title">Reading</p>
+          <p class="meta-row">Progress <strong data-toc-progress>0%</strong></p>
+          <ul class="list-clean">
+            {tocHeadings.map((heading: (typeof tocHeadings)[number]) => <li><a href={`#${heading.slug}`} data-toc-link>{heading.text}</a></li>)}
+          </ul>
+        </nav>
+      </aside>
+    )}
+
+    <div class="card">
+      <div class="card-body content">
+        <Content />
+      </div>
+    </div>
+
+    <section class="section-stack">
+      <h2>关联路线图节点</h2>
+      {relatedNodes.length > 0 ? (
+        <div class="card-grid">
+          {relatedNodes.map((node) => <Card href={`/roadmap/${normalizeSlug(node)}/`} title={node.data.title} subtitle={node.data.status.toUpperCase()} />)}
+        </div>
+      ) : (
+        <Card title="暂无关联路线图节点" />
+      )}
+    </section>
+
+    <section class="section-stack">
+      <h2>关联成果</h2>
+      {relatedArtifacts.length > 0 ? (
+        <div class="card-grid">
+          {relatedArtifacts.map((artifact) => <Card href={`/artifacts/${normalizeSlug(artifact)}/`} title={artifact.data.title} subtitle={artifact.data.type.toUpperCase()} />)}
+        </div>
+      ) : (
+        <Card title="暂无关联成果" />
+      )}
+    </section>
+
+    <section class="section-stack">
+      <h2>相关文章</h2>
+      {relatedPosts.length > 0 ? (
+        <div class="card-grid">
+          {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+        </div>
+      ) : (
+        <Card title="暂无相关文章" />
+      )}
+    </section>
+
+    <Card title="上一篇 / 下一篇">
+      <div class="filter-bar" style="justify-content:space-between;">
+        {olderPost ? <a href={`/blog/${normalizeSlug(olderPost)}/`}>← {olderPost.data.title}</a> : <span class="meta-row">没有更早文章</span>}
+        {newerPost ? <a href={`/blog/${normalizeSlug(newerPost)}/`}>{newerPost.data.title} →</a> : <span class="meta-row">没有更新文章</span>}
+      </div>
+    </Card>
+  </article>
+
+  <script is:inline>
+    const tocDock = document.querySelector("[data-toc-dock]");
+    if (tocDock) {
+      const progressLabel = tocDock.querySelector("[data-toc-progress]");
+      const tocLinks = Array.from(tocDock.querySelectorAll("[data-toc-link]"));
+      const headingTargets = tocLinks
+        .map((link) => {
+          const href = link.getAttribute("href");
+          if (!href || !href.startsWith("#")) return null;
+          const target = document.querySelector(href);
+          if (!(target instanceof HTMLElement)) return null;
+          return { link, target };
+        })
+        .filter(Boolean);
+
+      const updateProgress = () => {
+        const doc = document.documentElement;
+        const scrollable = Math.max(doc.scrollHeight - window.innerHeight, 1);
+        const progress = Math.min(100, Math.max(0, Math.round((window.scrollY / scrollable) * 100)));
+        if (progressLabel) {
+          progressLabel.textContent = `${progress}%`;
+        }
+      };
+
+      const updateActiveHeading = () => {
+        let activeIndex = -1;
+        headingTargets.forEach((entry, index) => {
+          if (entry.target.getBoundingClientRect().top <= 120) {
+            activeIndex = index;
+          }
+        });
+
+        headingTargets.forEach((entry, index) => {
+          entry.link.classList.toggle("active", index === activeIndex);
+        });
+      };
+
+      const handleScroll = () => {
+        updateProgress();
+        updateActiveHeading();
+      };
+
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      window.addEventListener("resize", handleScroll);
+      handleScroll();
+    }
+  </script>
+</BaseLayout>

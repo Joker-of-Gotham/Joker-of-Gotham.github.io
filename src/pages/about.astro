@@ -1,0 +1,210 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Icon from "@/components/ui/Icon.astro";
+
+const email = "liuzhh268@mail2.sysu.edu.cn";
+
+interface ResumeLink {
+  label: string;
+  url: string;
+}
+
+interface ResumeItem {
+  name: string;
+  period: string;
+  summary: string;
+  points: string[];
+  link?: ResumeLink;
+}
+
+interface ResumeSection {
+  title: string;
+  items: ResumeItem[];
+}
+
+const links = [
+  { label: "GitHub", url: "https://github.com/Joker-of-Gotham", icon: "github" as const },
+  { label: "Kaggle", url: "https://www.kaggle.com/gothamjocker", icon: "kaggle" as const },
+  { label: "HuggingFace", url: "https://huggingface.co/ChikaKomari", icon: "huggingface" as const },
+  { label: "LinkedIn", url: "https://www.linkedin.com/in/zhonghan-liu", icon: "linkedin" as const },
+  { label: "OpenReview", url: "https://openreview.net/profile?id=%7ELiu_Zhonghan1", icon: "openreview" as const }
+];
+
+const sections: ResumeSection[] = [
+  {
+    title: "Education",
+    items: [
+      {
+        name: "中山大学 · 研究与工程方向学习",
+        period: "2024.09.01 至今",
+        summary: "围绕 AI、图论、逻辑与工程系统化持续构建知识体系。",
+        points: [
+          "建立路线图驱动的学习结构并按里程碑迭代",
+          "将课程学习与公开博客输出绑定，形成可追溯成果链"
+        ]
+      }
+    ]
+  },
+  {
+    title: "Experience",
+    items: [
+      {
+        name: "个人知识工程系统",
+        period: "2025.01.01 至今",
+        summary: "持续建设个人站点、路线图与成果库，形成研究-工程-写作闭环。",
+        points: [
+          "完成多级父子节点路线图与可视化视图",
+          "实现博客、路线图、成果之间双向关联"
+        ],
+        link: { label: "查看 Roadmap", url: "/roadmap/" }
+      }
+    ]
+  },
+  {
+    title: "Publications & Writing",
+    items: [
+      {
+        name: "LLM / 图论 / 本体工程系列写作",
+        period: "2025.07.01 至今",
+        summary: "围绕模型工程、数学基础与知识结构化持续输出技术内容。",
+        points: [
+          "维护专题化文章集合，支持按标签和方向检索",
+          "结合路线图节点管理内容优先级与发布节奏"
+        ],
+        link: { label: "查看 Blog", url: "/blog/" }
+      }
+    ]
+  },
+  {
+    title: "Skills",
+    items: [
+      {
+        name: "Python / TypeScript / Astro / 数据处理",
+        period: "持续迭代",
+        summary: "关注工程可维护性、知识结构化、可视化表达。",
+        points: [
+          "LLM 应用工程与检索增强实践",
+          "路线图建模、内容治理与信息架构设计"
+        ]
+      }
+    ]
+  }
+];
+---
+
+<BaseLayout title="About" crumbs={[{ label: "Home", href: "/" }, { label: "About" }]}> 
+  <section class="section-stack about-page">
+    <div class="section-heading-row" id="cv">
+      <div class="section-stack" style="gap:var(--space-2);">
+        <h1>About</h1>
+        <p>专注于把研究、工程与写作组织成可持续的公开成长系统。</p>
+      </div>
+      <div class="filter-bar">
+        <button class="button primary" type="button" data-email-open>
+          <Icon name="mail" size={16} />
+          <span>联系我</span>
+        </button>
+      </div>
+    </div>
+
+    {
+      sections.map((section) => (
+        <section class="resume-section">
+          <h2>{section.title}</h2>
+          <div class="resume-list">
+            {
+              section.items.map((item: ResumeItem) => (
+                <article class="resume-item card">
+                  <div class="card-body">
+                    <div class="resume-item-head">
+                      <strong>{item.name}</strong>
+                      <span class="meta-row">{item.period}</span>
+                    </div>
+                    <p>{item.summary}</p>
+                    <ul class="tree-highlight-list">
+                      {item.points.map((point: string) => <li>{point}</li>)}
+                    </ul>
+                    {item.link && (
+                      <p>
+                        <a class="text-link" href={item.link.url}>{item.link.label}</a>
+                      </p>
+                    )}
+                  </div>
+                </article>
+              ))
+            }
+          </div>
+        </section>
+      ))
+    }
+
+    <section class="resume-section">
+      <h2>Selected Links</h2>
+      <div class="quick-link-grid">
+        {links.map((link) => (
+          <a class="quick-link-item" href={link.url} target="_blank" rel="noreferrer">
+            <Icon name={link.icon} size={16} />
+            <span>{link.label}</span>
+            <Icon name="external" size={13} class="link-end" />
+          </a>
+        ))}
+        <button class="quick-link-item" type="button" data-email-open>
+          <Icon name="mail" size={16} />
+          <span>Email</span>
+          <Icon name="external" size={13} class="link-end" />
+        </button>
+      </div>
+    </section>
+  </section>
+
+  <dialog class="email-dialog" id="email-dialog">
+    <form method="dialog" class="card-body section-stack" style="min-width:min(460px, 92vw);">
+      <div class="section-heading-row" style="border-bottom:0;padding-bottom:0;">
+        <h3>选择邮件方式</h3>
+        <button class="button" value="cancel">关闭</button>
+      </div>
+      <p class="meta-row">邮箱：{email}</p>
+      <div class="quick-link-grid">
+        <a class="quick-link-item" href={`mailto:${email}`}>
+          <Icon name="mail" size={16} />
+          <span>默认邮件客户端</span>
+        </a>
+        <a class="quick-link-item" href={`https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(email)}`} target="_blank" rel="noreferrer">
+          <Icon name="mail" size={16} />
+          <span>Outlook Web</span>
+        </a>
+        <a class="quick-link-item" href={`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(email)}`} target="_blank" rel="noreferrer">
+          <Icon name="mail" size={16} />
+          <span>Gmail Web</span>
+        </a>
+        <button class="quick-link-item" type="button" id="copy-email-btn">
+          <Icon name="mail" size={16} />
+          <span>复制邮箱地址</span>
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script is:inline>
+    const modal = document.getElementById("email-dialog");
+    const triggers = document.querySelectorAll("[data-email-open]");
+    const copyButton = document.getElementById("copy-email-btn");
+
+    triggers.forEach((button) => {
+      button.addEventListener("click", () => {
+        if (modal instanceof HTMLDialogElement) {
+          modal.showModal();
+        }
+      });
+    });
+
+    copyButton?.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText("liuzhh268@mail2.sysu.edu.cn");
+        copyButton.textContent = "已复制";
+      } catch (_error) {
+        copyButton.textContent = "复制失败";
+      }
+    });
+  </script>
+</BaseLayout>

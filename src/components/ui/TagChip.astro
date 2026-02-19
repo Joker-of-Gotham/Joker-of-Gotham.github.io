@@ -1,0 +1,10 @@
+﻿---
+export interface Props {
+  label: string;
+  active?: boolean;
+}
+
+const { label, active = false } = Astro.props;
+---
+
+<span class={`tag-chip ${active ? "active" : ""}`}>{label}</span>

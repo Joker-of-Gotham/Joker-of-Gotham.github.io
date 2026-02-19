@@ -1,0 +1,201 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import BlogExplorer from "@/components/blog/BlogExplorer.astro";
+import { getPublishedBlogPosts, normalizeSlug, readingTimeFromBody, formatDate } from "@/lib/content/queries";
+import katex from "katex";
+
+const posts = await getPublishedBlogPosts();
+
+const escapeHtml = (input: string) =>
+  input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const stripHtmlTags = (input: string) => input.replace(/<[^>]*>/g, " ");
+
+const sanitizePreviewSource = (input: string) =>
+  input
+    .replace(/\r\n?/g, "\n")
+    .replace(/\{:\s*\.([a-zA-Z0-9_-]+)\s*\}/g, " ")
+    .replace(/<img[^>]*>/gi, " ")
+    .replace(/<[^>\n]*$/g, " ")
+    .trim();
+
+const countUnescapedSingleDollar = (source: string) => {
+  let count = 0;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    if (char !== "$") continue;
+
+    const escaped = index > 0 && source[index - 1] === "\\";
+    if (escaped) continue;
+
+    const isDouble = source[index + 1] === "$";
+    if (isDouble) {
+      index += 1;
+      continue;
+    }
+
+    count += 1;
+  }
+
+  return count;
+};
+
+const isMalformedPreviewSource = (source: string) => {
+  if (!source.trim()) return true;
+  if (/<[^>\n]*$/.test(source)) return true;
+
+  const doubleDollarCount = source.match(/\$\$/g)?.length ?? 0;
+  if (doubleDollarCount % 2 === 1) return true;
+
+  return countUnescapedSingleDollar(source) % 2 === 1;
+};
+
+const normalizePreviewText = (input: string) =>
+  input
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\$\$[\s\S]*?\$\$/g, " ")
+    .replace(/\$\$[^$]*$/g, " ")
+    .replace(/\$[^$\n]+\$/g, " ")
+    .replace(/\$[^\n]*$/g, " ")
+    .replace(/`{1,3}[^`]*`{1,3}/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[#>*_\-\[\]\(\)]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const stripResidualMathTokens = (input: string) =>
+  input
+    .replace(/\$\$/g, " ")
+    .replace(/\$/g, " ")
+    .replace(/\\\(|\\\)|\\\[|\\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const hasOddDelimiter = (source: string, delimiter: "$" | "$$") => {
+  if (delimiter === "$$") {
+    const count = source.match(/\$\$/g)?.length ?? 0;
+    return count % 2 === 1;
+  }
+
+  return countUnescapedSingleDollar(source) % 2 === 1;
+};
+
+const normalizeMathDelimiters = (source: string) => {
+  let next = source;
+  if (hasOddDelimiter(next, "$$")) {
+    next = next.replace(/\$\$/g, "");
+  }
+  if (hasOddDelimiter(next, "$")) {
+    next = next.replace(/\$/g, "");
+  }
+  return next;
+};
+
+const safeExcerptWithFormula = (input: string, limit = 320) => {
+  const source = stripHtmlTags(input).trim();
+  if (!source) return "";
+  if (source.length <= limit) return source;
+
+  const formulaPattern = /\$\$[\s\S]+?\$\$|\$[^$\n]+?\$/g;
+  let nextLimit = limit;
+  let match: RegExpExecArray | null;
+
+  while ((match = formulaPattern.exec(source)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+
+    if (start < limit && limit < end) {
+      nextLimit = end;
+      break;
+    }
+
+    if (start >= limit) break;
+  }
+
+  let excerpt = source.slice(0, nextLimit).trim();
+
+  if (hasOddDelimiter(excerpt, "$$")) {
+    excerpt = excerpt.slice(0, excerpt.lastIndexOf("$$")).trim();
+  }
+
+  if (hasOddDelimiter(excerpt, "$")) {
+    excerpt = excerpt.slice(0, excerpt.lastIndexOf("$")).trim();
+  }
+
+  const normalized = normalizeMathDelimiters(excerpt);
+  return normalized.length < source.length ? `${normalized}…` : normalized;
+};
+
+const renderPreviewHtml = (input: string) => {
+  const source = normalizeMathDelimiters(safeExcerptWithFormula(sanitizePreviewSource(input)));
+  if (!source) return "";
+  const pattern = /\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g;
+
+  let lastIndex = 0;
+  let output = "";
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(source)) !== null) {
+    const [raw, displayMath, inlineMath] = match;
+    const start = match.index;
+
+    output += escapeHtml(normalizePreviewText(source.slice(lastIndex, start)));
+
+    const formula = (displayMath ?? inlineMath ?? "").trim();
+    if (formula) {
+      output += katex.renderToString(formula, {
+        throwOnError: false,
+        displayMode: false
+      });
+    } else {
+      output += escapeHtml(raw);
+    }
+
+    lastIndex = start + raw.length;
+  }
+
+  output += escapeHtml(normalizePreviewText(source.slice(lastIndex)));
+  return output.replace(/\$\$/g, "").replace(/\$/g, "");
+};
+
+const items = posts.map((entry) => {
+  const rawSummary = sanitizePreviewSource(entry.data.summary?.trim().length ? entry.data.summary : "");
+  const summarySource = rawSummary.length > 0 && !isMalformedPreviewSource(rawSummary) ? rawSummary : sanitizePreviewSource(entry.body.slice(0, 1600));
+
+  const summaryHtml = renderPreviewHtml(summarySource);
+  const summaryText = stripResidualMathTokens(normalizePreviewText(summarySource));
+
+  return {
+    title: entry.data.title,
+    slug: normalizeSlug(entry),
+    summaryText,
+    summaryHtml,
+    dateLabel: formatDate(entry.data.date),
+    dateISO: entry.data.date.toISOString(),
+    year: String(entry.data.date.getFullYear()),
+    tags: entry.data.tags,
+    categories: entry.data.categories.length > 0 ? entry.data.categories : entry.data.category ? [entry.data.category] : [],
+    collection: entry.data.collection,
+    readingTime: entry.data.reading_time ?? readingTimeFromBody(entry.body),
+    cover: entry.data.cover
+  };
+});
+---
+
+<BaseLayout title="Blog" crumbs={[{ label: "Home", href: "/" }, { label: "Blog" }]}>
+  <section class="section-stack">
+    <h1>Blog</h1>
+    <p>Gallery 视图支持按标签、集合、年份与关键词组合筛选。</p>
+  </section>
+
+  <BlogExplorer items={items} />
+</BaseLayout>
+

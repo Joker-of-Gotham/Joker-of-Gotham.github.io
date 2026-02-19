@@ -1,0 +1,33 @@
+﻿tracks:
+  - LLM 工程
+  - 图论与逻辑
+  - 工程与写作
+topics:
+  - 人工智能
+  - 机器学习
+  - 强化学习
+  - 图论
+  - 逻辑学
+  - 前端
+types:
+  - project
+  - paper
+  - competition
+  - talk
+  - award
+  - dataset
+statuses:
+  - now
+  - blocked
+  - next
+  - later
+  - done
+roadmap_levels:
+  - domain
+  - pillar
+  - initiative
+  - task
+years:
+  - 2025
+  - 2026
+

@@ -1,0 +1,32 @@
+{
+  "name": "joker-of-gotham-site-v2",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "cms:local": "decap-server",
+    "postbuild": "pagefind --site dist --glob \"**/index.html\""
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.1",
+    "@astrojs/sitemap": "^3.6.0",
+    "astro": "^5.12.8",
+    "katex": "^0.16.28",
+    "mermaid": "^11.7.0",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@types/node": "^22.15.3",
+    "decap-server": "^3.2.0",
+    "gray-matter": "^4.0.3",
+    "pagefind": "^1.3.0",
+    "typescript": "^5.8.3"
+  }
+}

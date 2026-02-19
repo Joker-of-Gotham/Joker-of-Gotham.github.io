@@ -1,0 +1,121 @@
+﻿---
+import Icon from "@/components/ui/Icon.astro";
+
+type RoadmapStatus = "now" | "next" | "later" | "done" | "blocked";
+
+interface Milestone {
+  dateLabel: string;
+  dateISO: string;
+  status: RoadmapStatus;
+  note?: string;
+  evidence?: string;
+}
+
+interface TreeNode {
+  title: string;
+  slug: string;
+  track: string;
+  nodeLevel: string;
+  status: RoadmapStatus;
+  summary: string;
+  progress?: number;
+  lastUpdatedISO: string;
+  tags: string[];
+  highlights: string[];
+  milestones: Milestone[];
+  depth: number;
+  parent?: string;
+  children: TreeNode[];
+}
+
+interface Props {
+  node: TreeNode;
+}
+
+const { node } = Astro.props;
+const queryText = `${node.title} ${node.summary} ${node.tags.join(" ")} ${node.highlights.join(" ")}`.toLowerCase();
+const tagsText = node.tags.map((tag) => tag.toLowerCase()).join("|");
+const defaultOpen = node.status === "now";
+
+const statusLabel: Record<RoadmapStatus, string> = {
+  done: "Completed",
+  now: "Ongoing",
+  blocked: "Blocked",
+  next: "Planned",
+  later: "Pending"
+};
+---
+
+<li
+  class="tree-node-item"
+  data-roadmap-node
+  data-slug={node.slug}
+  data-parent={node.parent ?? ""}
+  data-track={node.track}
+  data-status={node.status}
+  data-level={node.nodeLevel}
+  data-progress={node.progress ?? 0}
+  data-updated={node.lastUpdatedISO}
+  data-query={queryText}
+  data-tags={tagsText}
+>
+  <article class="tree-node-card" data-roadmap-card>
+    <header class="tree-node-head">
+      <button
+        type="button"
+        class={`tree-toggle ${defaultOpen ? "is-open" : ""}`}
+        data-roadmap-toggle
+        data-slug={node.slug}
+        aria-expanded={defaultOpen ? "true" : "false"}
+      >
+        <Icon name="chevron-right" size={14} />
+      </button>
+
+      <a class="tree-node-title" href={`/roadmap/${node.slug}/`}>{node.title}</a>
+      <span class="tag-chip node-level-chip">{node.nodeLevel}</span>
+      <span class={`badge ${node.status}`}>{statusLabel[node.status]}</span>
+      <span class="meta-row tree-progress">{(node.progress ?? 0).toFixed(1)}%</span>
+    </header>
+
+    <div class="tree-node-content" data-roadmap-content hidden={!defaultOpen} data-default-open={defaultOpen ? "1" : "0"}>
+      <p>{node.summary}</p>
+
+      {node.highlights.length > 0 && (
+        <div class="tree-highlight-block">
+          <p class="meta-row">Highlights</p>
+          <ul class="tree-highlight-list">
+            {node.highlights.map((point) => <li>{point}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {
+        node.milestones.length > 0 && (
+          <ul class="tree-milestone-list">
+            {node.milestones.map((milestone) => (
+              <li>
+                <div class="tree-task-date">
+                  <Icon name="calendar" size={12} />
+                  <span>{milestone.dateLabel}</span>
+                </div>
+                <span class="tree-task-note">{milestone.note ?? "持续推进中"}</span>
+                <span class={`badge ${milestone.status} tree-task-status`}>{statusLabel[milestone.status]}</span>
+                {milestone.evidence && (
+                  <a href={milestone.evidence} target="_blank" rel="noreferrer">Evidence</a>
+                )}
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </article>
+
+  {
+    node.children.length > 0 && (
+      <ul class="tree-node-children">
+        {node.children.map((child) => <Astro.self node={child} />)}
+      </ul>
+    )
+  }
+</li>

@@ -1,0 +1,44 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
+
+const artifacts = await getArtifacts();
+---
+
+<BaseLayout title="Artifacts" crumbs={[{ label: "Home", href: "/" }, { label: "Artifacts" }]}> 
+  <section class="section-stack">
+    <div class="section-heading-row">
+      <h1>Artifacts</h1>
+      <span class="meta-row">项目、论文、数据与公开成果</span>
+    </div>
+
+    <div class="card-grid grid-3">
+      {
+        artifacts.map((entry) => (
+          <a class="card" href={`/artifacts/${normalizeSlug(entry)}/`}>
+            {
+              entry.data.cover ? (
+                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading="lazy" />
+              ) : (
+                <div class="card-cover placeholder-cover">Artifact</div>
+              )
+            }
+            <div class="card-body">
+              <h3>{entry.data.title}</h3>
+              <p>{entry.data.summary}</p>
+              <div class="meta-row">
+                <span class="tag-chip">{entry.data.type}</span>
+                <span>{formatDate(entry.data.date)}</span>
+              </div>
+              {entry.data.tags.length > 0 && (
+                <div class="meta-row">
+                  {entry.data.tags.slice(0, 3).map((tag: string) => <span class="tag-chip">{tag}</span>)}
+                </div>
+              )}
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>

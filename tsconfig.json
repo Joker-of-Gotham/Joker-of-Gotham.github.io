@@ -1,0 +1,38 @@
+{
+  "extends": "astro/tsconfigs/base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    },
+    "noImplicitAny": false,
+    "strict": false
+  },
+  "include": [
+    "src",
+    "astro.config.mjs"
+  ],
+  "exclude": [
+    "assets",
+    "public/assets",
+    "dist",
+    "node_modules",
+    "_site",
+    ".jekyll-cache",
+    "_includes",
+    "_layouts",
+    "_posts",
+    "_graph_theory",
+    "_logic",
+    "_llm_learning",
+    "_technical_talk",
+    "_sass",
+    "_tabs",
+    "_data",
+    "_plugins",
+    "jekyll",
+    "docs"
+  ]
+}

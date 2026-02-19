@@ -1,0 +1,12 @@
+﻿---
+export interface Props {
+  columns?: 1 | 2 | 3;
+}
+
+const { columns = 2 } = Astro.props;
+const className = columns === 3 ? "card-grid grid-3" : "card-grid";
+---
+
+<div class={className}>
+  <slot />
+</div>

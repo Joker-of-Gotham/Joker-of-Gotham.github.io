@@ -1,0 +1,87 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RoadmapExplorer from "@/components/roadmap/RoadmapExplorer.astro";
+import { getRoadmapNodes, getPublishedBlogPosts, getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
+import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
+
+const [nodes, posts, artifacts] = await Promise.all([getRoadmapNodes(), getPublishedBlogPosts(), getArtifacts()]);
+const summary = computeRoadmapPointSummary(nodes);
+
+const relatedPostCounts = new Map<string, number>();
+const relatedArtifactCounts = new Map<string, number>();
+
+nodes.forEach((entry) => {
+  const slug = normalizeSlug(entry);
+
+  const postSet = new Set(entry.data.related_posts);
+  posts.forEach((post) => {
+    if (post.data.related_nodes.includes(slug)) {
+      postSet.add(normalizeSlug(post));
+    }
+  });
+  relatedPostCounts.set(slug, postSet.size);
+
+  const artifactSet = new Set(entry.data.related_artifacts);
+  artifacts.forEach((artifact) => {
+    if (artifact.data.related_nodes.includes(slug)) {
+      artifactSet.add(normalizeSlug(artifact));
+    }
+  });
+  relatedArtifactCounts.set(slug, artifactSet.size);
+});
+
+const items = nodes.map((entry) => {
+  const slug = normalizeSlug(entry);
+  const point = summary.pointsBySlug.get(slug) ?? { total: 1, completed: 0, progress: 0, isRoot: true };
+  const milestoneDates = entry.data.milestones.map((milestone: (typeof entry.data.milestones)[number]) => milestone.date);
+  const start = milestoneDates.length > 0 ? new Date(Math.min(...milestoneDates.map((item: Date) => item.getTime()))) : entry.data.last_updated;
+  const end = milestoneDates.length > 0 ? new Date(Math.max(...milestoneDates.map((item: Date) => item.getTime()))) : entry.data.last_updated;
+
+  return {
+    title: entry.data.title,
+    slug,
+    track: entry.data.track,
+    trackProgress: summary.trackMetrics.get(entry.data.track)?.progress ?? 0,
+    trackRootCount: summary.trackMetrics.get(entry.data.track)?.rootCount ?? 0,
+    trackNodeCount: summary.trackMetrics.get(entry.data.track)?.nodeCount ?? 0,
+    nodeLevel: entry.data.node_level,
+    parent: entry.data.parent,
+    sortOrder: entry.data.sort_order,
+    status: entry.data.status,
+    summary: entry.data.summary,
+    progress: point.progress,
+    pointTotal: point.total,
+    pointCompleted: point.completed,
+    isRoot: point.isRoot,
+    cover: entry.data.cover,
+    highlights: entry.data.highlights,
+    lastUpdatedLabel: formatDate(entry.data.last_updated),
+    lastUpdatedISO: entry.data.last_updated.toISOString(),
+    tags: entry.data.tags,
+    childrenCount: (summary.childrenByParent.get(slug) ?? []).length,
+    relatedPostsCount: relatedPostCounts.get(slug) ?? 0,
+    relatedArtifactsCount: relatedArtifactCounts.get(slug) ?? 0,
+    milestoneCount: entry.data.milestones.length,
+    ganttStartISO: start.toISOString(),
+    ganttStartLabel: formatDate(start),
+    ganttEndISO: end.toISOString(),
+    ganttEndLabel: formatDate(end),
+    milestones: entry.data.milestones.map((milestone: (typeof entry.data.milestones)[number]) => ({
+      dateLabel: formatDate(milestone.date),
+      dateISO: milestone.date.toISOString(),
+      status: milestone.status,
+      note: milestone.note,
+      evidence: milestone.evidence
+    }))
+  };
+});
+---
+
+<BaseLayout title="Roadmap" crumbs={[{ label: "Home", href: "/" }, { label: "Roadmap" }]}> 
+  <section class="section-stack roadmap-page-head">
+    <h1>Roadmap</h1>
+    <p class="meta-row">按层级、统计与时间线查看所有路线图节点。</p>
+  </section>
+
+  <RoadmapExplorer items={items} />
+</BaseLayout>

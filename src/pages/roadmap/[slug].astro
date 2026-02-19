@@ -1,0 +1,272 @@
+﻿---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Badge from "@/components/ui/Badge.astro";
+import Card from "@/components/ui/Card.astro";
+import type { CollectionEntry } from "astro:content";
+import { getRoadmapNodes, getPublishedBlogPosts, getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
+import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
+
+export async function getStaticPaths() {
+  const nodes = await getRoadmapNodes();
+  return nodes.map((entry) => ({ params: { slug: normalizeSlug(entry) }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<"roadmap"> };
+const { Content } = await entry.render();
+const currentSlug = normalizeSlug(entry);
+
+const [posts, artifacts, nodes] = await Promise.all([getPublishedBlogPosts(), getArtifacts(), getRoadmapNodes()]);
+const nodeBySlug = new Map(nodes.map((node) => [normalizeSlug(node), node]));
+const pointSummary = computeRoadmapPointSummary(nodes);
+
+const relatedPosts = posts.filter((post) => {
+  const postSlug = normalizeSlug(post);
+  return entry.data.related_posts.includes(postSlug) || post.data.related_nodes.includes(currentSlug);
+});
+
+const relatedArtifacts = artifacts.filter((artifact) => {
+  const artifactSlug = normalizeSlug(artifact);
+  return entry.data.related_artifacts.includes(artifactSlug) || artifact.data.related_nodes.includes(currentSlug);
+});
+
+const parentChain: CollectionEntry<"roadmap">[] = [];
+const visitedParent = new Set<string>();
+let parentSlug = entry.data.parent;
+while (parentSlug && !visitedParent.has(parentSlug)) {
+  visitedParent.add(parentSlug);
+  const parentNode = nodeBySlug.get(parentSlug);
+  if (!parentNode) break;
+  parentChain.unshift(parentNode);
+  parentSlug = parentNode.data.parent;
+}
+
+const childrenByParent = nodes.reduce((map, node) => {
+  const parent = node.data.parent;
+  if (!parent) return map;
+  const list = map.get(parent) ?? [];
+  list.push(node);
+  map.set(parent, list);
+  return map;
+}, new Map<string, CollectionEntry<"roadmap">[]>());
+
+childrenByParent.forEach((list: CollectionEntry<"roadmap">[]) => {
+  list.sort(
+    (a: CollectionEntry<"roadmap">, b: CollectionEntry<"roadmap">) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0)
+  );
+});
+
+const collectDescendants = (parentSlugValue: string, depth = 1, visited = new Set<string>()) => {
+  if (visited.has(parentSlugValue)) return [] as Array<{ node: CollectionEntry<"roadmap">; depth: number }>;
+  visited.add(parentSlugValue);
+
+  const directChildren = childrenByParent.get(parentSlugValue) ?? [];
+  const rows: Array<{ node: CollectionEntry<"roadmap">; depth: number }> = [];
+
+  directChildren.forEach((child: CollectionEntry<"roadmap">) => {
+    const slug = normalizeSlug(child);
+    rows.push({ node: child, depth });
+    rows.push(...collectDescendants(slug, depth + 1, visited));
+  });
+
+  return rows;
+};
+
+const descendantRows = collectDescendants(currentSlug);
+const subtreeRows = [{ node: entry, depth: 0 }, ...descendantRows];
+
+type MilestoneRow = (typeof entry.data.milestones)[number] & { dateLabel: string };
+const orderedMilestones: MilestoneRow[] = entry.data.milestones
+  .slice()
+  .sort((a: (typeof entry.data.milestones)[number], b: (typeof entry.data.milestones)[number]) => a.date.getTime() - b.date.getTime())
+  .map((milestone: (typeof entry.data.milestones)[number]) => ({
+    ...milestone,
+    dateLabel: formatDate(milestone.date)
+  }));
+
+const statusLabel = {
+  done: "Completed",
+  now: "Ongoing",
+  blocked: "Blocked",
+  next: "Planned",
+  later: "Pending"
+};
+
+const currentPoint = pointSummary.pointsBySlug.get(currentSlug);
+const progress = currentPoint?.progress ?? 0;
+
+const executionRows = subtreeRows.map((row: { node: CollectionEntry<"roadmap">; depth: number }) => {
+    const slug = normalizeSlug(row.node);
+    const point = pointSummary.pointsBySlug.get(slug);
+    const directChildren = childrenByParent.get(slug) ?? [];
+    const milestones = row.node.data.milestones
+      .slice()
+      .sort((a: (typeof row.node.data.milestones)[number], b: (typeof row.node.data.milestones)[number]) => a.date.getTime() - b.date.getTime());
+    const completedMilestoneCount = milestones.filter((milestone: (typeof milestones)[number]) => milestone.status === "done").length;
+    const nextMilestone =
+      milestones.find((milestone: (typeof milestones)[number]) => milestone.status !== "done" && milestone.date.getTime() >= Date.now()) ??
+      milestones.find((milestone: (typeof milestones)[number]) => milestone.status !== "done");
+    const latestMilestone = milestones[milestones.length - 1];
+    const relatedPostCount = posts.filter((post) => {
+      const postSlug = normalizeSlug(post);
+      return row.node.data.related_posts.includes(postSlug) || post.data.related_nodes.includes(slug);
+    }).length;
+    const relatedArtifactCount = artifacts.filter((artifact) => {
+      const artifactSlug = normalizeSlug(artifact);
+      return row.node.data.related_artifacts.includes(artifactSlug) || artifact.data.related_nodes.includes(slug);
+    }).length;
+
+    return {
+      nodeTitle: row.node.data.title,
+      nodeSlug: slug,
+      level: row.node.data.node_level,
+      depth: row.depth,
+      status: row.node.data.status,
+      progress: point?.progress ?? 0,
+      childrenCount: directChildren.length,
+      relatedPostCount,
+      relatedArtifactCount,
+      milestoneCount: milestones.length,
+      completedMilestoneCount,
+      nextMilestoneDate: nextMilestone ? formatDate(nextMilestone.date) : "-",
+      nextMilestoneStatus: nextMilestone?.status,
+      nextMilestoneNote: nextMilestone?.note ?? "暂无后续里程碑",
+      latestMilestoneDate: latestMilestone ? formatDate(latestMilestone.date) : "-",
+      lastUpdatedLabel: formatDate(row.node.data.last_updated)
+    };
+  });
+
+const crumbs = [
+  { label: "Home", href: "/" },
+  { label: "Roadmap", href: "/roadmap/" },
+  ...parentChain.map((node) => ({ label: node.data.title, href: `/roadmap/${normalizeSlug(node)}/` })),
+  { label: entry.data.title }
+];
+---
+
+<BaseLayout
+  title={entry.data.title}
+  crumbs={crumbs}
+  pagefindFilters={{
+    kind: "roadmap",
+    track: entry.data.track,
+    level: entry.data.node_level,
+    status: entry.data.status,
+    year: entry.data.last_updated.getFullYear(),
+    parent: entry.data.parent ?? "root",
+    tags: entry.data.tags
+  }}
+>
+  <section class="section-stack">
+    <header class="card">
+      <div class="card-body section-stack" style="gap:var(--space-4)">
+        <div class="filter-bar" style="justify-content:space-between;align-items:flex-start;">
+          <div class="section-stack" style="gap:var(--space-2)">
+            <h1>{entry.data.title}</h1>
+            <div class="meta-row">
+              <Badge status={entry.data.status} />
+              <span class="tag-chip">{entry.data.node_level}</span>
+              <span>{entry.data.track}</span>
+              <span>更新于 {formatDate(entry.data.last_updated)}</span>
+            </div>
+          </div>
+          <a class="button" href="/roadmap/">返回 Roadmap</a>
+        </div>
+
+        <div class="progress-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress}>
+          <span style={`width:${progress}%`} />
+        </div>
+        <p class="meta-row">Progress {progress}% · Milestones {orderedMilestones.length} · Related {relatedPosts.length + relatedArtifacts.length}</p>
+      </div>
+    </header>
+
+    <article class="card">
+      <div class="card-body section-stack">
+        <h2>Execution Table</h2>
+        <p class="meta-row">
+          <span>Parent</span>
+          {parentChain.length > 0 ? <a href={`/roadmap/${normalizeSlug(parentChain[parentChain.length - 1])}/`}>{parentChain[parentChain.length - 1].data.title}</a> : <span>Root Node</span>}
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Node</th>
+                <th>Level</th>
+                <th>Status</th>
+                <th>Progress</th>
+                <th>Children</th>
+                <th>Related Blog</th>
+                <th>Related Artifacts</th>
+                <th>Milestones</th>
+                <th>Next Target</th>
+                <th>Last Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {executionRows.length > 0 ? (
+                executionRows.map((row) => (
+                  <tr>
+                    <td>
+                      <a href={`/roadmap/${row.nodeSlug}/`} style={`padding-left:${row.depth * 12}px;display:inline-block;`}>
+                        {row.nodeTitle}
+                      </a>
+                    </td>
+                    <td>{row.level}</td>
+                    <td><span class={`badge ${row.status}`}>{statusLabel[row.status]}</span></td>
+                    <td>{row.progress.toFixed(1)}%</td>
+                    <td>{row.childrenCount}</td>
+                    <td>{row.relatedPostCount}</td>
+                    <td>{row.relatedArtifactCount}</td>
+                    <td>{row.completedMilestoneCount}/{row.milestoneCount}</td>
+                    <td>
+                      <div class="meta-row" style="gap:6px;">
+                        <span>{row.nextMilestoneDate}</span>
+                        {row.nextMilestoneStatus ? <span class={`badge ${row.nextMilestoneStatus}`}>{statusLabel[row.nextMilestoneStatus]}</span> : <span>-</span>}
+                        <span>{row.nextMilestoneNote}</span>
+                      </div>
+                    </td>
+                    <td>{row.latestMilestoneDate !== "-" ? row.latestMilestoneDate : row.lastUpdatedLabel}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colspan={10}>
+                    <span class="meta-row">暂无执行里程碑</span>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-body content roadmap-detail-content">
+        <Content />
+      </div>
+    </article>
+
+    <section class="section-stack">
+      <h2>Related Blog Posts</h2>
+      {relatedPosts.length > 0 ? (
+        <div class="card-grid">
+          {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+        </div>
+      ) : (
+        <Card title="暂无关联博客" />
+      )}
+    </section>
+
+    <section class="section-stack">
+      <h2>Related Artifacts</h2>
+      {relatedArtifacts.length > 0 ? (
+        <div class="card-grid">
+          {relatedArtifacts.map((artifact) => <Card href={`/artifacts/${normalizeSlug(artifact)}/`} title={artifact.data.title} subtitle={artifact.data.type.toUpperCase()} />)}
+        </div>
+      ) : (
+        <Card title="暂无关联成果" />
+      )}
+    </section>
+  </section>
+</BaseLayout>

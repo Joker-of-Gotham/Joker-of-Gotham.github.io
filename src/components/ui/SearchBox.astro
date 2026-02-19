@@ -1,0 +1,11 @@
+﻿---
+export interface Props {
+  name?: string;
+  value?: string;
+  placeholder?: string;
+}
+
+const { name = "q", value = "", placeholder = "Search..." } = Astro.props;
+---
+
+<input class="input" type="search" name={name} value={value} placeholder={placeholder} />

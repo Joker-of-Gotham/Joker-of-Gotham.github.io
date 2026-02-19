@@ -1,0 +1,401 @@
+﻿---
+import RoadmapTreeNode from "@/components/roadmap/RoadmapTreeNode.astro";
+import { buildRoadmapTree } from "@/lib/content/roadmapTree";
+
+type RoadmapStatus = "now" | "next" | "later" | "done" | "blocked";
+
+interface RoadmapItem {
+  title: string;
+  slug: string;
+  track: string;
+  trackProgress: number;
+  trackRootCount: number;
+  trackNodeCount: number;
+  nodeLevel: string;
+  parent?: string;
+  sortOrder: number;
+  status: RoadmapStatus;
+  summary: string;
+  progress: number;
+  pointTotal: number;
+  pointCompleted: number;
+  isRoot: boolean;
+  lastUpdatedLabel: string;
+  lastUpdatedISO: string;
+  tags: string[];
+  cover?: string;
+  highlights: string[];
+  childrenCount: number;
+  relatedPostsCount: number;
+  relatedArtifactsCount: number;
+  milestoneCount: number;
+  ganttStartISO: string;
+  ganttStartLabel: string;
+  ganttEndISO: string;
+  ganttEndLabel: string;
+  milestones: { dateLabel: string; dateISO: string; status: RoadmapStatus; note?: string; evidence?: string }[];
+}
+
+interface Props {
+  items: RoadmapItem[];
+}
+
+const { items } = Astro.props;
+const tree = buildRoadmapTree(items.map((item) => ({ ...item })));
+const round1 = (value: number) => Number(value.toFixed(1));
+
+const statusLabel: Record<RoadmapStatus, string> = {
+  done: "Completed",
+  now: "Ongoing",
+  blocked: "Blocked",
+  next: "Planned",
+  later: "Pending"
+};
+
+const trackRows = Array.from(
+  items.reduce((map, item) => {
+    const list = map.get(item.track) ?? [];
+    list.push(item);
+    map.set(item.track, list);
+    return map;
+  }, new Map<string, RoadmapItem[]>()).entries()
+).map(([track, list]) => {
+  const roots = list.filter((item) => item.isRoot);
+  const totalPoints = roots.reduce((sum, item) => sum + item.pointTotal, 0);
+  const completedPoints = roots.reduce((sum, item) => sum + item.pointCompleted, 0);
+
+  return {
+    track,
+    progress: totalPoints > 0 ? round1((completedPoints / totalPoints) * 100) : 0,
+    rootCount: roots.length,
+    nodeCount: list.length,
+    statusCount: {
+      done: list.filter((item) => item.status === "done").length,
+      now: list.filter((item) => item.status === "now").length,
+      blocked: list.filter((item) => item.status === "blocked").length,
+      next: list.filter((item) => item.status === "next").length,
+      later: list.filter((item) => item.status === "later").length
+    },
+    roots: tree.roots.filter((node) => node.track === track)
+  };
+}).sort((a, b) => a.track.localeCompare(b.track, "zh-CN"));
+
+const visibleGanttItems = items
+  .filter((item): item is RoadmapItem & { status: "done" | "now" | "next" } => item.status === "done" || item.status === "now" || item.status === "next")
+  .sort((a, b) => Date.parse(a.ganttStartISO) - Date.parse(b.ganttStartISO));
+
+const allPoints = visibleGanttItems.flatMap((item) => {
+  const milestoneDates = item.milestones
+    .map((milestone) => Date.parse(milestone.dateISO))
+    .filter((point) => Number.isFinite(point));
+
+  if (milestoneDates.length > 0) {
+    return milestoneDates;
+  }
+
+  return [Date.parse(item.ganttStartISO), Date.parse(item.ganttEndISO)];
+});
+
+const fallbackNow = Date.now();
+const globalStart = allPoints.length > 0 ? Math.min(...allPoints) : fallbackNow;
+const globalEnd = allPoints.length > 0 ? Math.max(...allPoints) : fallbackNow + 86400000;
+const totalSpan = Math.max(globalEnd - globalStart, 86400000);
+
+const toPct = (iso: string) => {
+  const point = Date.parse(iso);
+  const safePoint = Number.isFinite(point) ? point : globalStart;
+  return Number((((safePoint - globalStart) / totalSpan) * 100).toFixed(2));
+};
+
+type GanttRow = RoadmapItem & {
+  rowKey: string;
+  badgeStatus: RoadmapStatus;
+  doneSegment: null | {
+    startPct: number;
+    widthPct: number;
+    label: string;
+  };
+  trail: null | {
+    status: "now" | "next";
+    pointPct: number;
+    label: string;
+  };
+};
+
+const ganttRows: GanttRow[] = visibleGanttItems.map((item) => {
+  const orderedMilestones = item.milestones
+    .slice()
+    .sort((a, b) => Date.parse(a.dateISO) - Date.parse(b.dateISO));
+
+  if (item.status === "done") {
+    const doneMilestones = orderedMilestones.filter((milestone) => milestone.status === "done");
+    const allMilestones = orderedMilestones.length > 0 ? orderedMilestones : null;
+    const doneStart = doneMilestones[0];
+    const doneEnd = doneMilestones[doneMilestones.length - 1];
+    const startISO = doneStart?.dateISO ?? allMilestones?.[0]?.dateISO ?? item.ganttStartISO;
+    const endISO = doneEnd?.dateISO ?? allMilestones?.[allMilestones.length - 1]?.dateISO ?? item.ganttEndISO;
+    const startLabel = doneStart?.dateLabel ?? allMilestones?.[0]?.dateLabel ?? item.ganttStartLabel;
+    const endLabel = doneEnd?.dateLabel ?? allMilestones?.[allMilestones.length - 1]?.dateLabel ?? item.ganttEndLabel;
+    const startPct = toPct(startISO);
+    const endPct = toPct(endISO);
+
+    return {
+      ...item,
+      rowKey: item.slug,
+      badgeStatus: "done",
+      doneSegment: {
+        startPct,
+        widthPct: Math.max(Number((endPct - startPct).toFixed(2)), 3),
+        label: startLabel === endLabel ? startLabel : `${startLabel} - ${endLabel}`
+      },
+      trail: null
+    };
+  }
+
+  const source = orderedMilestones.find((milestone) => milestone.status === item.status) ?? orderedMilestones[0];
+  const startISO = source?.dateISO ?? item.ganttStartISO;
+  const startLabel = source?.dateLabel ?? item.ganttStartLabel;
+
+  return {
+    ...item,
+    rowKey: item.slug,
+    badgeStatus: item.status,
+    doneSegment: null,
+    trail: {
+      status: item.status,
+      pointPct: toPct(startISO),
+      label: startLabel
+    }
+  };
+});
+---
+
+<section class="section-stack roadmap-explorer" id="roadmap-explorer">
+  <section class="section-stack">
+    <div class="section-heading-row">
+      <h2>Roadmap Tree</h2>
+      <span class="meta-row">Hierarchy with parent-child progress</span>
+    </div>
+
+    <section class="roadmap-tree">
+      {
+        trackRows.map((row) => (
+          <section class="tree-track" data-track={row.track}>
+            <header class="tree-track-head">
+              <h3>{row.track}</h3>
+              <span class="meta-row">Progress {row.progress}% · {row.rootCount} roots / {row.nodeCount} nodes</span>
+            </header>
+            <div class="meta-row">
+              <span>Completed {row.statusCount.done}</span>
+              <span>Ongoing {row.statusCount.now}</span>
+              <span>Blocked {row.statusCount.blocked}</span>
+              <span>Planned {row.statusCount.next}</span>
+              <span>Pending {row.statusCount.later}</span>
+            </div>
+            <div class="progress-line" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={row.progress}>
+              <span style={`width:${row.progress}%`} />
+            </div>
+            <ul class="tree-node-list">
+              {row.roots.map((node) => <RoadmapTreeNode node={node} />)}
+            </ul>
+          </section>
+        ))
+      }
+    </section>
+  </section>
+
+  <section class="section-stack">
+    <div class="section-heading-row">
+      <h2>Roadmap Table</h2>
+      <span class="meta-row">Structured stats for links and milestones</span>
+    </div>
+
+    <section class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Track</th>
+            <th>Level</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th>Children</th>
+            <th>Related Blog</th>
+            <th>Related Artifacts</th>
+            <th>Milestones</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            items
+              .slice()
+              .sort((a, b) => a.sortOrder - b.sortOrder)
+              .map((item) => (
+                <tr data-track={item.track}>
+                  <td><a href={`/roadmap/${item.slug}/`}>{item.title}</a></td>
+                  <td>{item.track}</td>
+                  <td>{item.nodeLevel}</td>
+                  <td><span class={`badge ${item.status}`}>{statusLabel[item.status]}</span></td>
+                  <td>{item.progress.toFixed(1)}%</td>
+                  <td>{item.childrenCount}</td>
+                  <td>{item.relatedPostsCount}</td>
+                  <td>{item.relatedArtifactsCount}</td>
+                  <td>{item.milestoneCount}</td>
+                  <td>{item.lastUpdatedLabel}</td>
+                </tr>
+              ))
+          }
+        </tbody>
+      </table>
+    </section>
+  </section>
+
+  <section class="section-stack">
+    <div class="section-heading-row">
+      <h2>Roadmap Gantt</h2>
+      <span class="meta-row">Completed = range bar · Ongoing/Planned = fading trail only</span>
+    </div>
+
+    <section class="gantt-wrap">
+      <header class="gantt-head meta-row">
+        <span>{new Date(globalStart).toLocaleDateString("zh-CN")}</span>
+        <span>{new Date(globalEnd).toLocaleDateString("zh-CN")}</span>
+      </header>
+
+      <div class="gantt-grid">
+        {
+          ganttRows.map((row) => (
+            <article class="gantt-row card" data-track={row.track} data-gantt-row={row.rowKey}>
+              <div class="card-body">
+                <div class="gantt-row-head">
+                  <a href={`/roadmap/${row.slug}/`}>{row.title}</a>
+                  <span class={`badge ${row.badgeStatus}`}>{statusLabel[row.badgeStatus]}</span>
+                </div>
+                <p class="meta-row">{row.track} / {row.nodeLevel}</p>
+                <div class="gantt-lane">
+                  {
+                    row.doneSegment && (
+                      <span class="gantt-done-bar" style={`left:${row.doneSegment.startPct}%; width:${row.doneSegment.widthPct}%`}>
+                        {row.doneSegment.label}
+                      </span>
+                    )
+                  }
+
+                  {
+                    row.trail && (
+                      <span class={`gantt-live-trail ${row.trail.status}`} style={`left:${row.trail.pointPct}%`}>
+                        <span class="gantt-live-trail-label">{row.trail.label}</span>
+                      </span>
+                    )
+                  }
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+  </section>
+</section>
+
+<script>
+  // @ts-nocheck
+  const root = document.getElementById("roadmap-explorer");
+  if (root) {
+    const toggleButtons = Array.from(root.querySelectorAll("[data-roadmap-toggle]"));
+    const storageKey = "roadmap.tree.expanded";
+    const state = { expanded: new Set() };
+
+    const parseExpanded = (raw) => {
+      if (!raw) return [];
+
+      if (raw.trim().startsWith("[")) {
+        try {
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (_error) {
+          return [];
+        }
+      }
+
+      return raw.split(",");
+    };
+
+    const writeUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const expanded = Array.from(state.expanded).sort();
+      if (expanded.length > 0) {
+        params.set("expanded", expanded.join(","));
+      } else {
+        params.delete("expanded");
+      }
+      const next = params.toString();
+      window.history.replaceState({}, "", next ? `${window.location.pathname}?${next}` : window.location.pathname);
+    };
+
+    const restoreExpanded = () => {
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = params.get("expanded");
+      const fromStorage = window.localStorage.getItem(storageKey);
+      const source = fromUrl || fromStorage;
+
+      if (!source) {
+        root.querySelectorAll("[data-roadmap-content][data-default-open='1']").forEach((content) => {
+          const card = content.closest("[data-roadmap-card]");
+          const slug = card?.querySelector("[data-roadmap-toggle]")?.dataset?.slug;
+          if (slug) state.expanded.add(slug);
+        });
+        return;
+      }
+
+      parseExpanded(source)
+        .map((item) => String(item).trim())
+        .filter(Boolean)
+        .forEach((slug) => state.expanded.add(slug));
+    };
+
+    const persistExpanded = () => {
+      window.localStorage.setItem(storageKey, Array.from(state.expanded).join(","));
+    };
+
+    const renderExpanded = () => {
+      toggleButtons.forEach((button) => {
+        const slug = button.dataset.slug || "";
+        const card = button.closest("[data-roadmap-card]");
+        const content = card?.querySelector("[data-roadmap-content]");
+        const open = state.expanded.has(slug);
+
+        button.setAttribute("aria-expanded", open ? "true" : "false");
+        button.classList.toggle("is-open", open);
+
+        if (content) {
+          content.hidden = !open;
+        }
+      });
+    };
+
+    toggleButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const slug = button.dataset.slug || "";
+        if (!slug) return;
+
+        if (state.expanded.has(slug)) {
+          state.expanded.delete(slug);
+        } else {
+          state.expanded.add(slug);
+        }
+
+        renderExpanded();
+        persistExpanded();
+        writeUrl();
+      });
+    });
+
+    restoreExpanded();
+    renderExpanded();
+    persistExpanded();
+    writeUrl();
+  }
+</script>
+

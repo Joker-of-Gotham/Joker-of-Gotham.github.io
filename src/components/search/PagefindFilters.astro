@@ -1,0 +1,35 @@
+---
+type FilterPrimitive = string | number;
+type FilterValue = FilterPrimitive | FilterPrimitive[] | null | undefined;
+
+interface Props {
+  filters?: Record<string, FilterValue>;
+}
+
+const { filters = {} } = Astro.props;
+
+const entries = Object.entries(filters).flatMap(([key, value]) => {
+  if (value === undefined || value === null) {
+    return [];
+  }
+
+  const list = Array.isArray(value) ? value : [value];
+
+  return list
+    .map((item) => String(item).trim())
+    .filter((item) => item.length > 0)
+    .map((item) => ({ key, value: item }));
+});
+---
+
+{
+  entries.length > 0 && (
+    <div aria-hidden="true">
+      {
+        entries.map((entry) => (
+          <span data-pagefind-filter={`${entry.key}[data-pagefind-filter-value]`} data-pagefind-filter-value={entry.value}></span>
+        ))
+      }
+    </div>
+  )
+}
