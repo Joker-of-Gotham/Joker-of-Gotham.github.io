@@ -1,14 +1,15 @@
-﻿tracks:
-  - LLM 工程
-  - 图论与逻辑
-  - 工程与写作
+tracks:
+  - Structural Signal Mining
+  - Semantic Signal Mining
+  - Psychological Signal Mining
 topics:
-  - 人工智能
-  - 机器学习
-  - 强化学习
-  - 图论
-  - 逻辑学
-  - 前端
+  - Complex Networks
+  - Critical Node Identification
+  - GraphRAG
+  - Financial Knowledge Graph
+  - Latent Preference Inference
+  - Personalized Decision Systems
+  - Embodied AI
 types:
   - project
   - paper
@@ -28,6 +29,8 @@ roadmap_levels:
   - initiative
   - task
 years:
+  - 2024
   - 2025
   - 2026
-
+  - 2027
+  - 2028

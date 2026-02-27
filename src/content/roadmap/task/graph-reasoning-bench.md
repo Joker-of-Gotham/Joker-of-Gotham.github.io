@@ -1,32 +1,35 @@
 ---
-title: 图推理基准集
+title: "O1-KR3: Transfer Structural Methods to Semantic Networks"
 slug: graph-reasoning-bench
-track: 图论与逻辑
+track: Structural Signal Mining
 node_level: task
 parent: graph-ontology-schema
 sort_order: 22
 status: later
-summary: 构建覆盖路径、连通性、同构与约束验证的图推理评测基准。
+summary: Transfer critical-node methods from complex-network settings to semantic networks to improve stable key-signal discovery under noisy information-network conditions.
 highlights:
-  - 建立可复现实验数据集
-  - 标注任务类型与难度等级
-  - 打通结果记录与可视化面板
-progress: 27
-last_updated: 2026-02-18
+  - Connects the low-dimensional and mid-dimensional directions
+  - Targets robust signal extraction under semantic noise
+  - Provides interpretable and reproducible cross-domain evaluation
+progress: 18
+last_updated: 2026-02-27
 milestones:
-  - date: 2026-03-28
+  - date: 2027-03-31
     status: next
-    note: 发布首批路径类样本
-  - date: 2026-05-15
+    note: Define mapping protocols from structural features to semantic-network features
+  - date: 2027-07-31
     status: later
-    note: 完成约束验证任务集
+    note: Complete mid-stage experiments and error analysis
+  - date: 2027-10-31
+    status: later
+    note: "O1-KR3 deadline: deliver transfer method and validation results"
 related_posts:
-  - 2025-07-11-图论导论-路径和环
-  - 2025-07-21-图论导论-平面图
+  - 2025-09-19-本体工程
+  - 2025-07-16-logicnet
 related_artifacts:
-  - graph-theory-study-map
+  - campus-market-intel
 ---
 
 ## Overview
 
-让“图论学习成果”可测量、可比较、可复用。
+This task is the second half of Objective 1, extending key-node discovery from pure structural graphs to practical semantic information networks.

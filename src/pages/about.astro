@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Icon from "@/components/ui/Icon.astro";
 
@@ -25,22 +25,37 @@ interface ResumeSection {
 const links = [
   { label: "GitHub", url: "https://github.com/Joker-of-Gotham", icon: "github" as const },
   { label: "Kaggle", url: "https://www.kaggle.com/gothamjocker", icon: "kaggle" as const },
-  { label: "HuggingFace", url: "https://huggingface.co/ChikaKomari", icon: "huggingface" as const },
   { label: "LinkedIn", url: "https://www.linkedin.com/in/zhonghan-liu", icon: "linkedin" as const },
-  { label: "OpenReview", url: "https://openreview.net/profile?id=%7ELiu_Zhonghan1", icon: "openreview" as const }
+  { label: "OpenReview", url: "https://openreview.net/profile?id=%7ELiu_Zhonghan1", icon: "openreview" as const },
+  { label: "ORCID", url: "https://orcid.org/0009-0000-0849-3557", icon: "external" as const }
 ];
 
 const sections: ResumeSection[] = [
   {
+    title: "Research Profile",
+    items: [
+      {
+        name: "Implicit Signal Mining for Personalized Decision Systems",
+        period: "2024 - Present",
+        summary: "A unified research agenda that integrates structural, semantic, and psychological signal mining.",
+        points: [
+          "Low-dimensional Structural Mining: critical node identification and influence-aware graph mining",
+          "Mid-dimensional Semantic Mining: GraphRAG construction and semantic structure mining for GraphRAG",
+          "High-dimensional Psychological Mining: latent preference discovery and ToM-style preference inference"
+        ]
+      }
+    ]
+  },
+  {
     title: "Education",
     items: [
       {
-        name: "中山大学 · 研究与工程方向学习",
-        period: "2024.09.01 至今",
-        summary: "围绕 AI、图论、逻辑与工程系统化持续构建知识体系。",
+        name: "Sun Yat-sen University (SYSU), School of Intelligent Systems Engineering",
+        period: "2023 - Present",
+        summary: "B.Eng. candidate | GPA 4.04/5.00 | Rank 15/154",
         points: [
-          "建立路线图驱动的学习结构并按里程碑迭代",
-          "将课程学习与公开博客输出绑定，形成可追溯成果链"
+          "Built a long-term path across complex networks, LLM systems, and preference modeling",
+          "Integrated coursework, research execution, and engineering systems development"
         ]
       }
     ]
@@ -49,42 +64,149 @@ const sections: ResumeSection[] = [
     title: "Experience",
     items: [
       {
-        name: "个人知识工程系统",
-        period: "2025.01.01 至今",
-        summary: "持续建设个人站点、路线图与成果库，形成研究-工程-写作闭环。",
+        name: "AI Intern, Evolution Asset Management Co., Ltd.",
+        period: "Apr 2025 - Present",
+        summary: "AI Infrastructure | Financial Knowledge Graph | Latent Trading Signal Mining",
         points: [
-          "完成多级父子节点路线图与可视化视图",
-          "实现博客、路线图、成果之间双向关联"
-        ],
-        link: { label: "查看 Roadmap", url: "/roadmap/" }
+          "Designed and implemented an LLM-assisted pipeline for automated financial knowledge graph construction",
+          "Connected graph-serving capabilities to the firm's internal AI assistant and prototyped signal mining workflows",
+          "Improved reproducibility with modular stages and versioned schemas, prompts, and configurations"
+        ]
+      },
+      {
+        name: "Undergraduate Research Assistant (Intern), HCPLab (SYSU)",
+        period: "Jul 2024 - Sep 2024",
+        summary: "LLM Reasoning Evaluation | LLM-as-a-Judge",
+        points: [
+          "Contributed to MM-OPERA evaluation design for explanation quality in open-ended association reasoning",
+          "Implemented judge pipelines with GPT-4o and DeepSeek-V3 for scoring, aggregation, and logging",
+          "Supported experiment packaging and internal review artifacts"
+        ]
       }
     ]
   },
   {
-    title: "Publications & Writing",
+    title: "Publications",
     items: [
       {
-        name: "LLM / 图论 / 本体工程系列写作",
-        period: "2025.07.01 至今",
-        summary: "围绕模型工程、数学基础与知识结构化持续输出技术内容。",
+        name: "Alignment Between the Minds: Embodied Discovery of Latent Human Preference in Multi-turn Instruction Following",
+        period: "Submitted (ICML 2026)",
+        summary: "First-author work on latent preference inference through multi-turn embodied interaction.",
         points: [
-          "维护专题化文章集合，支持按标签和方向检索",
-          "结合路线图节点管理内容优先级与发布节奏"
+          "Proposed a structured evaluation framework and a plug-and-play belief module",
+          "Studied progressive preference representation under long-horizon interaction",
+          "Manuscript available upon request"
+        ]
+      },
+      {
+        name: "Identifying Critical Nodes with Deep Learning and Reinforcement Learning: A Case Study on Urban Road Networks",
+        period: "Accepted (GBCESC 2025)",
+        summary: "Research on critical node identification and influence modeling in complex networks.",
+        points: [
+          "Accepted at GBCESC 2025",
+          "Best Paper Award (GBCESC 2025)",
+          "Proceedings to appear; manuscript available upon request"
+        ]
+      },
+      {
+        name: "MM-OPERA: Benchmarking Open-ended Association Reasoning for Large Vision-Language Models",
+        period: "NeurIPS 2025 Poster / arXiv:2510.26937",
+        summary: "Benchmarking VLM association reasoning with LLM-as-a-Judge evaluation.",
+        points: [
+          "Conference poster at NeurIPS 2025",
+          "Public preprint and code release",
+          "Focused on rationality, stability, and human alignment criteria"
         ],
-        link: { label: "查看 Blog", url: "/blog/" }
+        link: { label: "arXiv", url: "https://arxiv.org/abs/2510.26937" }
       }
     ]
   },
   {
-    title: "Skills",
+    title: "Selected Projects",
     items: [
       {
-        name: "Python / TypeScript / Astro / 数据处理",
-        period: "持续迭代",
-        summary: "关注工程可维护性、知识结构化、可视化表达。",
+        name: "CSIRO Biomass Prediction Model Series (Kaggle Models)",
+        period: "2025",
+        summary: "Computer Vision | Transformer | Architecture Exploration",
         points: [
-          "LLM 应用工程与检索增强实践",
-          "路线图建模、内容治理与信息架构设计"
+          "Released a transformer-based biomass regression model series on Kaggle Models",
+          "Reached 2.7k+ views and 1.0k+ downloads",
+          "Two related notebooks achieved Gold status"
+        ]
+      },
+      {
+        name: "Zanao: LLM-driven Market Archive & Analytics",
+        period: "2025",
+        summary: "LLM Workflow Orchestration | Data Acquisition | Full-stack Development",
+        points: [
+          "Built multi-turn workflows for detailed QA and resource retrieval",
+          "Implemented authenticated data export/acquisition and a Redis-based producer-consumer pipeline",
+          "Delivered API services and a streaming dashboard with data visualization"
+        ]
+      },
+      {
+        name: "AIRI LocalGUI Task Agent (Open Source; In Progress)",
+        period: "2025 - Present",
+        summary: "Desktop Task Automation | Planner-Executor | Plan Verification",
+        points: [
+          "Converted natural-language requests into Phase-Step-Action execution plans",
+          "Maintained a 43-tool registry with signature-based argument binding",
+          "Added multi-round verification and repair for reliable closed-loop execution"
+        ],
+        link: { label: "Repo", url: "https://github.com/Joker-of-Gotham/Airi-GUI-Automation-Module" }
+      },
+      {
+        name: "JingWei: Personal Workflow and Knowledge System",
+        period: "2025",
+        summary: "Personal Knowledge Product | Agent Workflow Orchestration",
+        points: [
+          "Built modules for scholarly search, PDF ingestion, OCR-to-Markdown, and graph-based knowledge visualization",
+          "Supported cross-platform retrieval, topic mining, annotation, and source tracking",
+          "Shipped reproducible setup with Docker Compose"
+        ],
+        link: { label: "Repo", url: "https://github.com/Joker-of-Gotham/Self-Workflow-Construction" }
+      }
+    ]
+  },
+  {
+    title: "Future Plan (OKR)",
+    items: [
+      {
+        name: "2026-2028 Integration Plan",
+        period: "Milestone-driven execution",
+        summary: "Integrate structural, semantic, and psychological signal mining into one decision framework, then extend to embodied settings.",
+        points: [
+          "O1-KR1 (by June 30, 2026): critical node identification on multi-layer heterogeneous networks",
+          "O1-KR2 (by September 30, 2026): scalable financial knowledge-graph infrastructure and signal mining",
+          "O2-KR1 (by December 31, 2026): personalized multi-device AI companion based on Airi, benchmarked against Neuro-sama",
+          "Independent KR (by August 2027): secure funding for a personal workstation cluster",
+          "O1-KR3 (by October 31, 2027): transfer critical-node methods from complex networks to semantic networks",
+          "O2-KR2 (by June 30, 2028): full three-direction integration with personalized decision capability"
+        ]
+      }
+    ]
+  },
+  {
+    title: "Honors & Skills",
+    items: [
+      {
+        name: "Selected Honors",
+        period: "2023 - Present",
+        summary: "Scholarships, distinctions, research awards, and competitions.",
+        points: [
+          "China National Scholarship (2023-2024), SYSU First-class Scholarship (2023-2024), SYSU Second-class Scholarship (2024-2025)",
+          "Kaggle Notebooks Expert (2025-Present), Best Paper Award (GBCESC 2025)",
+          "Bronze Medal (NeurIPS 2025 Google Code Golf), Provincial First Prize (CUMCM 2025), Meritorious Winner (MCM 2025, Huashu Cup 2025)"
+        ]
+      },
+      {
+        name: "Technical Skills",
+        period: "Continuous iteration",
+        summary: "Programming, systems engineering, data infrastructure, and LLM tooling.",
+        points: [
+          "Python, TypeScript, C/C++, SQL | FastAPI, Flask, Vue 3, TypeScript",
+          "Neo4j, Redis, SQLite, PostgreSQL, Docker | PyTorch, Hugging Face Transformers",
+          "Dify, Ollama, RAG, Prompt Engineering, LLM Evaluation | Git, Linux, Notion"
         ]
       }
     ]
@@ -97,12 +219,12 @@ const sections: ResumeSection[] = [
     <div class="section-heading-row" id="cv">
       <div class="section-stack" style="gap:var(--space-2);">
         <h1>About</h1>
-        <p>专注于把研究、工程与写作组织成可持续的公开成长系统。</p>
+        <p>Chika Komari. Research focus: implicit signal mining for personalized decision systems.</p>
       </div>
       <div class="filter-bar">
         <button class="button primary" type="button" data-email-open>
           <Icon name="mail" size={16} />
-          <span>联系我</span>
+          <span>Contact</span>
         </button>
       </div>
     </div>
@@ -160,14 +282,14 @@ const sections: ResumeSection[] = [
   <dialog class="email-dialog" id="email-dialog">
     <form method="dialog" class="card-body section-stack" style="min-width:min(460px, 92vw);">
       <div class="section-heading-row" style="border-bottom:0;padding-bottom:0;">
-        <h3>选择邮件方式</h3>
-        <button class="button" value="cancel">关闭</button>
+        <h3>Choose Email Method</h3>
+        <button class="button" value="cancel">Close</button>
       </div>
-      <p class="meta-row">邮箱：{email}</p>
+      <p class="meta-row">Email: {email}</p>
       <div class="quick-link-grid">
         <a class="quick-link-item" href={`mailto:${email}`}>
           <Icon name="mail" size={16} />
-          <span>默认邮件客户端</span>
+          <span>Default Mail App</span>
         </a>
         <a class="quick-link-item" href={`https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(email)}`} target="_blank" rel="noreferrer">
           <Icon name="mail" size={16} />
@@ -179,7 +301,7 @@ const sections: ResumeSection[] = [
         </a>
         <button class="quick-link-item" type="button" id="copy-email-btn">
           <Icon name="mail" size={16} />
-          <span>复制邮箱地址</span>
+          <span>Copy Email Address</span>
         </button>
       </div>
     </form>
@@ -201,9 +323,9 @@ const sections: ResumeSection[] = [
     copyButton?.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText("liuzhh268@mail2.sysu.edu.cn");
-        copyButton.textContent = "已复制";
+        copyButton.textContent = "Copied";
       } catch (_error) {
-        copyButton.textContent = "复制失败";
+        copyButton.textContent = "Copy failed";
       }
     });
   </script>

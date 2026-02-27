@@ -1,41 +1,41 @@
-﻿---
-title: LLM 应用工程化
+---
+title: Semantic Signal Mining (Financial Knowledge Graphs)
 slug: llm-systems-track
-track: LLM 工程
+track: Semantic Signal Mining
 node_level: domain
 sort_order: 10
 status: now
-summary: 建立从模型选择、检索增强、评测到上线监控的端到端工程能力。
+summary: Integrate unstructured semantic signals into structured complex-network representations and build scalable financial knowledge-graph and signal-mining systems.
 cover: /assets/images/LLM学习/deepseek-r1/DeepSeek-R1训练范式.png
 highlights:
-  - 完成强化学习与推理能力专题
-  - 建立 Prompt + RAG 的实践模板
-  - 沉淀可复用的评测指标
-progress: 58
-last_updated: 2026-02-18
+  - Financial KG infrastructure has been developed at Evolution Asset Management since Apr 2025
+  - End-to-end automation from schema design to extraction, normalization, and Neo4j build is in place
+  - This domain corresponds to the mid-dimensional independent direction in Objective 1
+progress: 52
+last_updated: 2026-02-27
 milestones:
-  - date: 2025-07-18
+  - date: 2025-04-01
     status: done
-    note: 完成强化学习基础专题
-  - date: 2025-09-23
-    status: done
-    note: DeepSeek-R1 推理范式总结
-  - date: 2026-03-10
+    note: Started financial knowledge-graph infrastructure work (AI Intern, EAM)
+  - date: 2026-09-30
     status: next
-    note: 发布 RAG 评测报告
+    note: "O1-KR2 deadline: deliver automated KG construction and trading-signal support"
+  - date: 2027-10-31
+    status: later
+    note: Align with O1-KR3 to transfer structural methods into semantic networks
 related_posts:
   - 2025-07-18-reinforcement-learning
   - 2025-09-23-deepseek-r1-conclude
 related_artifacts:
-  - llm-learning-knowledgebase
+  - campus-market-intel
 ---
 
 ## Overview
 
-这一方向关注的是把模型能力转化为稳定产品能力，而不是只停留在论文阅读。
+This direction emphasizes semantic structuring with engineering reproducibility: convert financial unstructured information into graph structures, then mine actionable key signals on top.
 
 ## Plan
 
-1. 先建立可复用的 Prompt 与评测模板。
-2. 再建设检索增强的知识中台与反馈闭环。
-3. 最后补齐线上观测与持续优化机制。
+1. Automate large-scale financial KG construction across vertical domains.
+2. Build key-node and key-signal modules for trader-facing support.
+3. Couple semantic mining with structural methods for better noise robustness.

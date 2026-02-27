@@ -98,7 +98,7 @@ const statusLabel: Record<RoadmapStatus, string> = {
                   <Icon name="calendar" size={12} />
                   <span>{milestone.dateLabel}</span>
                 </div>
-                <span class="tree-task-note">{milestone.note ?? "持续推进中"}</span>
+                <span class="tree-task-note">{milestone.note ?? "In progress"}</span>
                 <span class={`badge ${milestone.status} tree-task-status`}>{statusLabel[milestone.status]}</span>
                 {milestone.evidence && (
                   <a href={milestone.evidence} target="_blank" rel="noreferrer">Evidence</a>

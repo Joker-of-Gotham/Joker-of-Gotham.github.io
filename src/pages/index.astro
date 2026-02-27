@@ -41,11 +41,11 @@ const toCardSummary = (source: string, limit = 120) => {
   return `${normalized.slice(0, limit).trim()}…`;
 };
 const fallbackHero = {
-  system_label: "Personal Knowledge and Blog System",
-  name: "Joker",
-  tagline: "研究 x 工程 x 写作的长期实践者",
-  intro: "我把学习、实验和项目统一到一条可验证的成长路径，用结构化内容持续迭代。",
-  now: ["持续完善路线图与博客联动系统"]
+  system_label: "Implicit Signal Mining for Personalized Decision Systems",
+  name: "Chika Komari",
+  tagline: "A unified path across structural, semantic, and psychological signal mining",
+  intro: "I focus on implicit signal mining in complex information networks for risk-aware and personalized decision systems.",
+  now: ["Advancing O1-KR1, O1-KR2, and O2-KR1 milestones"]
 };
 const hero = home?.hero
   ? {
@@ -54,10 +54,10 @@ const hero = home?.hero
     }
   : fallbackHero;
 const fallbackHeroMetrics = [
-  { label: "Papers Published", value: "2", detail: "持续投稿与公开整理", icon: "paper" },
-  { label: "Kaggle Medals", value: "Gold 0 · Silver 1 · Bronze 2", detail: "竞赛奖牌累计", icon: "medal" },
-  { label: "GitHub Repositories", value: "84", detail: "公开仓库数量", icon: "repo" },
-  { label: "GitHub Commits", value: "2,350", detail: "主仓库累计提交", icon: "commit" }
+  { label: "Publications / Preprint", value: "3", detail: "1 under review · 1 accepted · 1 preprint", icon: "paper" },
+  { label: "GPA / Rank", value: "4.04/5.00 · 15/154", detail: "Sun Yat-sen University", icon: "chart" },
+  { label: "Kaggle Models Views / Downloads", value: "2.7K+ / 1.0K+", detail: "CSIRO series", icon: "download" },
+  { label: "Internship", value: "Evolution Asset Management", detail: "AI Intern since Apr 2025", icon: "repo" }
 ];
 const heroMetrics = home?.hero?.metrics?.length ? home.hero.metrics : fallbackHeroMetrics;
 
@@ -128,7 +128,7 @@ const trackRows = Array.from(
     <div class="section-heading-row">
       <h2>Roadmap Snapshot</h2>
       <a class="text-link" href="/roadmap/">
-        查看完整路线图
+        View Full Roadmap
         <Icon name="arrow-right" size={14} />
       </a>
     </div>
@@ -138,7 +138,7 @@ const trackRows = Array.from(
         <section class="snapshot-track">
           <div class="snapshot-head">
             <h3>{row.track}</h3>
-            <span class="meta-row">平均进度 {row.progress}% · {row.rootCount} roots / {row.totalNodes} nodes</span>
+            <span class="meta-row">Avg. progress {row.progress}% · {row.rootCount} roots / {row.totalNodes} nodes</span>
           </div>
           <div class="progress-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={row.progress}>
             <span style={`width:${row.progress}%`} />
@@ -160,7 +160,7 @@ const trackRows = Array.from(
     <div class="section-heading-row">
       <h2>Featured Artifacts</h2>
       <a class="text-link" href="/artifacts/">
-        浏览全部成果
+        Browse All Artifacts
         <Icon name="arrow-right" size={14} />
       </a>
     </div>
@@ -194,7 +194,7 @@ const trackRows = Array.from(
     <div class="section-heading-row">
       <h2>Latest Updates</h2>
       <a class="text-link" href="/blog/">
-        进入博客
+        Open Blog
         <Icon name="arrow-right" size={14} />
       </a>
     </div>

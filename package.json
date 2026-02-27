@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "check": "astro check",
     "cms:local": "decap-server",
-    "postbuild": "pagefind --site dist --glob \"**/index.html\""
+    "postbuild": "pagefind --site dist --glob \"**/index.html\" --silent"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.1",
@@ -22,7 +22,7 @@
     "remark-math": "^6.0.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.4",
+    "@astrojs/check": "^0.9.2",
     "@types/node": "^22.15.3",
     "decap-server": "^3.2.0",
     "gray-matter": "^4.0.3",

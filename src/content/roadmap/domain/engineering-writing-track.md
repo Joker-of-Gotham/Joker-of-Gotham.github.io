@@ -1,32 +1,34 @@
-﻿---
-title: 技术写作与前端系统化输出
+---
+title: Psychological Signal Mining (Personalized Decision and Interaction)
 slug: engineering-writing-track
-track: 工程与写作
+track: Psychological Signal Mining
 node_level: domain
 sort_order: 30
-status: later
-summary: 形成从技术实践、复盘到结构化写作发布的完整闭环，提高内容影响力。
+status: next
+summary: Introduce human psychological states and behavioral representations as inductive biases to build personalized memory networks and decision systems.
 cover: /assets/images/技术杂谈/前端开发1_工程化/组件化示意图.png
 highlights:
-  - 前端开发五篇系列已完成
-  - 计划新增工程案例复盘模板
-  - 准备引入可视化对比图表
-progress: 33
-last_updated: 2026-02-18
+  - ICML 2026 submission on latent preference discovery has been completed
+  - Planned Airi-based personalized AI companion with benchmarking against Neuro-sama
+  - Long-term goal is transfer from virtual interaction to real robotic deployment
+progress: 31
+last_updated: 2026-02-27
 milestones:
-  - date: 2025-08-12
+  - date: 2026-01-31
     status: done
-    note: 前端基础系列完成
-  - date: 2026-05-10
+    note: Submitted ICML 2026 paper on latent preference discovery
+  - date: 2026-12-31
     status: next
-    note: 发布架构复盘系列
+    note: "O2-KR1 deadline: deliver a personalized multi-device AI companion"
+  - date: 2028-06-30
+    status: later
+    note: "O2-KR2 deadline: complete first full integration of all three directions"
 related_posts:
-  - 2025-08-12-前端开发-五
   - 2025-07-24-赞哦校园集市信息提取
 related_artifacts:
-  - campus-market-intel
+  - llm-learning-knowledgebase
 ---
 
 ## Overview
 
-目标是让每个项目沉淀成可复用的经验，而不是一次性成果展示。
+This domain is the high-dimensional layer of the agenda: discover, represent, and use latent preferences in interactive decision systems, then validate in embodied settings.

@@ -129,7 +129,7 @@ const executionRows = subtreeRows.map((row: { node: CollectionEntry<"roadmap">; 
       completedMilestoneCount,
       nextMilestoneDate: nextMilestone ? formatDate(nextMilestone.date) : "-",
       nextMilestoneStatus: nextMilestone?.status,
-      nextMilestoneNote: nextMilestone?.note ?? "暂无后续里程碑",
+      nextMilestoneNote: nextMilestone?.note ?? "No upcoming milestone",
       latestMilestoneDate: latestMilestone ? formatDate(latestMilestone.date) : "-",
       lastUpdatedLabel: formatDate(row.node.data.last_updated)
     };
@@ -166,10 +166,10 @@ const crumbs = [
               <Badge status={entry.data.status} />
               <span class="tag-chip">{entry.data.node_level}</span>
               <span>{entry.data.track}</span>
-              <span>更新于 {formatDate(entry.data.last_updated)}</span>
+              <span>Updated on {formatDate(entry.data.last_updated)}</span>
             </div>
           </div>
-          <a class="button" href="/roadmap/">返回 Roadmap</a>
+          <a class="button" href="/roadmap/">Back to Roadmap</a>
         </div>
 
         <div class="progress-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress}>
@@ -231,7 +231,7 @@ const crumbs = [
               ) : (
                 <tr>
                   <td colspan={10}>
-                    <span class="meta-row">暂无执行里程碑</span>
+                    <span class="meta-row">No execution milestones</span>
                   </td>
                 </tr>
               )}
@@ -254,7 +254,7 @@ const crumbs = [
           {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
         </div>
       ) : (
-        <Card title="暂无关联博客" />
+        <Card title="No related blog posts" />
       )}
     </section>
 
@@ -265,7 +265,7 @@ const crumbs = [
           {relatedArtifacts.map((artifact) => <Card href={`/artifacts/${normalizeSlug(artifact)}/`} title={artifact.data.title} subtitle={artifact.data.type.toUpperCase()} />)}
         </div>
       ) : (
-        <Card title="暂无关联成果" />
+        <Card title="No related artifacts" />
       )}
     </section>
   </section>

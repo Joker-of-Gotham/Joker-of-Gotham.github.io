@@ -1,32 +1,35 @@
 ---
-title: 本体与术语映射层
+title: "O1-KR1: Critical Node Identification on Multi-layer Heterogeneous Networks"
 slug: graph-ontology-schema
-track: 图论与逻辑
+track: Structural Signal Mining
 node_level: pillar
 parent: graph-logic-track
 sort_order: 21
-status: next
-summary: 设计跨专题术语本体，打通图论、逻辑学与关系学习概念映射。
+status: now
+summary: Develop a graph-neural-network-centered method for critical node identification in multi-layer heterogeneous network settings, with delivery by June 30, 2026.
 highlights:
-  - 定义核心实体与关系类型
-  - 建立术语同义词与版本管理
-  - 形成可复用的映射规则模板
-progress: 38
-last_updated: 2026-02-18
+  - Core O1-KR1 methodology and evaluation protocol are being finalized
+  - Structural interpretation for diffusion and influence is emphasized
+  - Interfaces are designed for later transfer to semantic-network settings (O1-KR3)
+progress: 40
+last_updated: 2026-02-27
 milestones:
-  - date: 2026-02-08
-    status: done
-    note: 确立核心实体草案
-  - date: 2026-03-18
+  - date: 2026-03-31
+    status: now
+    note: Finish baselines, data splits, and critical-node metric definitions
+  - date: 2026-05-31
     status: next
-    note: 完成第一版术语映射表
+    note: Complete ablation studies and robustness analysis
+  - date: 2026-06-30
+    status: next
+    note: "O1-KR1 deadline: deliver the low-dimensional independent study"
 related_posts:
-  - 2025-09-19-本体工程
-  - 2025-07-16-logicnet
+  - 2025-07-11-图论导论-路径和环
+  - 2025-07-21-图论导论-平面图
 related_artifacts:
   - graph-theory-study-map
 ---
 
 ## Overview
 
-这层负责“概念对齐”，为后续知识图谱检索与推理打基础。
+This pillar closes the loop for structural modeling with task definition, implementation, evaluation, and reproducibility, ensuring timely O1-KR1 delivery.

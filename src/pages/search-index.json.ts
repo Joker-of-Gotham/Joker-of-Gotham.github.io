@@ -36,35 +36,35 @@ export const GET: APIRoute = async () => {
       title: "Home",
       url: "/",
       kind: "page",
-      summary: "主页",
+      summary: "Home page",
       tags: []
     },
     {
       title: "Roadmap",
       url: "/roadmap/",
       kind: "page",
-      summary: "路线图总览",
+      summary: "Roadmap overview",
       tags: []
     },
     {
       title: "Blog",
       url: "/blog/",
       kind: "page",
-      summary: "博客总览",
+      summary: "Blog overview",
       tags: []
     },
     {
       title: "Artifacts",
       url: "/artifacts/",
       kind: "page",
-      summary: "成果总览",
+      summary: "Artifacts overview",
       tags: []
     },
     {
       title: "About",
       url: "/about/",
       kind: "page",
-      summary: "关于页",
+      summary: "About page",
       tags: []
     }
   ];

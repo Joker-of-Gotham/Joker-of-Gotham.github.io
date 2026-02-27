@@ -1,31 +1,34 @@
 ---
-title: 技术写作流水线
+title: "O2-KR1: Personalized Memory Network and AI Companion"
 slug: writing-pipeline
-track: 工程与写作
+track: Psychological Signal Mining
 node_level: pillar
 parent: engineering-writing-track
 sort_order: 31
 status: next
-summary: 建立从选题、提纲、配图到发布复盘的一体化写作流程。
+summary: Focus on memory storage and utilization to deliver a personalized, multi-device AI companion based on Airi and benchmarked against Neuro-sama.
 highlights:
-  - 固化选题筛选标准
-  - 统一文章结构模板
-  - 发布后自动回收反馈指标
-progress: 41
-last_updated: 2026-02-18
+  - "Directly aligned with O2-KR1 (deadline: December 31, 2026)"
+  - Covers conversational companionship, video interaction, automation, and VR interaction
+  - Optimizes adaptation to diverse user mental states, preferences, and habits
+progress: 26
+last_updated: 2026-02-27
 milestones:
-  - date: 2026-01-30
-    status: done
-    note: 完成模板规范初版
-  - date: 2026-03-08
+  - date: 2026-06-30
     status: next
-    note: 接入发布后数据回收
+    note: Deliver v1 memory architecture with storage/retrieval and core evaluation
+  - date: 2026-09-30
+    status: next
+    note: Complete systematic benchmarking against Neuro-sama baseline
+  - date: 2026-12-31
+    status: next
+    note: "O2-KR1 deadline: release open-source multi-device deployment solution"
 related_posts:
-  - 2025-08-12-前端开发-五
+  - 2025-07-18-reinforcement-learning
 related_artifacts:
-  - campus-market-intel
+  - llm-learning-knowledgebase
 ---
 
 ## Overview
 
-这条分支的目标是让输出质量和产出频率都能稳定提升。
+This pillar transforms preference discovery into deployable product capability, enabling personalized AI companionship at practical cost.

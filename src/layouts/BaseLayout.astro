@@ -18,7 +18,7 @@ interface Props {
   pagefindFilters?: Record<string, string | number | Array<string | number> | null | undefined>;
 }
 
-const { title, description = "Joker 的结构化学习与工程实践站点", crumbs = [], pagefindFilters = {} } = Astro.props;
+const { title, description = "Chika Komari's research and engineering website", crumbs = [], pagefindFilters = {} } = Astro.props;
 const { home, taxonomy } = await getSiteConfig();
 
 const quickLinks = home?.quick_links?.length
@@ -35,7 +35,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} | Joker</title>
+    <title>{title} | Chika Komari</title>
     <meta name="description" content={description} />
     <slot name="head" />
   </head>

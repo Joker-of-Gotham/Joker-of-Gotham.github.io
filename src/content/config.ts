@@ -85,7 +85,7 @@ const site = defineCollection({
   type: "data",
   schema: z.object({
     hero: z.object({
-      system_label: z.string().default("Personal Knowledge and Blog System"),
+      system_label: z.string().default("Implicit Signal Mining for Personalized Decision Systems"),
       name: z.string(),
       tagline: z.string(),
       intro: z.string(),

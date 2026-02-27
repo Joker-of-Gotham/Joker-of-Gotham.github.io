@@ -1,40 +1,37 @@
-﻿hero:
-  system_label: Personal Knowledge and Blog System
-  name: Joker
-  tagline: 研究 x 工程 x 写作的长期实践者
-  intro: 我把学习、实验和项目统一到一条可验证的成长路径，用结构化内容持续迭代。
+hero:
+  system_label: Implicit Signal Mining for Personalized Decision Systems
+  name: Chika Komari
+  tagline: A unified track across structural, semantic, and psychological signal mining
+  intro: I focus on implicit signal mining in complex information networks for risk-aware and personalized decision systems.
   now:
-    - 正在推进 LLM 应用工程化与知识结构化
-    - 正在完善路线图驱动的公开知识库
+    - "O1-KR1 (due June 30, 2026): critical node identification on multi-layer heterogeneous networks"
+    - "O1-KR2 (due September 30, 2026): scalable financial knowledge-graph infrastructure and signal mining automation"
+    - "O2-KR1 (due December 31, 2026): personalized multi-device AI companion based on Airi"
   cta_primary_label: ""
   cta_primary_url: ""
   cta_secondary_label: ""
   cta_secondary_url: ""
   metrics:
-    - label: Papers Published
-      value: "2"
-      detail: 近 12 个月持续投稿与公开整理
+    - label: Publications / Preprint
+      value: "3"
+      detail: 1 under review · 1 accepted · 1 NeurIPS poster preprint
       icon: paper
-    - label: Kaggle Medals
-      value: "Gold 0 · Silver 1 · Bronze 2"
-      detail: 竞赛奖牌累计
-      icon: medal
-    - label: Kaggle Code Citations
-      value: "120"
-      detail: Notebook / Code 引用次数
+    - label: GPA / Rank
+      value: "4.04/5.00 · 15/154"
+      detail: Sun Yat-sen University (School of Intelligent Systems Engineering)
       icon: chart
-    - label: Kaggle Model Views / Downloads
-      value: "3.4K / 420"
-      detail: 模型卡浏览与下载
+    - label: Kaggle Models Views / Downloads
+      value: "2.7K+ / 1.0K+"
+      detail: CSIRO Biomass Prediction Model Series
       icon: download
-    - label: GitHub Repositories
-      value: "84"
-      detail: 持续维护中的公开仓库
+    - label: Kaggle Tier
+      value: "Notebooks Expert"
+      detail: Kaggle Progression tier (2025-Present)
+      icon: medal
+    - label: Internship
+      value: "Evolution Asset Management"
+      detail: AI Intern (Apr 2025 - Present)
       icon: repo
-    - label: GitHub Commits
-      value: "2,350"
-      detail: 主仓库累计提交
-      icon: commit
 quick_links:
   - label: GitHub
     url: https://github.com/Joker-of-Gotham
@@ -42,19 +39,29 @@ quick_links:
   - label: Kaggle
     url: https://www.kaggle.com/gothamjocker
     external: true
+  - label: LinkedIn
+    url: https://www.linkedin.com/in/zhonghan-liu
+    external: true
+  - label: OpenReview
+    url: https://openreview.net/profile?id=%7ELiu_Zhonghan1
+    external: true
+  - label: ORCID
+    url: https://orcid.org/0009-0000-0849-3557
+    external: true
 pinned_tracks:
-  - LLM 工程
-  - 图论与逻辑
-  - 工程与写作
+  - Structural Signal Mining
+  - Semantic Signal Mining
+  - Psychological Signal Mining
 featured_artifacts:
-  - campus-market-intel
-  - ml4t-notes-series
+  - alignment-between-the-minds-icml-2026
   - graph-theory-study-map
+  - campus-market-intel
+  - llm-learning-knowledgebase
 featured_posts:
   - 2025-09-23-deepseek-r1-conclude
-  - 2025-07-24-赞哦校园集市信息提取
+  - 2025-07-21-resources
   - 2025-07-18-reinforcement-learning
 changelog:
-  - 路线图新增树状层级与局部折叠记忆
-  - 博客、成果、路线图形成双向关联
-  - 搜索系统升级为实时全站索引
+  - "Jan 2026: submitted first-author ICML 2026 paper on latent preference discovery"
+  - "2025: accepted at GBCESC 2025 and received Best Paper Award"
+  - "Since Apr 2025: building financial knowledge-graph infrastructure at Evolution Asset Management"

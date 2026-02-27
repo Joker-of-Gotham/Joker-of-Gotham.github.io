@@ -16,7 +16,7 @@ const quickKindTabs = [
   <section class="section-stack" id="search-page">
     <div class="section-heading-row">
       <h1>Search</h1>
-      <span class="meta-row">实时检索路线图 / 博客 / 成果</span>
+      <span class="meta-row">Live search across roadmap, blog, and artifacts</span>
     </div>
 
     <div class="card search-shell">
@@ -24,7 +24,7 @@ const quickKindTabs = [
         <label class="sr-only" for="search-query-input">Search query</label>
         <div class="input icon-input-wrap search-input-wrap">
           <Icon name="search" size={16} />
-          <input id="search-query-input" class="unstyled-input" placeholder="输入关键词，按 Enter 搜索..." autocomplete="off" />
+          <input id="search-query-input" class="unstyled-input" placeholder="Type keywords and press Enter..." autocomplete="off" />
         </div>
 
         <div class="filter-bar" id="search-kind-tabs">
@@ -60,7 +60,7 @@ const quickKindTabs = [
     </div>
 
     <div class="search-result-list" id="search-result-list"></div>
-    <p class="meta-row" id="search-empty" hidden>没有匹配结果，尝试更换关键词或筛选条件。</p>
+    <p class="meta-row" id="search-empty" hidden>No matching results. Try different keywords or filters.</p>
   </section>
 
   <script is:inline>
@@ -262,7 +262,7 @@ const quickKindTabs = [
 
       boot().catch(() => {
         if (list) {
-          list.innerHTML = '<article class="card"><div class="card-body"><p>搜索索引加载失败，请刷新页面重试。</p></div></article>';
+          list.innerHTML = '<article class="card"><div class="card-body"><p>Failed to load the search index. Please refresh and try again.</p></div></article>';
         }
       });
     }

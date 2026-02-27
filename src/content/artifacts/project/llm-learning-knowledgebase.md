@@ -1,22 +1,27 @@
-﻿---
-title: LLM 学习知识库
+---
+title: AIRI LocalGUI Task Agent (Open Source; In Progress)
 slug: llm-learning-knowledgebase
 type: project
 date: 2025-09-23
-venue: 个人长期项目
-summary: 以路线图节点为主线，把 LLM 相关文章、实验记录与评测结论组织成可追踪知识库。
+venue: Open-source Project
+summary: 把自然语言指令转换为可执行桌面任务计划，支持自动校验、自动修复与多工具协同执行。
 cover: /assets/images/LLM学习/deepseek-r1/DeepSeek-R1训练范式.png
 tags:
-  - LLM
-  - 强化学习
-  - 知识工程
+  - Desktop Automation
+  - Planner-Executor
+  - Plan Verification
 links:
-  - label: Related Post
-    url: /blog/2025-09-23-deepseek-r1-conclude/
+  - label: Repo
+    url: https://github.com/Joker-of-Gotham/Airi-GUI-Automation-Module
   - label: Roadmap
-    url: /roadmap/llm-systems-track/
+    url: /roadmap/engineering-writing-track/
 related_nodes:
-  - llm-systems-track
+  - engineering-writing-track
+  - writing-pipeline
 ---
 
-该成果沉淀了从理论阅读到工程落地的证据链，支持后续沿同一结构持续扩展。
+该项目对应 CV 中的 AIRI LocalGUI Task Agent，当前重点包括：
+
+- 通过 LLM normalizer + planner 将请求拆解为 `Phase / Step / Action` 三层计划。
+- 维护 43 个工具注册与签名绑定机制，覆盖文件、Office、网页、进程与屏幕操作。
+- 引入多轮计划校验与修复，结合自动检查、自动修复与 LLM 驱动修复提升闭环可靠性。

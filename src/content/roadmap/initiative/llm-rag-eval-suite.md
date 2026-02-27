@@ -1,31 +1,34 @@
 ---
-title: RAG 评测套件
+title: "O1-KR2 Execution: Signal Quality and Risk Evaluation"
 slug: llm-rag-eval-suite
-track: LLM 工程
+track: Semantic Signal Mining
 node_level: initiative
 parent: llm-rag-workbench
 sort_order: 12
 status: next
-summary: 建立检索命中、答案正确性、引用可信度三层评测体系。
+summary: Build an evaluation framework for graph-derived trading signals covering stability, economic relevance, and risk-aware constraints.
 highlights:
-  - 统一评测样本格式
-  - 引入“引用可追溯率”指标
-  - 支持回归测试与版本对比
-progress: 45
-last_updated: 2026-02-18
+  - Joint evaluation of structural and semantic signal quality
+  - Risk-aware metrics and consistency checks across backtests
+  - Regression-style comparisons across versions and strategies
+progress: 32
+last_updated: 2026-02-27
 milestones:
-  - date: 2026-02-18
+  - date: 2026-05-31
     status: next
-    note: 设计评测数据结构与维度定义
-  - date: 2026-03-20
+    note: Finalize evaluation schema and metric definitions
+  - date: 2026-08-31
     status: next
-    note: 完成自动化回归脚本
+    note: Complete automated evaluation runs and risk-metric integration
+  - date: 2026-09-30
+    status: next
+    note: Support O1-KR2 acceptance with evaluation evidence
 related_posts:
-  - 2025-07-18-reinforcement-learning
+  - 2025-08-27-machine-learning-for-trade-algo-p7
 related_artifacts:
-  - llm-learning-knowledgebase
+  - campus-market-intel
 ---
 
 ## Overview
 
-目标是让每一次模型和检索改动都可量化比较，而不是凭主观判断。
+This execution layer ensures O1-KR2 outputs are not just runnable but decision-grade, with quantifiable quality and risk properties.
