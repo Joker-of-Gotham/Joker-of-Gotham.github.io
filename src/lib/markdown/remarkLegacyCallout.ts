@@ -65,6 +65,11 @@ function isBlankParagraph(node: MarkdownNode) {
   return node.type === "paragraph" && toText(node).trim() === "";
 }
 
+function isStandaloneMarkerNode(node: MarkdownNode) {
+  if (!["paragraph", "code"].includes(node.type)) return false;
+  return markerOnlyPattern.test(toText(node).trim());
+}
+
 function findPreviousRenderableNode(children: MarkdownNode[], index: number) {
   for (let pointer = index - 1; pointer >= 0; pointer -= 1) {
     const candidate = children[pointer];
@@ -84,13 +89,16 @@ function processChildren(parent: MarkdownNode) {
     const child = children[index];
     processChildren(child);
 
-    if (child.type !== "paragraph") continue;
+    if (!["paragraph", "code"].includes(child.type)) continue;
     const text = toText(child).trim();
     if (!text) continue;
 
     const markerOnly = text.match(markerOnlyPattern);
     if (markerOnly) {
-      const target = findPreviousRenderableNode(children, index);
+      const target =
+        parent.type === "blockquote"
+          ? parent
+          : findPreviousRenderableNode(children, index) ?? (parent.type === "listItem" ? parent : null);
       if (target) {
         addClasses(target, parseClassNames(markerOnly[1]));
       }
@@ -98,6 +106,8 @@ function processChildren(parent: MarkdownNode) {
       index -= 1;
       continue;
     }
+
+    if (child.type !== "paragraph") continue;
 
     const markerTail = text.match(markerTailPattern);
     if (markerTail) {
@@ -121,6 +131,10 @@ function cleanupMarkerTokens(node: MarkdownNode) {
 
     if (child.type === "paragraph") {
       return toText(child).trim().length > 0;
+    }
+
+    if (isStandaloneMarkerNode(child)) {
+      return false;
     }
 
     return true;

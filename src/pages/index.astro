@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Badge from "@/components/ui/Badge.astro";
 import Icon from "@/components/ui/Icon.astro";
+import CommitActivity from "@/components/home/CommitActivity.astro";
 import { getArtifacts, getPublishedBlogPosts, getRoadmapNodes, getSiteConfig, normalizeSlug, formatDate } from "@/lib/content/queries";
 import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
 
@@ -13,18 +14,22 @@ const [{ home }, posts, nodes, artifacts] = await Promise.all([
 ]);
 
 const featuredArtifacts = artifacts.filter((entry) => home?.featured_artifacts.includes(normalizeSlug(entry))).slice(0, 6);
-const latestPosts = (home?.featured_posts?.length
-  ? posts.filter((entry) => home.featured_posts.includes(normalizeSlug(entry)))
-  : posts
-).slice(0, 5);
+const latestPosts = posts.slice(0, 5);
+const githubUrl = home?.quick_links.find((item) => item.label.toLowerCase().includes("github"))?.url ?? "https://github.com/Joker-of-Gotham";
+const githubUsername = githubUrl.split("/").filter(Boolean).pop() ?? "Joker-of-Gotham";
 
 const summary = computeRoadmapPointSummary(nodes);
 const rootSlugSet = summary.rootSlugs;
 
 const normalizeCardSummary = (input: string) =>
   input
+    .replace(/\r\n?/g, "\n")
     .replace(/<[^>]*>/g, " ")
-    .replace(/\{:\s*\.([a-zA-Z0-9_-]+)\s*\}/g, " ")
+    .replace(/<[^>\n]*$/g, " ")
+    .replace(/^\s{0,3}>\s?/gm, " ")
+    .replace(/^\s{0,3}#{1,6}\s+/gm, " ")
+    .replace(/^\s*\{:\s*(?:\.[a-zA-Z0-9_-]+\s*)+\}\s*$/gm, " ")
+    .replace(/\{:\s*(?:\.[a-zA-Z0-9_-]+\s*)+\}/g, " ")
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/\$\$[\s\S]*?\$\$/g, " ")
     .replace(/\$\$[^$]*$/g, " ")
@@ -32,6 +37,7 @@ const normalizeCardSummary = (input: string) =>
     .replace(/\$[^\n]*$/g, " ")
     .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[*_`~#>]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -123,6 +129,8 @@ const trackRows = Array.from(
       ))}
     </aside>
   </section>
+
+  <CommitActivity username={githubUsername} githubUrl={githubUrl} />
 
   <section class="section-stack">
     <div class="section-heading-row">

@@ -42,6 +42,7 @@ const newerPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
 const olderPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
 
 const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
+const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 ---
 
 <BaseLayout
@@ -69,7 +70,7 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
 
     {tocHeadings.length > 0 && (
       <aside class="toc-dock" data-toc-dock>
-        <button class="toc-dock-handle" type="button" aria-label="Toggle table of contents">
+        <button class="toc-dock-handle" type="button" aria-label="Toggle table of contents" aria-controls={tocPanelId} aria-expanded="false">
           <span class="toc-dock-bars">
             <span></span>
             <span></span>
@@ -77,11 +78,17 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
             <span></span>
           </span>
         </button>
-        <nav class="toc-dock-panel" aria-label="Table of contents">
+        <nav class="toc-dock-panel" id={tocPanelId} aria-label="Table of contents">
           <p class="sidebar-title">Reading</p>
           <p class="meta-row">Progress <strong data-toc-progress>0%</strong></p>
-          <ul class="list-clean">
-            {tocHeadings.map((heading: (typeof tocHeadings)[number]) => <li><a href={`#${heading.slug}`} data-toc-link>{heading.text}</a></li>)}
+          <ul class="list-clean toc-list">
+            {
+              tocHeadings.map((heading: (typeof tocHeadings)[number]) => (
+                <li data-toc-depth={heading.depth}>
+                  <a href={`#${heading.slug}`} data-toc-link>{heading.text}</a>
+                </li>
+              ))
+            }
           </ul>
         </nav>
       </aside>
@@ -137,6 +144,7 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
   <script is:inline>
     const tocDock = document.querySelector("[data-toc-dock]");
     if (tocDock) {
+      const toggleButton = tocDock.querySelector(".toc-dock-handle");
       const progressLabel = tocDock.querySelector("[data-toc-progress]");
       const tocLinks = Array.from(tocDock.querySelectorAll("[data-toc-link]"));
       const headingTargets = tocLinks
@@ -148,6 +156,35 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
           return { link, target };
         })
         .filter(Boolean);
+
+      const syncExpandedState = () => {
+        if (toggleButton) {
+          toggleButton.setAttribute("aria-expanded", tocDock.classList.contains("is-open") ? "true" : "false");
+        }
+      };
+
+      const closeDock = () => {
+        tocDock.classList.remove("is-open");
+        syncExpandedState();
+      };
+
+      toggleButton?.addEventListener("click", (event) => {
+        event.preventDefault();
+        tocDock.classList.toggle("is-open");
+        syncExpandedState();
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!tocDock.contains(event.target)) {
+          closeDock();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeDock();
+        }
+      });
 
       const updateProgress = () => {
         const doc = document.documentElement;
@@ -179,6 +216,35 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
       window.addEventListener("scroll", handleScroll, { passive: true });
       window.addEventListener("resize", handleScroll);
       handleScroll();
+      syncExpandedState();
     }
+
+    const legacyMarkerOnlyPattern = /^\{\:\s*(?:\.[A-Za-z0-9_-]+\s*)+\}$/;
+    document.querySelectorAll(".content p, .content blockquote p").forEach((node) => {
+      const text = node.textContent?.trim();
+      if (!text || !legacyMarkerOnlyPattern.test(text)) return;
+
+      const classes = text.match(/\.[A-Za-z0-9_-]+/g)?.map((item) => item.slice(1)) ?? [];
+      const previousElement = node.previousElementSibling;
+      const target = previousElement ?? node.parentElement?.closest("blockquote, li, div, section");
+
+      if (target && classes.length > 0) {
+        target.classList.add(...classes);
+      }
+
+      node.remove();
+    });
+
+    document.querySelectorAll(".content blockquote > p.callout, .content blockquote > p[class*='prompt-']").forEach((node) => {
+      const wrapper = node.parentElement;
+      if (!(wrapper instanceof HTMLElement) || wrapper.children.length !== 1) return;
+
+      node.classList.forEach((className) => wrapper.classList.add(className));
+      wrapper.style.padding = "0";
+      wrapper.style.border = "0";
+      wrapper.style.background = "transparent";
+      wrapper.style.boxShadow = "none";
+      wrapper.style.margin = "0";
+    });
   </script>
 </BaseLayout>

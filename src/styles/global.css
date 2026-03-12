@@ -144,10 +144,34 @@ img {
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent-secondary) 44%, rgba(12, 21, 35, 0.9)) transparent;
   border-right: 1px solid var(--border-default);
   background: color-mix(in srgb, var(--bg-surface) 90%, transparent);
   backdrop-filter: blur(12px);
   padding: var(--space-8) var(--space-6);
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-secondary) 78%, transparent), color-mix(in srgb, var(--text-muted) 54%, transparent));
+  background-clip: content-box;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-secondary) 92%, transparent), color-mix(in srgb, var(--accent-primary) 72%, transparent));
+  background-clip: content-box;
 }
 
 .main-area {
@@ -632,6 +656,8 @@ a:focus-visible {
 
 .hero-title {
   max-width: 12ch;
+  font-size: clamp(2.4rem, 4.2vw, 4.3rem);
+  line-height: 1.04;
 }
 
 .hero-subtitle {
@@ -672,6 +698,126 @@ a:focus-visible {
 .hero-metric-value {
   color: var(--text-strong);
   font-size: 1.02rem;
+}
+
+.commit-activity-card .card-body {
+  gap: var(--space-4);
+}
+
+.commit-activity-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.commit-activity-chart {
+  display: grid;
+  gap: var(--space-3);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent-secondary) 42%, var(--border-default)) transparent;
+}
+
+.commit-activity-chart::-webkit-scrollbar {
+  height: 10px;
+}
+
+.commit-activity-chart::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.commit-activity-chart::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-secondary) 38%, var(--border-default));
+}
+
+.commit-activity-months {
+  --weeks: 53;
+  display: grid;
+  grid-template-columns: 44px repeat(var(--weeks), 12px);
+  gap: 6px;
+  min-width: max-content;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.commit-activity-axis-spacer {
+  width: 44px;
+}
+
+.commit-activity-board {
+  display: flex;
+  gap: 12px;
+  min-width: max-content;
+}
+
+.commit-activity-weekdays {
+  width: 44px;
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  align-items: center;
+}
+
+.commit-activity-columns {
+  display: flex;
+  gap: 6px;
+}
+
+.commit-activity-week {
+  display: grid;
+  grid-template-rows: repeat(7, 12px);
+  gap: 6px;
+}
+
+.commit-activity-cell {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--border-default) 40%, transparent);
+  background: color-mix(in srgb, var(--bg-muted) 92%, transparent);
+}
+
+.commit-activity-cell.level-1 {
+  background: color-mix(in srgb, var(--status-done) 34%, #0d2818);
+}
+
+.commit-activity-cell.level-2 {
+  background: color-mix(in srgb, var(--status-done) 52%, #10331b);
+}
+
+.commit-activity-cell.level-3 {
+  background: color-mix(in srgb, var(--status-done) 72%, #143f20);
+}
+
+.commit-activity-cell.level-4 {
+  background: color-mix(in srgb, #7cf07f 88%, #1b4e23);
+}
+
+.commit-activity-cell.outside {
+  opacity: 0.22;
+}
+
+.commit-activity-legend {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: max-content;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.commit-activity-note {
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
 @keyframes hero-rise {
@@ -1141,19 +1287,29 @@ th {
 }
 
 .content h1 {
-  font-size: clamp(1.02rem, 1.48vw, 1.18rem);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.16;
+  letter-spacing: -0.025em;
 }
 
 .content h2 {
-  font-size: clamp(0.96rem, 1.3vw, 1.1rem);
+  font-size: clamp(1.38rem, 2.15vw, 1.84rem);
+  line-height: 1.2;
 }
 
 .content h3 {
-  font-size: clamp(0.92rem, 1.16vw, 1.02rem);
+  font-size: clamp(1.12rem, 1.64vw, 1.4rem);
+  line-height: 1.24;
 }
 
 .content h4 {
-  font-size: clamp(0.88rem, 1.02vw, 0.95rem);
+  font-size: clamp(1rem, 1.32vw, 1.16rem);
+  line-height: 1.28;
+}
+
+.content :where(h1, h2, h3, h4) {
+  font-weight: 700;
+  scroll-margin-top: 104px;
 }
 
 .content p,
@@ -1320,12 +1476,26 @@ pre.astro-code[data-lang^="MERMAID"]::before {
   margin: 0;
 }
 
-.content blockquote {
+.content blockquote:not(.callout):not(.prompt-info):not(.prompt-proof):not(.prompt-warning):not(.prompt-attention):not(.prompt-example):not(.prompt-flow):not(:has(> .callout)):not(:has(> [class*="prompt-"])) {
   margin: 0;
   padding: var(--space-3) var(--space-4);
   border-left: 3px solid color-mix(in srgb, var(--accent-secondary) 54%, var(--border-default));
   border-radius: var(--radius-md);
   background: color-mix(in srgb, var(--accent-secondary) 8%, transparent);
+}
+
+.content blockquote:has(> .callout),
+.content blockquote:has(> [class*="prompt-"]) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.content blockquote:has(> .callout) > .callout,
+.content blockquote:has(> [class*="prompt-"]) > [class*="prompt-"] {
+  margin: 0;
 }
 
 .content .prompt-info {
@@ -1464,26 +1634,30 @@ pre.astro-code[data-lang^="MERMAID"]::before {
 .toc-dock {
   position: fixed;
   right: 18px;
-  top: 38%;
+  top: 94px;
   z-index: 45;
-  width: 44px;
+  width: 52px;
+  max-height: calc(100vh - 118px);
   border: 1px solid var(--border-default);
-  border-radius: 16px;
+  border-radius: 20px;
   background: color-mix(in srgb, var(--bg-surface) 90%, transparent);
-  backdrop-filter: blur(10px);
-  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  transition: width 180ms ease;
+  transition: width 180ms ease, border-color 180ms ease, transform 180ms ease;
 }
 
 .toc-dock:hover,
-.toc-dock:focus-within {
-  width: min(320px, calc(100vw - 28px));
+.toc-dock:focus-within,
+.toc-dock.is-open {
+  width: min(312px, calc(100vw - 32px));
+  border-color: color-mix(in srgb, var(--accent-secondary) 38%, var(--border-default));
+  transform: translateX(-4px);
 }
 
 .toc-dock-handle {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -1514,25 +1688,85 @@ pre.astro-code[data-lang^="MERMAID"]::before {
   overflow: hidden;
   transition: opacity 140ms ease, max-height 180ms ease;
   padding: 0 var(--space-4);
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--accent-secondary) 38%, var(--border-default)) transparent;
 }
 
 .toc-dock:hover .toc-dock-panel,
-.toc-dock:focus-within .toc-dock-panel {
+.toc-dock:focus-within .toc-dock-panel,
+.toc-dock.is-open .toc-dock-panel {
   opacity: 1;
-  max-height: 58vh;
+  max-height: calc(100vh - 176px);
   overflow: auto;
   padding: 0 var(--space-4) var(--space-4);
+}
+
+.toc-dock-panel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.toc-dock-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toc-dock-panel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-secondary) 72%, transparent), color-mix(in srgb, var(--accent-primary) 68%, transparent));
+  background-clip: content-box;
+}
+
+.toc-dock .sidebar-title {
+  margin-bottom: var(--space-2);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+}
+
+.toc-dock .toc-list {
+  gap: 2px;
+}
+
+.toc-dock .toc-list li {
+  min-width: 0;
+}
+
+.toc-dock .toc-list li[data-toc-depth="1"] a {
+  padding-left: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--text-default);
+}
+
+.toc-dock .toc-list li[data-toc-depth="2"] a {
+  padding-left: 14px;
+  font-size: 0.92rem;
+}
+
+.toc-dock .toc-list li[data-toc-depth="3"] a {
+  padding-left: 28px;
+  font-size: 0.84rem;
+  color: color-mix(in srgb, var(--text-muted) 92%, transparent);
 }
 
 .toc-dock .list-clean a {
   color: var(--text-muted);
   display: block;
-  padding: 5px 0;
+  padding: 7px 10px;
+  border-radius: 10px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  transition: color 140ms ease, background 140ms ease, padding-left 140ms ease;
+}
+
+.toc-dock .list-clean a:hover {
+  color: var(--text-strong);
+  background: color-mix(in srgb, var(--accent-secondary) 12%, transparent);
 }
 
 .toc-dock .list-clean a.active {
   color: var(--accent-secondary);
   font-weight: 600;
+  background: color-mix(in srgb, var(--accent-secondary) 14%, transparent);
 }
 
 .roadmap-page-head {
@@ -1627,6 +1861,10 @@ pre.astro-code[data-lang^="MERMAID"]::before {
   .hero-metrics-grid {
     grid-template-columns: 1fr;
   }
+
+  .commit-activity-head {
+    align-items: flex-start;
+  }
 }
 
 @media (max-width: 1023px) {
@@ -1680,6 +1918,11 @@ pre.astro-code[data-lang^="MERMAID"]::before {
     grid-template-columns: 1fr;
   }
 
+  .commit-activity-months,
+  .commit-activity-board {
+    min-width: max-content;
+  }
+
   .roadmap-toolbar {
     align-items: stretch;
   }
@@ -1726,6 +1969,16 @@ pre.astro-code[data-lang^="MERMAID"]::before {
 
   .tree-task-status {
     justify-self: flex-start;
+  }
+
+  .commit-activity-months {
+    grid-template-columns: 36px repeat(var(--weeks), 12px);
+    font-size: 0.74rem;
+  }
+
+  .commit-activity-weekdays {
+    width: 36px;
+    font-size: 0.74rem;
   }
 }
 

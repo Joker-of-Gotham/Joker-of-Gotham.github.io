@@ -1,0 +1,207 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+
+interface Props {
+  username: string;
+  githubUrl?: string;
+}
+
+const { username, githubUrl = "https://github.com/Joker-of-Gotham" } = Astro.props;
+const legendLevels = [0, 1, 2, 3, 4];
+---
+
+<section class="section-stack">
+  <div class="section-heading-row">
+    <h2>GitHub Commit Activity</h2>
+    <a class="text-link" href={githubUrl} target="_blank" rel="noopener noreferrer">
+      Open GitHub
+      <Icon name="arrow-right" size={14} />
+    </a>
+  </div>
+
+  <article class="card commit-activity-card" data-commit-activity-root data-github-username={username}>
+    <div class="card-body">
+      <div class="commit-activity-head">
+        <div class="section-stack" style="gap:var(--space-2);">
+          <p class="meta-row">Last 12 months</p>
+          <h3 data-commit-summary>Syncing GitHub profile contributions...</h3>
+        </div>
+        <p class="meta-row" data-commit-total>Source: GitHub profile graph</p>
+      </div>
+
+      <div class="commit-activity-chart">
+        <div class="commit-activity-months" data-commit-months style="--weeks:53;">
+          <span class="commit-activity-axis-spacer" aria-hidden="true"></span>
+        </div>
+
+        <div class="commit-activity-board">
+          <div class="commit-activity-weekdays" aria-hidden="true">
+            <span></span>
+            <span>Mon</span>
+            <span></span>
+            <span>Wed</span>
+            <span></span>
+            <span>Fri</span>
+            <span></span>
+          </div>
+
+          <div class="commit-activity-columns" data-commit-columns></div>
+        </div>
+
+        <div class="commit-activity-legend" aria-hidden="true">
+          <span>Less</span>
+          {legendLevels.map((level) => <span class={`commit-activity-cell level-${level}`}></span>)}
+          <span>More</span>
+        </div>
+      </div>
+
+      <p class="meta-row commit-activity-note" data-commit-note>
+        Live contributions are fetched from your public GitHub profile graph.
+      </p>
+    </div>
+  </article>
+</section>
+
+<script is:inline>
+  const commitRoots = document.querySelectorAll("[data-commit-activity-root]");
+
+  const monthFormatter = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    timeZone: "UTC"
+  });
+
+  const numberFormatter = new Intl.NumberFormat("en-US");
+
+  const toUtcDate = (value) => {
+    const date = new Date(`${value}T00:00:00Z`);
+    return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  };
+
+  const formatDayKey = (value) => value.toISOString().slice(0, 10);
+
+  const addUtcDays = (value, days) => {
+    const next = new Date(value);
+    next.setUTCDate(next.getUTCDate() + days);
+    return next;
+  };
+
+  const buildCalendarWeeks = (contributions) => {
+    if (!Array.isArray(contributions) || contributions.length === 0) return [];
+
+    const sorted = [...contributions].sort((a, b) => a.date.localeCompare(b.date));
+    const counts = new Map(sorted.map((item) => [item.date, item]));
+    const firstDate = toUtcDate(sorted[0].date);
+    const lastDate = toUtcDate(sorted[sorted.length - 1].date);
+    const calendarStart = addUtcDays(firstDate, -firstDate.getUTCDay());
+    const calendarEnd = addUtcDays(lastDate, 6 - lastDate.getUTCDay());
+    const weeks = [];
+    let cursor = calendarStart;
+    let weekBuffer = [];
+
+    while (cursor <= calendarEnd) {
+      const date = formatDayKey(cursor);
+      const entry = counts.get(date) ?? { date, count: 0, level: 0 };
+      const inRange = date >= sorted[0].date && date <= sorted[sorted.length - 1].date;
+
+      weekBuffer.push({
+        date,
+        count: entry.count ?? 0,
+        level: entry.level ?? 0,
+        inRange
+      });
+
+      if (weekBuffer.length === 7) {
+        const labelSource =
+          weekBuffer.find((day) => day.inRange && toUtcDate(day.date).getUTCDate() === 1) ??
+          (weeks.length === 0 ? weekBuffer.find((day) => day.inRange) : undefined);
+
+        weeks.push({
+          monthLabel: labelSource ? monthFormatter.format(toUtcDate(labelSource.date)) : "",
+          days: weekBuffer
+        });
+        weekBuffer = [];
+      }
+
+      cursor = addUtcDays(cursor, 1);
+    }
+
+    return weeks;
+  };
+
+  const renderCalendar = (root, payload) => {
+    const summary = root.querySelector("[data-commit-summary]");
+    const total = root.querySelector("[data-commit-total]");
+    const note = root.querySelector("[data-commit-note]");
+    const months = root.querySelector("[data-commit-months]");
+    const columns = root.querySelector("[data-commit-columns]");
+    const contributions = payload?.contributions ?? [];
+    const weeks = buildCalendarWeeks(contributions);
+    const totalLastYear = payload?.total?.lastYear ?? Object.values(payload?.total ?? {}).pop() ?? 0;
+    const activeDays = contributions.filter((item) => (item.count ?? 0) > 0).length;
+
+    if (!months || !columns || weeks.length === 0) {
+      if (summary) summary.textContent = "Unable to load GitHub contribution data.";
+      if (total) total.textContent = "Open GitHub for the latest graph";
+      if (note) note.textContent = "The live contribution source is temporarily unavailable.";
+      return;
+    }
+
+    months.style.setProperty("--weeks", String(weeks.length));
+    months.innerHTML = '<span class="commit-activity-axis-spacer" aria-hidden="true"></span>';
+    columns.innerHTML = "";
+
+    weeks.forEach((week) => {
+      const monthLabel = document.createElement("span");
+      monthLabel.textContent = week.monthLabel;
+      months.appendChild(monthLabel);
+
+      const weekColumn = document.createElement("div");
+      weekColumn.className = "commit-activity-week";
+
+      week.days.forEach((day) => {
+        const cell = document.createElement("span");
+        cell.className = `commit-activity-cell level-${day.level}${day.inRange ? "" : " outside"}`;
+        cell.title = `${day.date} · ${day.count} contribution${day.count === 1 ? "" : "s"}`;
+        weekColumn.appendChild(cell);
+      });
+
+      columns.appendChild(weekColumn);
+    });
+
+    if (summary) {
+      summary.textContent = `${numberFormatter.format(totalLastYear)} contributions in the last year`;
+    }
+
+    if (total) {
+      total.textContent = `${numberFormatter.format(activeDays)} active days shown`;
+    }
+
+    if (note) {
+      note.textContent = "Live contributions are fetched from your public GitHub profile graph and may be cached for about one hour.";
+    }
+  };
+
+  commitRoots.forEach((root) => {
+    const rootElement = root;
+    const githubUsername = rootElement.getAttribute("data-github-username");
+    if (!githubUsername) return;
+
+    fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(githubUsername)}?y=last`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`GitHub contribution request failed: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((payload) => renderCalendar(rootElement, payload))
+      .catch(() => {
+        const summary = rootElement.querySelector("[data-commit-summary]");
+        const total = rootElement.querySelector("[data-commit-total]");
+        const note = rootElement.querySelector("[data-commit-note]");
+
+        if (summary) summary.textContent = "Unable to sync the live GitHub contribution graph.";
+        if (total) total.textContent = "Open GitHub for the latest data";
+        if (note) note.textContent = "The external contribution calendar source is unavailable right now.";
+      });
+  });
+</script>
