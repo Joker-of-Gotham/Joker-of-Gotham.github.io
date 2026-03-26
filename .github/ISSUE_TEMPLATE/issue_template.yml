@@ -1,0 +1,31 @@
+---
+name: "Generic Issue"
+about: "A general issue template"
+title: "[TYPE] Issue Title"
+labels:
+  - untriaged
+---
+
+## Type
+- :white_check_mark: Bug
+- :rocket: Feature
+- :question: Documentation
+
+## Description
+
+Provide a detailed description of the issue.
+
+## Steps to Reproduce
+
+1. 
+2. 
+3. 
+
+## Expected Behavior
+
+## Actual Behavior
+
+## Screenshots / Logs
+
+## Additional Context
+

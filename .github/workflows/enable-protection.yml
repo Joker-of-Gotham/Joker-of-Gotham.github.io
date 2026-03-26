@@ -1,0 +1,49 @@
+name: Enable Branch Protection
+on:
+  push:
+    branches:
+      - main
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable protection if not enabled
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const branch = 'main';
+            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+            try {
+              const res = await octokit.request('GET /repos/{owner}/{repo}/branches/{branch}/protection', {
+                owner,
+                repo,
+                branch
+              });
+              if (res.data.required_status_checks) {
+                console.log('Protection already enabled');
+                return;
+              }
+            } catch (e) {
+              // If protection not enabled, error 404
+            }
+            const protection = {
+              required_status_checks: {
+                strict: false,
+                contexts: []
+              },
+              enforce_admins: true,
+              required_pull_request_reviews: {
+                dismiss_stale_reviews: true,
+                require_code_owner_reviews: true,
+                required_approving_review_count: 1
+              },
+              restrictions: null
+            };
+            await octokit.request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', {
+              owner,
+              repo,
+              branch,
+              ...protection
+            });
+            console.log('Branch protection applied');

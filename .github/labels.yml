@@ -1,0 +1,47 @@
+# Label definitions for the repository
+#
+# Label names are case-sensitive.
+#
+# Example labels:
+# - enhancement
+# - bug
+# - ci
+# - investigation
+# - branch-protection
+# - owner
+# - priority
+# - next-step
+
+- name: enhancement
+  color: "0e8a16"
+  description: "New feature request"
+
+"bug":
+  color: "d73a4a"
+  description: "Something isn't working"
+
+"ci":
+  color: "0e8a16"
+  description: "CI build/automation"
+
+"investigation":
+  color: "c9d1d9"
+  description: "Need investigation"
+
+"branch-protection":
+  color: "5319e7"
+  description: "Branch protection rule"
+
+"owner":
+  color: "1f6a8a"
+  description: "Owner team"
+
+"priority":
+  color: "e11d2b"
+  description: "Priority level"
+
+untriaged:
+  color: "ededed"
+  description: "Issue without labels"
+  color: "0085ff"
+  description: "Next step/action"

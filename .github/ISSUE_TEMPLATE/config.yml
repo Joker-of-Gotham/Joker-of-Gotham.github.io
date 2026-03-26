@@ -1,0 +1,4 @@
+name: Branch Protection Feature Request
+about: Request enabling branch protection on default branch
+labels:
+  - enhancement
