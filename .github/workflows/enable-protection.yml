@@ -1,38 +1,36 @@
 name: Enable Branch Protection
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch
+    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: write
   pull-requests: write
   administration: write
-  security_events: write
 jobs:
   protect:
     runs-on: ubuntu-latest
     steps:
-      - name: Enable ...protection if not enabled
-        uses: peter-evans/create-or-update-branch-protection@v3
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v6
         with:
           script: |
-            const { owner, repo } = context.repo;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
             const branch = 'main';
-            const octokit = github;
+            // Check if protection exists
             try {
-              const res = await octokit.request('GET /repos/{owner}/{repo}/branches/{branch}/protection', {
+              await github.rest.repos.getBranchProtection({
                 owner,
                 repo,
                 branch
               });
-              if (res.data.required_status_checks) {
-                console.log('Protection already enabled');
-                return;
-              }
+              console.info('Branch protection already enabled');
+              return;
             } catch (e) {
-              // If protection not enabled, error 404
+              if (e.status !== 404) throw e;
             }
+            // Set protection
             const protection = {
               required_status_checks: {
                 strict: false,
@@ -46,10 +44,10 @@ jobs:
               },
               restrictions: null
             };
-            await octokit.request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', {
+            await github.rest.repos.updateBranchProtection({
               owner,
               repo,
               branch,
-              ...protection
+              protection
             });
-            console.log('Branch protection applied');
+            console.info('Branch protection applied');
