@@ -12,42 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/github-script@v6
+      - uses: peter-evans/create-or-update-branch-protection@v4
         with:
-          script: |
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const branch = 'main';
-            // Check if protection exists
-            try {
-              await github.rest.repos.getBranchProtection({
-                owner,
-                repo,
-                branch
-              });
-              console.info('Branch protection already enabled');
-              return;
-            } catch (e) {
-              if (e.status !== 404) throw e;
-            }
-            // Set protection
-            const protection = {
-              required_status_checks: {
-                strict: false,
-                contexts: []
-              },
-              enforce_admins: true,
-              required_pull_request_reviews: {
-                dismiss_stale_reviews: true,
-                require_code_owner_reviews: true,
-                required_approving_review_count: 1
-              },
-              restrictions: null
-            };
-            await github.rest.repos.updateBranchProtection({
-              owner,
-              repo,
-              branch,
-              protection
-            });
-            console.info('Branch protection applied');
+          token: ${{ secrets.GITHUB_TOKEN }}
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          branch: main
+          required_status_checks: |
+            strict: false
+            contexts: []
+          enforce_admins: true
+          required_pull_request_reviews: |
+            dismiss_stale_reviews: true
+            require_code_owner_reviews: true
+            required_approving_review_count: 1
+          restrictions: |
+            users: []
+            teams: []
