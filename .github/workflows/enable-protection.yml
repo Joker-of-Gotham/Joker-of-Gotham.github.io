@@ -4,6 +4,8 @@ on:
     branches:
       - main
   workflow_dispatch
+permissions:
+  contents: write
 jobs:
   protect:
     runs-on: ubuntu-latest
