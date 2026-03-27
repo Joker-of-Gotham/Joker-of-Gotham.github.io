@@ -4,7 +4,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  administration: write
 jobs:
   protect:
     runs-on: ubuntu-latest
@@ -20,6 +19,14 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "Checking current branch protection status..."
+          
+          # Check if branch protection is already enabled
+          if gh api /repos/${{ github.repository }}/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count' > /dev/null 2>&1; then
+            echo "Branch protection is already enabled. Skipping..."
+            exit 0
+          fi
+          
           echo "Enabling basic branch protection for main branch..."
           
           # Use proper JSON format for GitHub API
