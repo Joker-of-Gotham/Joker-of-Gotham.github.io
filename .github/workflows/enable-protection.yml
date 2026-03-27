@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Enable Branch Protection
-        uses: peter-evans/create-or-update-branch-protection@v3
+        uses: peter-evans/create-or-update-branch-protection@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
