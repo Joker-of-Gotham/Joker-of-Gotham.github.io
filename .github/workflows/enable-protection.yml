@@ -17,7 +17,7 @@ jobs:
           branch: main
           enforce_admins: true
           # removed required_status_checks
-          required_status_checks: null
+
           required_pull_request_reviews:
             dismiss_stale_reviews: true
             require_code_owner_reviews: true
