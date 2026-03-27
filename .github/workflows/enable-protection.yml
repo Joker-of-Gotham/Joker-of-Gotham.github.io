@@ -3,22 +3,19 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch
 permissions:
   contents: write
   pull-requests: write
   administration: write
-  security_events: write
 jobs:
   protect:
     runs-on: ubuntu-latest
     steps:
-      - name: Enable Branch Protection
-        uses: peter-evans/create-or-update-branch-protection@v4
+      - uses: peter-evans/create-or-update-branch-protection@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
-          # enforce_admins: true
+          enforce_admins: true
           required_status_checks:
             strict: true
             contexts:
