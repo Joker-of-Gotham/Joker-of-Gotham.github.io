@@ -22,14 +22,21 @@ jobs:
         run: |
           echo "Enabling basic branch protection for main branch..."
           
-          # Try a minimal protection setup
-          gh api \
-            --method PUT \
-            /repos/${{ github.repository }}/branches/main/protection \
-            -f "required_status_checks=null" \
-            -f "enforce_admins=true" \
-            -f "required_pull_request_reviews[required_approving_review_count]=1" \
-            -f "allow_force_pushes=false" \
-            -f "allow_deletions=false"
+          # Use proper JSON format for GitHub API
+          echo '{
+            "required_status_checks": {
+              "strict": false,
+              "contexts": []
+            },
+            "enforce_admins": false,
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 1,
+              "dismiss_stale_reviews": false,
+              "require_code_owner_reviews": false
+            },
+            "restrictions": null,
+            "allow_force_pushes": false,
+            "allow_deletions": false
+          }' | gh api --method PUT /repos/${{ github.repository }}/branches/main/protection --input -
           
           echo "Basic branch protection enabled!"
