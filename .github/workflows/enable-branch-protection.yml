@@ -1,9 +1,11 @@
 name: Enable Basic Branch Protection
 on:
   workflow_dispatch:  # Manual trigger only
+  # Don't run on push - only manual trigger
 permissions:
   contents: write
   pull-requests: write
+  administration: write
 jobs:
   protect:
     runs-on: ubuntu-latest
@@ -22,28 +24,28 @@ jobs:
           echo "Checking current branch protection status..."
           
           # Check if branch protection is already enabled
-          if gh api /repos/${{ github.repository }}/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count' > /dev/null 2>&1; then
+          if gh api /repos/${{ github.repository }}/branches/main/protection --jq '.required_pull_request_reviews.required_approving_review_count' 2>/dev/null; then
             echo "Branch protection is already enabled. Skipping..."
             exit 0
+          else
+            echo "Branch protection check failed or not enabled. Attempting to enable..."
+            
+            # Use proper JSON format for GitHub API
+            echo '{
+              "required_status_checks": {
+                "strict": false,
+                "contexts": []
+              },
+              "enforce_admins": false,
+              "required_pull_request_reviews": {
+                "required_approving_review_count": 1,
+                "dismiss_stale_reviews": false,
+                "require_code_owner_reviews": false
+              },
+              "restrictions": null,
+              "allow_force_pushes": false,
+              "allow_deletions": false
+            }' | gh api --method PUT /repos/${{ github.repository }}/branches/main/protection --input -
+            
+            echo "Basic branch protection enabled!"
           fi
-          
-          echo "Enabling basic branch protection for main branch..."
-          
-          # Use proper JSON format for GitHub API
-          echo '{
-            "required_status_checks": {
-              "strict": false,
-              "contexts": []
-            },
-            "enforce_admins": false,
-            "required_pull_request_reviews": {
-              "required_approving_review_count": 1,
-              "dismiss_stale_reviews": false,
-              "require_code_owner_reviews": false
-            },
-            "restrictions": null,
-            "allow_force_pushes": false,
-            "allow_deletions": false
-          }' | gh api --method PUT /repos/${{ github.repository }}/branches/main/protection --input -
-          
-          echo "Basic branch protection enabled!"
