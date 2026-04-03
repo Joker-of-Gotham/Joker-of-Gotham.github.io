@@ -1,0 +1,50 @@
+name: Configure Branch Protection
+
+on:
+  workflow_dispatch:  # Manual trigger only
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight as backup check
+
+permissions:
+  contents: read
+  pull-requests: write
+  administration: write
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Configure branch protection with required checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Configuring branch protection for main branch..."
+          
+          # Get the workflow name from deploy.yml
+          WORKFLOW_NAME="Build and Deploy Astro site"
+          
+          # Update branch protection with required status checks using GitHub CLI
+          echo '{
+            "strict": false,
+            "contexts": ["'"$WORKFLOW_NAME"'"]
+          }' | gh api -X PATCH /repos/${{ github.repository }}/branches/main/protection/required_status_checks --input -
+          
+          echo "Branch protection updated with required status check: $WORKFLOW_NAME"
+          
+      - name: Verify configuration
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Verifying branch protection configuration..."
+          RESPONSE=$(curl -s \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/branches/main/protection)
+          
+          echo "Required status checks:"
+          echo "$RESPONSE" | grep -A 5 -B 5 "required_status_checks"
+          
+          echo "Done! Main branch now requires the '$WORKFLOW_NAME' check to pass before merging."
