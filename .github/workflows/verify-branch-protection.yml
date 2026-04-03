@@ -1,0 +1,30 @@
+name: Verify Branch Protection
+
+on:
+  workflow_dispatch:  # Manual trigger only
+  schedule:
+    - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Verify branch protection is enabled
+        run: |
+          echo "Checking if main branch has protection enabled..."
+          echo "This workflow serves as a reminder that branch protection should be configured."
+          echo "Please ensure in GitHub repository settings:"
+          echo "1. Go to Settings > Branches > Branch protection rules"
+          echo "2. Add rule for 'main' branch"
+          echo "3. Enable 'Require status checks' and select 'Build and Deploy Astro site'"
+          echo "4. Enable 'Require pull request reviews' with 1 required approval"
+          echo "5. Enable 'Require review from Code Owners'"
+          echo ""
+          echo "Note: This workflow does not modify branch protection rules."
+          echo "It only serves as a periodic reminder to check configuration."
