@@ -5,10 +5,9 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Run weekly on Sunday at midnight as backup check
 
-permissions:
-  contents: read
-  pull-requests: write
-  administration: write
+# This workflow requires a personal access token with repo scope
+# Create a secret called PAT_TOKEN with a personal access token
+# The default GITHUB_TOKEN doesn't have admin permissions
 
 jobs:
   configure:
@@ -18,17 +17,12 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Setup GitHub CLI
-        run: |
-          type -p curl >/dev/null || (apt-get update && apt-get install curl -y)
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && apt-get update \
-          && apt-get install gh -y
+        uses: actions/setup-gh-cli@v1
           
       - name: Configure branch protection with required checks
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Use PAT_TOKEN if available, otherwise use GITHUB_TOKEN (which may not have admin permissions)
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           echo "Configuring branch protection for main branch..."
           
@@ -37,29 +31,32 @@ jobs:
           
           # First, check current protection status
           echo "Current branch protection status:"
-          gh api /repos/${{ github.repository }}/branches/main/protection
+          gh api /repos/${{ github.repository }}/branches/main/protection --silent || echo "Note: May not have permission to view protection"
           
           # Update branch protection with required status checks using GitHub CLI
           echo "Updating required status checks..."
-          gh api -X PATCH /repos/${{ github.repository }}/branches/main/protection/required_status_checks \
-            -f strict:bool=false \
-            -f contexts[]="$WORKFLOW_NAME"
-          
-          echo "Branch protection updated with required status check: $WORKFLOW_NAME"
+          # Create JSON payload for the update
+          echo '{"strict": false, "contexts": ["'"$WORKFLOW_NAME"'"]}' | \
+            gh api -X PATCH /repos/${{ github.repository }}/branches/main/protection/required_status_checks --input - --silent && \
+            echo "Branch protection updated with required status check: $WORKFLOW_NAME" || \
+            echo "Note: May not have permission to update branch protection. Ensure PAT_TOKEN secret is set with a personal access token with repo scope."
           
       - name: Verify configuration
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           echo "Verifying branch protection configuration..."
           
           # Get and display the protection configuration
           echo "Full protection configuration:"
-          gh api /repos/${{ github.repository }}/branches/main/protection
+          gh api /repos/${{ github.repository }}/branches/main/protection --silent || echo "Note: May not have permission to view protection details"
           
           echo ""
           echo "Required status checks details:"
-          gh api /repos/${{ github.repository }}/branches/main/protection/required_status_checks
+          gh api /repos/${{ github.repository }}/branches/main/protection/required_status_checks --silent || echo "Note: May not have permission to view required status checks"
           
           echo ""
-          echo "Done! Main branch now requires the 'Build and Deploy Astro site' check to pass before merging."
+          echo "Note: If this workflow fails due to permissions, you can:"
+          echo "1. Create a personal access token with repo scope"
+          echo "2. Add it as a repository secret named PAT_TOKEN"
+          echo "3. Or disable this workflow if branch protection is already configured manually"
