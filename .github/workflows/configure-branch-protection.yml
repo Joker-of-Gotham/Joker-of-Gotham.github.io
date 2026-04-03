@@ -35,11 +35,15 @@ jobs:
           # Get the workflow name from deploy.yml
           WORKFLOW_NAME="Build and Deploy Astro site"
           
+          # First, check current protection status
+          echo "Current branch protection status:"
+          gh api /repos/${{ github.repository }}/branches/main/protection
+          
           # Update branch protection with required status checks using GitHub CLI
-          echo '{
-            "strict": false,
-            "contexts": ["'"$WORKFLOW_NAME"'"]
-          }' | gh api -X PATCH /repos/${{ github.repository }}/branches/main/protection/required_status_checks --input -
+          echo "Updating required status checks..."
+          gh api -X PATCH /repos/${{ github.repository }}/branches/main/protection/required_status_checks \
+            -f strict:bool=false \
+            -f contexts[]="$WORKFLOW_NAME"
           
           echo "Branch protection updated with required status check: $WORKFLOW_NAME"
           
@@ -48,12 +52,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Verifying branch protection configuration..."
-          RESPONSE=$(curl -s \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Accept: application/vnd.github.v3+json" \
-            https://api.github.com/repos/${{ github.repository }}/branches/main/protection)
           
-          echo "Required status checks:"
-          echo "$RESPONSE" | grep -A 5 -B 5 "required_status_checks"
+          # Get and display the protection configuration
+          echo "Full protection configuration:"
+          gh api /repos/${{ github.repository }}/branches/main/protection
           
-          echo "Done! Main branch now requires the '$WORKFLOW_NAME' check to pass before merging."
+          echo ""
+          echo "Required status checks details:"
+          gh api /repos/${{ github.repository }}/branches/main/protection/required_status_checks
+          
+          echo ""
+          echo "Done! Main branch now requires the 'Build and Deploy Astro site' check to pass before merging."
