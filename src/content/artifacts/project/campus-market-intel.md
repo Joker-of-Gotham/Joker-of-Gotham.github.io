@@ -5,7 +5,7 @@ type: project
 date: 2025-07-24
 venue: Open-source Project
 summary: 面向真实市场信息流的端到端系统，覆盖数据采集、语义检索、多轮问答与可视化分析。
-cover: /assets/images/技术杂谈/校园集市信息提取/整体流程.png
+cover: /assets/img/covers/GBC-小智和鲁帕.webp
 tags:
   - LLM Workflow Orchestration
   - Financial Data Pipeline

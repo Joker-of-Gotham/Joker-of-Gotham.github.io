@@ -1,5 +1,6 @@
 ﻿---
 import "@/styles/main.css";
+import { ViewTransitions } from "astro:transitions";
 import Sidebar from "@/components/layout/Sidebar.astro";
 import Topbar from "@/components/layout/Topbar.astro";
 import CommandPalette from "@/components/search/CommandPalette.astro";
@@ -37,6 +38,11 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} | Chika Komari</title>
     <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" /></noscript>
+    <ViewTransitions />
     <slot name="head" />
   </head>
   <body>
@@ -45,6 +51,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
 
       <div class="main-area">
         <Topbar title={title} crumbs={crumbs} />
+        <slot name="full-bleed" />
         <main class="main-container" data-pagefind-body>
           <PagefindFilters filters={pagefindFilters} />
           <slot />
@@ -55,39 +62,103 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
     <CommandPalette />
 
     <script>
-      const sidebar = document.getElementById("site-sidebar");
-      const toggle = document.getElementById("drawer-toggle");
+      let _sidebarAC: AbortController | null = null;
+      function initSidebar() {
+        _sidebarAC?.abort();
+        _sidebarAC = new AbortController();
+        const sig = _sidebarAC.signal;
 
-      function closeSidebar() {
-        sidebar?.classList.remove("open");
-        document.querySelector(".mobile-mask")?.remove();
+        const sidebar = document.getElementById("site-sidebar");
+        const toggle = document.getElementById("drawer-toggle");
+        if (!sidebar || !toggle) return;
+
+        function closeSidebar() {
+          sidebar!.classList.remove("open");
+          document.querySelector(".mobile-mask")?.remove();
+        }
+        function openSidebar() {
+          sidebar!.classList.add("open");
+          if (!document.querySelector(".mobile-mask")) {
+            const mask = document.createElement("button");
+            mask.className = "mobile-mask";
+            mask.setAttribute("aria-label", "Close sidebar");
+            mask.addEventListener("click", closeSidebar);
+            document.body.appendChild(mask);
+          }
+        }
+
+        toggle.addEventListener("click", (e) => {
+          e.stopPropagation();
+          sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
+        }, { signal: sig });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape" && sidebar.classList.contains("open")) closeSidebar();
+        }, { signal: sig });
       }
+      document.addEventListener("astro:page-load", initSidebar);
+    </script>
 
-      function openSidebar() {
-        sidebar?.classList.add("open");
+    <script>
+      function initAnimations() {
+        const els = document.querySelectorAll("[data-animate]:not(.in-view)");
+        if (!els.length) return;
 
-        if (!document.querySelector(".mobile-mask")) {
-          const mask = document.createElement("button");
-          mask.className = "mobile-mask";
-          mask.setAttribute("aria-label", "Close sidebar");
-          mask.addEventListener("click", closeSidebar);
-          document.body.appendChild(mask);
+        const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (prefersReduced) {
+          els.forEach((el) => (el as HTMLElement).classList.add("in-view"));
+          return;
         }
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                (e.target as HTMLElement).classList.add("in-view");
+                observer.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
+        );
+        els.forEach((el) => observer.observe(el));
       }
+      document.addEventListener("astro:page-load", initAnimations);
+    </script>
 
-      toggle?.addEventListener("click", () => {
-        if (sidebar?.classList.contains("open")) {
-          closeSidebar();
-        } else {
-          openSidebar();
-        }
-      });
+    <script>
+      let _carouselAC: AbortController | null = null;
+      function initHeroCarousel() {
+        _carouselAC?.abort();
+        _carouselAC = new AbortController();
+        const sig = _carouselAC.signal;
 
-      window.addEventListener("resize", () => {
-        if (window.innerWidth > 1023) {
-          closeSidebar();
+        const slides = document.querySelectorAll("#hero-carousel .hero-carousel-slide");
+        const dots = document.querySelectorAll("#hero-carousel-dots .hero-carousel-dot");
+        if (slides.length <= 1) return;
+
+        let current = 0;
+        let timer: ReturnType<typeof setInterval>;
+
+        function goTo(idx: number) {
+          if (idx === current) return;
+          slides[current].classList.remove("is-active");
+          dots[current]?.classList.remove("is-active");
+          current = idx;
+          slides[current].classList.add("is-active");
+          dots[current]?.classList.add("is-active");
+          clearInterval(timer);
+          timer = setInterval(() => goTo((current + 1) % slides.length), 6000);
         }
-      });
+
+        dots.forEach((dot) => {
+          dot.addEventListener("click", () => goTo(parseInt((dot as HTMLElement).dataset.idx || "0", 10)), { signal: sig });
+        });
+
+        sig.addEventListener("abort", () => clearInterval(timer));
+        timer = setInterval(() => goTo((current + 1) % slides.length), 6000);
+      }
+      document.addEventListener("astro:page-load", initHeroCarousel);
     </script>
 
     <script>
@@ -228,10 +299,20 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
         }
       };
 
+      const schedule = (fn: () => void) => {
+        if ("requestIdleCallback" in window) {
+          (window as any).requestIdleCallback(fn, { timeout: 2000 });
+        } else {
+          setTimeout(fn, 50);
+        }
+      };
+
       const applyEnhancements = () => {
-        decorateCodeBlocks(document);
-        cleanupLegacyMarkers(document);
-        void renderMermaidBlocks(document);
+        schedule(() => {
+          decorateCodeBlocks(document);
+          cleanupLegacyMarkers(document);
+        });
+        schedule(() => void renderMermaidBlocks(document));
       };
 
       if (!rootWindow["__jokerEnhancers"].bound) {

@@ -1,6 +1,7 @@
 ---
 title: 资源整理
 date: 2025-07-21T00:00:00.000Z
+cover: /assets/img/covers/超时空辉夜姬壁纸-辉夜3.webp
 categories:
   - 资源整理
 tags:

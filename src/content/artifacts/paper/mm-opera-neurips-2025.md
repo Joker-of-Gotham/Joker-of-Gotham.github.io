@@ -5,6 +5,7 @@ type: paper
 date: 2025-10-31
 venue: NeurIPS 2025 Poster
 summary: Benchmarking Open-ended Association Reasoning for Large Vision-Language Models，并引入 LLM-as-a-Judge 进行解释质量评估。
+cover: /assets/img/covers/超时空辉夜姬壁纸-三人合照2.webp
 tags:
   - VLM Reasoning
   - LLM-as-a-Judge

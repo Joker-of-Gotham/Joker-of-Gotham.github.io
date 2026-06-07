@@ -2,6 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Badge from "@/components/ui/Badge.astro";
 import Card from "@/components/ui/Card.astro";
+import Comments from "@/components/ui/Comments.astro";
 import type { CollectionEntry } from "astro:content";
 import { getRoadmapNodes, getPublishedBlogPosts, getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
 import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
@@ -268,5 +269,7 @@ const crumbs = [
         <Card title="No related artifacts" />
       )}
     </section>
+
+    <Comments term={entry.data.title} />
   </section>
 </BaseLayout>

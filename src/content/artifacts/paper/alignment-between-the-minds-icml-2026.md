@@ -5,6 +5,7 @@ type: paper
 date: 2026-01-31
 venue: Submitted to ICML 2026
 summary: 研究具身体在多轮指令交互中对用户潜在偏好的持续推断、维护与利用，聚焦高维心理信号挖掘。
+cover: /assets/img/covers/败犬女主-八奈见2.webp
 tags:
   - Latent Preference Discovery
   - Embodied Agent

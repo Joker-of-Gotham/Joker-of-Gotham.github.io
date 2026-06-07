@@ -1,6 +1,7 @@
 ---
 title: '机器学习与算法交易(二): 金融特征工程与简单量化交易'
 date: 2025-08-07T00:00:00.000Z
+cover: /assets/img/covers/GBC-仁菜3.webp
 categories:
   - 人工智能
   - 机器学习

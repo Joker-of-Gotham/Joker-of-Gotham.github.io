@@ -1,6 +1,7 @@
 ---
 title: '机器学习与算法交易(三): 机器学习与因子分析交易流程'
 date: 2025-08-11T00:00:00.000Z
+cover: /assets/img/covers/GBC-仁菜4.webp
 categories:
   - 人工智能
   - 机器学习

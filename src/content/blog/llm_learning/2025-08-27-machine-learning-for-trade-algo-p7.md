@@ -1,6 +1,7 @@
 ---
 title: 因子专题：Alpha因子分析
 date: 2025-08-18T00:00:00.000Z
+cover: /assets/img/covers/GBC-五人合照4.webp
 categories:
   - 人工智能
   - 机器学习

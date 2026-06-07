@@ -1,0 +1,109 @@
+---
+interface Props {
+  term?: string;
+}
+
+const { term } = Astro.props;
+---
+
+<section class="comments-section">
+  <div class="comments-heading">
+    <h2>💬 评论与讨论</h2>
+    <p class="comments-subtitle">使用 GitHub 账号登录即可参与讨论 · 选中正文文字可引用评论</p>
+  </div>
+  <div class="giscus" data-giscus-term={term || undefined}></div>
+  <noscript>
+    <p class="comments-noscript">评论功能需要 JavaScript 支持。请启用 JavaScript 或访问
+      <a href="https://github.com/Joker-of-Gotham/Joker-of-Gotham.github.io/discussions" target="_blank" rel="noopener">GitHub Discussions</a> 直接参与讨论。
+    </p>
+  </noscript>
+</section>
+
+<script>
+  // @ts-nocheck
+  let _commentsAbort = null;
+
+  document.addEventListener('astro:page-load', () => {
+    // ── Giscus ──
+    document.querySelectorAll('.giscus').forEach((container) => {
+      if (container.querySelector('iframe') || container.querySelector('script')) return;
+
+      const term = container.getAttribute('data-giscus-term');
+      const script = document.createElement('script');
+      script.src = 'https://giscus.app/client.js';
+      script.setAttribute('data-repo', 'Joker-of-Gotham/Joker-of-Gotham.github.io');
+      script.setAttribute('data-repo-id', 'R_kgDOODVsWw');
+      script.setAttribute('data-category', 'General');
+      script.setAttribute('data-category-id', 'DIC_kwDOODVsW84C-t5Z');
+      script.setAttribute('data-mapping', term ? 'specific' : 'pathname');
+      if (term) script.setAttribute('data-term', term);
+      script.setAttribute('data-strict', '0');
+      script.setAttribute('data-reactions-enabled', '1');
+      script.setAttribute('data-emit-metadata', '1');
+      script.setAttribute('data-input-position', 'top');
+      script.setAttribute('data-theme', 'preferred_color_scheme');
+      script.setAttribute('data-lang', 'zh-CN');
+      script.setAttribute('data-loading', 'lazy');
+      script.crossOrigin = 'anonymous';
+      script.async = true;
+      container.appendChild(script);
+    });
+
+    // ── Selection Quote Tooltip ──
+    const articleEl = document.querySelector('.article-content, .roadmap-detail-content');
+    if (!articleEl) return;
+
+    let tip = document.getElementById('quote-tip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.id = 'quote-tip';
+      tip.className = 'quote-tip';
+      tip.hidden = true;
+      tip.innerHTML = '<button class="quote-tip-btn" type="button">💬 引用评论</button>';
+      document.body.appendChild(tip);
+    }
+
+    let toast = document.getElementById('quote-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'quote-toast';
+      toast.className = 'quote-toast';
+      document.body.appendChild(toast);
+    }
+
+    const hide = () => { tip.hidden = true; };
+
+    articleEl.addEventListener('mouseup', () => {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || sel.toString().trim().length < 3) { hide(); return; }
+
+      const rect = sel.getRangeAt(0).getBoundingClientRect();
+      tip.style.top = `${rect.top + window.scrollY - 46}px`;
+      tip.style.left = `${Math.max(70, Math.min(rect.left + rect.width / 2, window.innerWidth - 70))}px`;
+      tip.hidden = false;
+    });
+
+    tip.querySelector('.quote-tip-btn')?.addEventListener('click', async () => {
+      const sel = window.getSelection();
+      const text = sel?.toString().trim();
+      if (!text) return;
+
+      try { await navigator.clipboard.writeText(`> ${text.replace(/\n/g, '\n> ')}\n\n`); } catch {}
+
+      document.querySelector('.comments-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      hide();
+      sel?.removeAllRanges();
+
+      toast.textContent = '✓ 已复制引用文本，请粘贴到评论框';
+      toast.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => toast.classList.remove('show'), 2800);
+    });
+
+    if (_commentsAbort) _commentsAbort.abort();
+    _commentsAbort = new AbortController();
+    document.addEventListener('pointerdown', (e) => {
+      if (tip && !tip.contains(e.target)) hide();
+    }, { signal: _commentsAbort.signal });
+  });
+</script>

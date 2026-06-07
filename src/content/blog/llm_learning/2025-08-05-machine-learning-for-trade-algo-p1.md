@@ -1,6 +1,7 @@
 ---
 title: '机器学习与算法交易(一): 发展历史与数据'
 date: 2025-08-05T00:00:00.000Z
+cover: /assets/img/covers/GBC-仁菜2.webp
 categories:
   - 人工智能
   - 机器学习

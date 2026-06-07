@@ -5,7 +5,7 @@ type: project
 date: 2025-09-23
 venue: Open-source Project
 summary: 把自然语言指令转换为可执行桌面任务计划，支持自动校验、自动修复与多工具协同执行。
-cover: /assets/images/LLM学习/deepseek-r1/DeepSeek-R1训练范式.png
+cover: /assets/img/covers/孤独摇滚-虹夏.webp
 tags:
   - Desktop Automation
   - Planner-Executor

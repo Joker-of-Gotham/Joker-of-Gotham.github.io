@@ -13,7 +13,7 @@ const [{ home }, posts, nodes, artifacts] = await Promise.all([
   getArtifacts()
 ]);
 
-const featuredArtifacts = artifacts.filter((entry) => home?.featured_artifacts.includes(normalizeSlug(entry))).slice(0, 6);
+const featuredArtifacts = artifacts.filter((entry) => home?.featured_artifacts.includes(normalizeSlug(entry))).slice(0, 3);
 const latestPosts = posts.slice(0, 5);
 const githubUrl = home?.quick_links.find((item) => item.label.toLowerCase().includes("github"))?.url ?? "https://github.com/Joker-of-Gotham";
 const githubUsername = githubUrl.split("/").filter(Boolean).pop() ?? "Joker-of-Gotham";
@@ -94,7 +94,25 @@ const trackRows = Array.from(
 ---
 
 <BaseLayout title="Home">
-  <section class="hero hero-grid hero-modern">
+  <section slot="full-bleed" class="hero hero-modern">
+    <div class="hero-carousel" id="hero-carousel">
+      {[
+        { src: "/assets/img/heroes/孤独摇滚-波奇.webp", pos: "center 20%" },
+        { src: "/assets/img/heroes/四月是你的谎言-薰和有马.webp", pos: "center 30%" },
+        { src: "/assets/img/heroes/GBC-五人合照2.webp", pos: "center 25%" },
+        { src: "/assets/img/heroes/败犬女主-小鞠知花.webp", pos: "center 20%" },
+        { src: "/assets/img/heroes/超时空辉夜姬壁纸-二人合照3.webp", pos: "right 20%" },
+      ].map((slide, i) => (
+        <div class={`hero-carousel-slide${i === 0 ? " is-active" : ""}`}>
+          <img src={slide.src} alt="" loading={i === 0 ? "eager" : "lazy"} decoding="async" style={`object-position: ${slide.pos};`} />
+        </div>
+      ))}
+    </div>
+    <div class="hero-carousel-dots" id="hero-carousel-dots">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <button class={`hero-carousel-dot${i === 0 ? " is-active" : ""}`} data-idx={String(i)} aria-label={`Slide ${i + 1}`} />
+      ))}
+    </div>
     <div class="hero-copy">
       <div class="hero-kicker">
         <Icon name="spark" size={14} />
@@ -104,7 +122,7 @@ const trackRows = Array.from(
       <p class="hero-subtitle">{hero.tagline}</p>
       <p class="hero-intro">{hero.intro}</p>
 
-      <div class="meta-row">
+      <div class="meta-row" style="animation: hero-entrance 600ms var(--ease-out) 450ms both; justify-content: center;">
         {(hero.now ?? []).map((item: string) => (
           <span class="tag-chip">
             <Icon name="status-now" size={12} />
@@ -114,9 +132,9 @@ const trackRows = Array.from(
       </div>
     </div>
 
-    <aside class="hero-metrics-grid">
+    <div class="hero-metrics-grid">
       {heroMetrics.map((metric, index: number) => (
-        <article class="card hero-metric" style={`animation-delay:${index * 70}ms`}>
+        <article class="card hero-metric" data-animate="fade-scale" style={`animation-delay:${150 + index * 100}ms`}>
           <div class="card-body">
             <div class="hero-metric-head">
               <span class="hero-metric-icon"><Icon name={metric.icon ?? "spark"} size={16} /></span>
@@ -127,23 +145,32 @@ const trackRows = Array.from(
           </div>
         </article>
       ))}
-    </aside>
+    </div>
+
+    <div class="scroll-indicator" aria-hidden="true">
+      <span>Scroll</span>
+      <svg class="scroll-indicator-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M12 5v14M5 12l7 7 7-7" />
+      </svg>
+    </div>
   </section>
 
-  <CommitActivity username={githubUsername} githubUrl={githubUrl} />
+  <div data-animate>
+    <CommitActivity username={githubUsername} githubUrl={githubUrl} />
+  </div>
 
-  <section class="section-stack">
+  <section class="section-stack section-spread" data-animate>
     <div class="section-heading-row">
       <h2>Roadmap Snapshot</h2>
-      <a class="text-link" href="/roadmap/">
+      <a class="text-link link-hover-line" href="/roadmap/">
         View Full Roadmap
         <Icon name="arrow-right" size={14} />
       </a>
     </div>
 
-    <div class="roadmap-snapshot-list">
+    <div class="snapshot-scroll">
       {trackRows.map((row) => (
-        <section class="snapshot-track">
+        <section class="snapshot-track" data-animate>
           <div class="snapshot-head">
             <h3>{row.track}</h3>
             <span class="meta-row">Avg. progress {row.progress}% · {row.rootCount} roots / {row.totalNodes} nodes</span>
@@ -164,29 +191,29 @@ const trackRows = Array.from(
     </div>
   </section>
 
-  <section class="section-stack">
+  <section class="section-stack section-spread" data-animate>
     <div class="section-heading-row">
       <h2>Featured Artifacts</h2>
-      <a class="text-link" href="/artifacts/">
+      <a class="text-link link-hover-line" href="/artifacts/">
         Browse All Artifacts
         <Icon name="arrow-right" size={14} />
       </a>
     </div>
 
-    <div class="card-grid grid-3">
+    <div class="editorial-grid">
       {
-        featuredArtifacts.map((entry) => (
-          <a class="card" href={`/artifacts/${normalizeSlug(entry)}/`}>
+        featuredArtifacts.map((entry, idx) => (
+          <a class={`card ${idx === 0 ? "card--hero card--overlay" : ""}`} data-animate href={`/artifacts/${normalizeSlug(entry)}/`}>
             {
               entry.data.cover ? (
-                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading="lazy" />
+                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading={idx === 0 ? "eager" : "lazy"} />
               ) : (
-                <div class="card-cover placeholder-cover"><Icon name="repo" size={20} /></div>
+                <div class="card-cover placeholder-cover" data-variant={((idx % 6) + 1).toString()}><Icon name="repo" size={idx === 0 ? 32 : 20} /></div>
               )
             }
             <div class="card-body">
               <h3>{entry.data.title}</h3>
-              <p>{toCardSummary(entry.data.summary)}</p>
+              <p>{toCardSummary(entry.data.summary, idx === 0 ? 200 : 120)}</p>
               <div class="meta-row">
                 <span class="tag-chip">{entry.data.type}</span>
                 {entry.data.tags.slice(0, 2).map((tag: string) => <span class="tag-chip">{tag}</span>)}
@@ -198,29 +225,29 @@ const trackRows = Array.from(
     </div>
   </section>
 
-  <section class="section-stack">
+  <section class="section-stack section-spread" data-animate>
     <div class="section-heading-row">
       <h2>Latest Updates</h2>
-      <a class="text-link" href="/blog/">
+      <a class="text-link link-hover-line" href="/blog/">
         Open Blog
         <Icon name="arrow-right" size={14} />
       </a>
     </div>
 
-    <div class="card-grid">
+    <div class="editorial-grid-wide">
       {
-        latestPosts.map((entry) => (
-          <a class="card" href={`/blog/${normalizeSlug(entry)}/`}>
+        latestPosts.map((entry, idx) => (
+          <a class={`card ${idx === 0 ? "card--hero card--overlay" : ""}`} data-animate href={`/blog/${normalizeSlug(entry)}/`}>
             {
               entry.data.cover ? (
-                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading="lazy" />
+                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading={idx === 0 ? "eager" : "lazy"} />
               ) : (
-                <div class="card-cover placeholder-cover"><Icon name="blog" size={20} /></div>
+                <div class="card-cover placeholder-cover" data-variant={(((idx + 3) % 6) + 1).toString()}><Icon name="blog" size={idx === 0 ? 32 : 20} /></div>
               )
             }
             <div class="card-body">
               <h3>{entry.data.title}</h3>
-              <p>{toCardSummary(entry.data.summary?.trim().length ? entry.data.summary : entry.body.slice(0, 800), 132)}</p>
+              <p>{toCardSummary(entry.data.summary?.trim().length ? entry.data.summary : entry.body.slice(0, 800), idx === 0 ? 200 : 132)}</p>
               <div class="meta-row">
                 <span>{formatDate(entry.data.date)}</span>
                 <span class="tag-chip">{entry.data.collection}</span>
@@ -231,7 +258,7 @@ const trackRows = Array.from(
       }
     </div>
 
-    <ul class="line-list">
+    <ul class="line-list" data-animate>
       {(home?.changelog ?? []).map((item: string) => (
         <li>
           <Icon name="spark" size={14} />

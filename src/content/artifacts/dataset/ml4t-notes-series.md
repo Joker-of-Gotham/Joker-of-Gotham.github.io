@@ -5,7 +5,7 @@ type: project
 date: 2025-08-27
 venue: Kaggle Models
 summary: Transformer-based 牧草生物量回归模型系列，聚焦架构探索、微调与高分辨率推理优化。
-cover: /assets/images/LLM学习/机器学习与金融量化/ML4T完整流程.png
+cover: /assets/img/covers/孤独摇滚-四人合照.webp
 tags:
   - Computer Vision
   - Transformer

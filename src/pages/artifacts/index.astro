@@ -12,15 +12,17 @@ const artifacts = await getArtifacts();
       <span class="meta-row">项目、论文、数据与公开成果</span>
     </div>
 
-    <div class="card-grid grid-3">
+    <div class="editorial-grid-wide">
       {
-        artifacts.map((entry) => (
-          <a class="card" href={`/artifacts/${normalizeSlug(entry)}/`}>
+        artifacts.map((entry, idx) => (
+          <a class={`card ${idx === 0 ? "card--hero card--overlay" : ""}`} href={`/artifacts/${normalizeSlug(entry)}/`}>
             {
               entry.data.cover ? (
-                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading="lazy" />
+                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading={idx === 0 ? "eager" : "lazy"} />
               ) : (
-                <div class="card-cover placeholder-cover">Artifact</div>
+                <div class="card-cover placeholder-cover" data-variant={((idx % 6) + 1).toString()}>
+                  <span style="font-size: 0.8rem; opacity: 0.6;">{entry.data.type}</span>
+                </div>
               )
             }
             <div class="card-body">

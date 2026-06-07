@@ -1,6 +1,7 @@
 ﻿---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/ui/Card.astro";
+import Comments from "@/components/ui/Comments.astro";
 import type { CollectionEntry } from "astro:content";
 import { getArtifacts, getRoadmapNodes, getPublishedBlogPosts, normalizeSlug, formatDate } from "@/lib/content/queries";
 
@@ -84,41 +85,63 @@ const normalizedLinks: Array<{ label: string; url: string; isInternal: boolean }
     tags: entry.data.tags
   }}
 >
-  <section class="section-stack">
-    <header class="section-stack" style="gap:var(--space-4);">
-      <h1>{entry.data.title}</h1>
-      <div class="meta-row">
-        <span>{entry.data.type.toUpperCase()}</span>
-        <span>{formatDate(entry.data.date)}</span>
-        {entry.data.venue && <span>{entry.data.venue}</span>}
-      </div>
+  <article class="section-stack">
+    <header class="blog-article-header">
+      {entry.data.cover ? (
+        <div class="blog-article-cover-wrap full-bleed">
+          <img class="blog-article-cover" src={entry.data.cover} alt={entry.data.title} loading="eager" fetchpriority="high" decoding="async" />
+          <div class="blog-article-cover-overlay" />
+          <div class="blog-article-cover-text">
+            <h1>{entry.data.title}</h1>
+            <div class="meta-row">
+              <span>{entry.data.type.toUpperCase()}</span>
+              <span>{formatDate(entry.data.date)}</span>
+              {entry.data.venue && <span>{entry.data.venue}</span>}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div class="blog-article-placeholder-cover full-bleed" />
+      )}
+
+      {!entry.data.cover && (
+        <div class="blog-article-header-content">
+          <h1>{entry.data.title}</h1>
+          <div class="meta-row">
+            <span>{entry.data.type.toUpperCase()}</span>
+            <span>{formatDate(entry.data.date)}</span>
+            {entry.data.venue && <span>{entry.data.venue}</span>}
+          </div>
+        </div>
+      )}
+
       <p>{entry.data.summary}</p>
       <div class="meta-row">
         {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
       </div>
     </header>
 
-    <Card title="Links">
-      <ul class="list-clean">
-        {
-          normalizedLinks.map((link: (typeof normalizedLinks)[number]) => (
-            <li>
-              <a href={link.url} target={link.isInternal ? undefined : "_blank"} rel={link.isInternal ? undefined : "noreferrer"}>
-                {link.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </Card>
+    {normalizedLinks.length > 0 && (
+      <Card title="Links">
+        <ul class="list-clean">
+          {
+            normalizedLinks.map((link: (typeof normalizedLinks)[number]) => (
+              <li>
+                <a href={link.url} target={link.isInternal ? undefined : "_blank"} rel={link.isInternal ? undefined : "noreferrer"}>
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </Card>
+    )}
 
-    <div class="card">
-      <div class="card-body content">
-        <Content />
-      </div>
+    <div class="article-content content">
+      <Content />
     </div>
 
-    <section class="section-stack">
+    <section class="section-stack" data-animate>
       <h2>关联路线图节点</h2>
       {relatedNodes.length > 0 ? (
         <div class="card-grid">
@@ -129,7 +152,7 @@ const normalizedLinks: Array<{ label: string; url: string; isInternal: boolean }
       )}
     </section>
 
-    <section class="section-stack">
+    <section class="section-stack" data-animate>
       <h2>关联博客</h2>
       {relatedPosts.length > 0 ? (
         <div class="card-grid">
@@ -139,5 +162,7 @@ const normalizedLinks: Array<{ label: string; url: string; isInternal: boolean }
         <Card title="暂无关联博客" />
       )}
     </section>
-  </section>
+
+    <Comments term={entry.data.title} />
+  </article>
 </BaseLayout>

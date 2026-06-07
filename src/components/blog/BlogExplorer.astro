@@ -38,33 +38,67 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
       <input id="blog-query" class="unstyled-input" placeholder="搜索文章" data-blog-control="query" />
     </div>
 
-    <label class="sr-only" for="blog-tag">标签</label>
-    <select id="blog-tag" data-blog-control="tag">
+    <div class="custom-select" data-custom-select="tag">
+      <button class="custom-select-trigger" type="button">全部标签</button>
+      <div class="custom-select-dropdown">
+        {tags.map((item) => (
+          <button class={`custom-select-option ${item === "all" ? "is-selected" : ""}`} type="button" data-value={item}>
+            {item === "all" ? "全部标签" : item}
+          </button>
+        ))}
+      </div>
+    </div>
+    <select id="blog-tag" data-blog-control="tag" hidden>
       {tags.map((item) => <option value={item}>{item === "all" ? "全部标签" : item}</option>)}
     </select>
 
-    <label class="sr-only" for="blog-collection">集合</label>
-    <select id="blog-collection" data-blog-control="collection">
+    <div class="custom-select" data-custom-select="collection">
+      <button class="custom-select-trigger" type="button">全部集合</button>
+      <div class="custom-select-dropdown">
+        {collections.map((item) => (
+          <button class={`custom-select-option ${item === "all" ? "is-selected" : ""}`} type="button" data-value={item}>
+            {item === "all" ? "全部集合" : item}
+          </button>
+        ))}
+      </div>
+    </div>
+    <select id="blog-collection" data-blog-control="collection" hidden>
       {collections.map((item) => <option value={item}>{item === "all" ? "全部集合" : item}</option>)}
     </select>
 
-    <label class="sr-only" for="blog-year">年份</label>
-    <select id="blog-year" data-blog-control="year">
+    <div class="custom-select" data-custom-select="year">
+      <button class="custom-select-trigger" type="button">全部年份</button>
+      <div class="custom-select-dropdown">
+        {years.map((item) => (
+          <button class={`custom-select-option ${item === "all" ? "is-selected" : ""}`} type="button" data-value={item}>
+            {item === "all" ? "全部年份" : item}
+          </button>
+        ))}
+      </div>
+    </div>
+    <select id="blog-year" data-blog-control="year" hidden>
       {years.map((item) => <option value={item}>{item === "all" ? "全部年份" : item}</option>)}
     </select>
 
-    <label class="sr-only" for="blog-sort">排序</label>
-    <select id="blog-sort" data-blog-control="sort">
+    <div class="custom-select" data-custom-select="sort">
+      <button class="custom-select-trigger" type="button">最新</button>
+      <div class="custom-select-dropdown">
+        <button class="custom-select-option is-selected" type="button" data-value="latest">最新</button>
+        <button class="custom-select-option" type="button" data-value="oldest">最早</button>
+      </div>
+    </div>
+    <select id="blog-sort" data-blog-control="sort" hidden>
       <option value="latest">最新</option>
       <option value="oldest">最早</option>
     </select>
   </header>
 
-  <div class="card-grid grid-3" data-blog-grid>
+  <div class="editorial-grid-wide" data-blog-grid>
     {
-      items.map((item) => (
+      items.map((item, idx) => (
         <a
-          class="card blog-entry"
+          class={`card blog-entry ${idx === 0 ? "card--hero card--overlay" : ""}`}
+          data-animate
           href={`/blog/${item.slug}/`}
           data-blog-item
           data-slug={item.slug}
@@ -77,9 +111,9 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
         >
           {
             item.cover ? (
-              <img class="card-cover" src={item.cover} alt={item.title} loading="lazy" />
+              <img class="card-cover" src={item.cover} alt={item.title} loading={idx === 0 ? "eager" : "lazy"} />
             ) : (
-              <div class="card-cover placeholder-cover"><Icon name="blog" size={20} /></div>
+              <div class="card-cover placeholder-cover" data-variant={((idx % 6) + 1).toString()}><Icon name="blog" size={idx === 0 ? 32 : 20} /></div>
             )
           }
           <div class="card-body">
@@ -114,8 +148,10 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
 
 <script>
   // @ts-nocheck
-  const root = document.getElementById("blog-explorer");
-  if (root) {
+  let _blogDocAbort = null;
+  document.addEventListener('astro:page-load', () => {
+    const root = document.getElementById("blog-explorer");
+    if (!root) return;
     const queryInput = root.querySelector('[data-blog-control="query"]');
     const tagSelect = root.querySelector('[data-blog-control="tag"]');
     const collectionSelect = root.querySelector('[data-blog-control="collection"]');
@@ -235,6 +271,43 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
 
       readInitialState();
       apply();
+
+      root.querySelectorAll('[data-custom-select]').forEach((wrapper) => {
+        const controlName = wrapper.dataset.customSelect;
+        const hiddenSelect = root.querySelector(`[data-blog-control="${controlName}"]`);
+        const trigger = wrapper.querySelector('.custom-select-trigger');
+        const options = wrapper.querySelectorAll('.custom-select-option');
+
+        trigger?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          root.querySelectorAll('[data-custom-select].is-open').forEach((el) => {
+            if (el !== wrapper) el.classList.remove('is-open');
+          });
+          wrapper.classList.toggle('is-open');
+        });
+
+        options.forEach((opt) => {
+          opt.addEventListener('click', () => {
+            const value = opt.dataset.value;
+            if (hiddenSelect) {
+              hiddenSelect.value = value;
+              hiddenSelect.dispatchEvent(new Event('change'));
+            }
+            trigger.textContent = opt.textContent;
+            options.forEach((o) => o.classList.remove('is-selected'));
+            opt.classList.add('is-selected');
+            wrapper.classList.remove('is-open');
+          });
+        });
+      });
+
+      if (_blogDocAbort) _blogDocAbort.abort();
+      _blogDocAbort = new AbortController();
+      document.addEventListener('click', () => {
+        root.querySelectorAll('[data-custom-select].is-open').forEach((el) => {
+          el.classList.remove('is-open');
+        });
+      }, { signal: _blogDocAbort.signal });
     }
-  }
+  });
 </script>

@@ -216,27 +216,31 @@ const sections: ResumeSection[] = [
 
 <BaseLayout title="About" crumbs={[{ label: "Home", href: "/" }, { label: "About" }]}> 
   <section class="section-stack about-page">
-    <div class="section-heading-row" id="cv">
-      <div class="section-stack" style="gap:var(--space-2);">
-        <h1>About</h1>
-        <p>Chika Komari. Research focus: implicit signal mining for personalized decision systems.</p>
+    <header class="about-hero-banner full-bleed" id="cv" data-animate>
+      <video class="about-hero-video" autoplay muted loop playsinline>
+        <source src="/assets/img/banners/孤独摇滚-波奇-动态.mp4" type="video/mp4" />
+      </video>
+      <div class="about-hero-banner-inner">
+        <h1 class="about-hero-name text-gradient">Chika Komari</h1>
+        <p class="about-hero-tagline">Implicit Signal Mining for Personalized Decision Systems</p>
+        <p class="about-hero-desc">A unified research path across structural, semantic, and psychological signal mining in complex information networks.</p>
+        <div class="filter-bar" style="justify-content: center; margin-top: var(--space-4);">
+          <button class="button primary" type="button" data-email-open>
+            <Icon name="mail" size={16} />
+            <span>Contact</span>
+          </button>
+        </div>
       </div>
-      <div class="filter-bar">
-        <button class="button primary" type="button" data-email-open>
-          <Icon name="mail" size={16} />
-          <span>Contact</span>
-        </button>
-      </div>
-    </div>
+    </header>
 
     {
-      sections.map((section) => (
-        <section class="resume-section">
-          <h2>{section.title}</h2>
-          <div class="resume-list">
+      sections.map((section, sectionIdx) => (
+        <section class="resume-section" data-animate>
+          <h2>{section.title === "Publications" ? "📄 " + section.title : section.title}</h2>
+          <div class={`resume-list ${section.title === "Publications" ? "resume-list--pub" : ""}`}>
             {
               section.items.map((item: ResumeItem) => (
-                <article class="resume-item card">
+                <article class={`resume-item card ${section.title === "Publications" ? "card--pub" : ""}`} data-animate>
                   <div class="card-body">
                     <div class="resume-item-head">
                       <strong>{item.name}</strong>
@@ -248,7 +252,7 @@ const sections: ResumeSection[] = [
                     </ul>
                     {item.link && (
                       <p>
-                        <a class="text-link" href={item.link.url}>{item.link.label}</a>
+                        <a class="text-link link-hover-line" href={item.link.url} target="_blank" rel="noreferrer">{item.link.label} ↗</a>
                       </p>
                     )}
                   </div>
@@ -260,7 +264,7 @@ const sections: ResumeSection[] = [
       ))
     }
 
-    <section class="resume-section">
+    <section class="resume-section" data-animate>
       <h2>Selected Links</h2>
       <div class="quick-link-grid">
         {links.map((link) => (

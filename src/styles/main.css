@@ -1,2 +1,4 @@
 ﻿@import "katex/dist/katex.min.css";
+@import "./tokens.css";
 @import "./global.css";
+@import "./animations.css";

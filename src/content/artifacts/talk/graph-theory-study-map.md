@@ -5,7 +5,7 @@ type: paper
 date: 2025-12-31
 venue: GBCESC 2025 (Accepted, Best Paper Award)
 summary: 研究城市路网场景下的关键节点识别与影响力传播建模，属于低维结构信号挖掘方向的核心成果。
-cover: /assets/images/图论/introduction_to_graph_theory/平面图/平面图.png
+cover: /assets/img/covers/青春恋爱物语-雪乃和团子.webp
 tags:
   - Complex Network
   - Critical Node Identification

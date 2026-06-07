@@ -15,6 +15,7 @@ const blog = defineCollection({
     category: z.string().optional(),
     summary: z.string().optional().default(""),
     cover: z.string().optional(),
+    emoji: z.string().optional(),
     collection: z.string().optional().default("blog"),
     related_nodes: z.array(z.string()).default([]),
     related_artifacts: z.array(z.string()).default([]),

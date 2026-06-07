@@ -40,13 +40,18 @@ const showTitle = title !== lastCrumbLabel;
   </div>
 </header>
 
-<script is:inline>
-  const topSearchRoot = document.getElementById("top-search");
-  if (topSearchRoot) {
+<script>
+  // @ts-nocheck
+  let _tsLoaded = false;
+  let _tsItems = [];
+  let _tsDocAbort = null;
+
+  document.addEventListener('astro:page-load', () => {
+    const topSearchRoot = document.getElementById("top-search");
+    if (!topSearchRoot) return;
+
     const input = document.getElementById("top-search-input");
     const resultPanel = document.getElementById("top-search-results");
-    let loaded = false;
-    let items = [];
     let hovering = false;
     let focused = false;
 
@@ -71,11 +76,11 @@ const showTitle = title !== lastCrumbLabel;
     };
 
     const loadItems = async () => {
-      if (loaded) return;
-      loaded = true;
+      if (_tsLoaded) return;
       const response = await fetch("/search-index.json", { cache: "no-store" });
       if (!response.ok) throw new Error("failed");
-      items = await response.json();
+      _tsItems = await response.json();
+      _tsLoaded = true;
     };
 
     const render = (query) => {
@@ -88,8 +93,8 @@ const showTitle = title !== lastCrumbLabel;
       }
 
       const filtered = (keyword
-        ? items.filter((item) => (`${item.title} ${item.summary || ""} ${(item.tags || []).join(" ")}`).toLowerCase().includes(keyword))
-        : items
+        ? _tsItems.filter((item) => (`${item.title} ${item.summary || ""} ${(item.tags || []).join(" ")}`).toLowerCase().includes(keyword))
+        : _tsItems
       ).slice(0, 8);
 
       if (filtered.length === 0) {
@@ -183,6 +188,8 @@ const showTitle = title !== lastCrumbLabel;
       }
     });
 
+    if (_tsDocAbort) _tsDocAbort.abort();
+    _tsDocAbort = new AbortController();
     document.addEventListener("pointerdown", (event) => {
       if (!(event.target instanceof Node)) return;
       if (!topSearchRoot.contains(event.target)) {
@@ -192,8 +199,8 @@ const showTitle = title !== lastCrumbLabel;
           closePanel();
         }
       }
-    });
+    }, { signal: _tsDocAbort.signal });
 
     closePanel();
-  }
+  });
 </script>

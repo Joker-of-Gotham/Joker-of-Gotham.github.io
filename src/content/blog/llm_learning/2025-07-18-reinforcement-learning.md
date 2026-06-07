@@ -1,6 +1,7 @@
-﻿---
+---
 title: 强化学习(reinforcement learning)
 date: 2025-07-18T00:00:00.000Z
+cover: /assets/img/covers/GBC-仁菜.webp
 categories:
   - 人工智能
   - 强化学习

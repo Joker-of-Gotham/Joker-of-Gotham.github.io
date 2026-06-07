@@ -1,6 +1,7 @@
 ---
 title: 讨论：从《DeepSeek-R1 通过强化学习激励LLM中的推理》开始
 date: 2025-09-23T00:00:00.000Z
+cover: /assets/img/covers/孤独摇滚-喜多和波奇.webp
 categories:
   - 人工智能
   - 强化学习，微调

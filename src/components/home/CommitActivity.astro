@@ -62,9 +62,8 @@ const legendLevels = [0, 1, 2, 3, 4];
   </article>
 </section>
 
-<script is:inline>
-  const commitRoots = document.querySelectorAll("[data-commit-activity-root]");
-
+<script>
+  // @ts-nocheck
   const monthFormatter = new Intl.DateTimeFormat("en-US", {
     month: "short",
     timeZone: "UTC"
@@ -181,27 +180,31 @@ const legendLevels = [0, 1, 2, 3, 4];
     }
   };
 
-  commitRoots.forEach((root) => {
-    const rootElement = root;
-    const githubUsername = rootElement.getAttribute("data-github-username");
-    if (!githubUsername) return;
+  document.addEventListener('astro:page-load', () => {
+    const commitRoots = document.querySelectorAll("[data-commit-activity-root]");
+    if (commitRoots.length === 0) return;
+    commitRoots.forEach((root) => {
+      const rootElement = root;
+      const githubUsername = rootElement.getAttribute("data-github-username");
+      if (!githubUsername) return;
 
-    fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(githubUsername)}?y=last`)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`GitHub contribution request failed: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((payload) => renderCalendar(rootElement, payload))
-      .catch(() => {
-        const summary = rootElement.querySelector("[data-commit-summary]");
-        const total = rootElement.querySelector("[data-commit-total]");
-        const note = rootElement.querySelector("[data-commit-note]");
+      fetch(`https://github-contributions-api.jogruber.de/v4/${encodeURIComponent(githubUsername)}?y=last`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`GitHub contribution request failed: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((payload) => renderCalendar(rootElement, payload))
+        .catch(() => {
+          const summary = rootElement.querySelector("[data-commit-summary]");
+          const total = rootElement.querySelector("[data-commit-total]");
+          const note = rootElement.querySelector("[data-commit-note]");
 
-        if (summary) summary.textContent = "Unable to sync the live GitHub contribution graph.";
-        if (total) total.textContent = "Open GitHub for the latest data";
-        if (note) note.textContent = "The external contribution calendar source is unavailable right now.";
-      });
+          if (summary) summary.textContent = "Unable to sync the live GitHub contribution graph.";
+          if (total) total.textContent = "Open GitHub for the latest data";
+          if (note) note.textContent = "The external contribution calendar source is unavailable right now.";
+        });
+    });
   });
 </script>

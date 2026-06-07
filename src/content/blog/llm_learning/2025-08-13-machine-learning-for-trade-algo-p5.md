@@ -1,6 +1,7 @@
 ---
 title: '机器学习与算法交易(五): 无监督学习及相关技术应用'
 date: 2025-08-18T00:00:00.000Z
+cover: /assets/img/covers/GBC-昴.webp
 categories:
   - 人工智能
   - 机器学习

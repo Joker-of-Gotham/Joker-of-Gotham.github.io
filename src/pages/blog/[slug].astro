@@ -1,6 +1,7 @@
 ﻿---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/ui/Card.astro";
+import Comments from "@/components/ui/Comments.astro";
 import type { CollectionEntry } from "astro:content";
 import { getPublishedBlogPosts, getRoadmapNodes, getArtifacts, normalizeSlug, formatDate, readingTimeFromBody } from "@/lib/content/queries";
 
@@ -56,13 +57,38 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
   }}
 >
   <article class="section-stack">
-    <header class="section-stack" style="gap:var(--space-4);">
-      <h1>{entry.data.title}</h1>
-      <div class="meta-row">
-        <span>{formatDate(entry.data.date)}</span>
-        <span>{entry.data.collection}</span>
-        <span>{readMinutes} 分钟阅读</span>
-      </div>
+    <header class="blog-article-header">
+      {entry.data.cover ? (
+        <div class="blog-article-cover-wrap full-bleed">
+          <img class="blog-article-cover" src={entry.data.cover} alt={entry.data.title} loading="eager" fetchpriority="high" decoding="async" />
+          <div class="blog-article-cover-overlay" />
+          <div class="blog-article-cover-text">
+            <h1>{entry.data.title}</h1>
+            <div class="meta-row">
+              <span>{formatDate(entry.data.date)}</span>
+              <span>{entry.data.collection}</span>
+              <span>{readMinutes} 分钟阅读</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div class="blog-article-placeholder-cover full-bleed" />
+      )}
+
+      {entry.data.emoji && (
+        <div class="blog-article-emoji">{entry.data.emoji}</div>
+      )}
+
+      {!entry.data.cover && (
+        <div class="blog-article-header-content">
+          <h1>{entry.data.title}</h1>
+          <div class="meta-row">
+            <span>{formatDate(entry.data.date)}</span>
+            <span>{entry.data.collection}</span>
+            <span>{readMinutes} 分钟阅读</span>
+          </div>
+        </div>
+      )}
       <div class="meta-row">
         {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
       </div>
@@ -94,13 +120,11 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
       </aside>
     )}
 
-    <div class="card">
-      <div class="card-body content">
-        <Content />
-      </div>
+    <div class="article-content content">
+      <Content />
     </div>
 
-    <section class="section-stack">
+    <section class="section-stack" data-animate>
       <h2>关联路线图节点</h2>
       {relatedNodes.length > 0 ? (
         <div class="card-grid">
@@ -111,7 +135,7 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
       )}
     </section>
 
-    <section class="section-stack">
+    <section class="section-stack" data-animate>
       <h2>关联成果</h2>
       {relatedArtifacts.length > 0 ? (
         <div class="card-grid">
@@ -122,7 +146,7 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
       )}
     </section>
 
-    <section class="section-stack">
+    <section class="section-stack" data-animate>
       <h2>相关文章</h2>
       {relatedPosts.length > 0 ? (
         <div class="card-grid">
@@ -139,6 +163,8 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
         {newerPost ? <a href={`/blog/${normalizeSlug(newerPost)}/`}>{newerPost.data.title} →</a> : <span class="meta-row">没有更新文章</span>}
       </div>
     </Card>
+
+    <Comments term={entry.data.title} />
   </article>
 
   <script is:inline>

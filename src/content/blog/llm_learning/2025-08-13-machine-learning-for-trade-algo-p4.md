@@ -1,6 +1,7 @@
 ---
 title: '机器学习与算法交易(四): 更复杂的机器学习与量化模型'
 date: 2025-08-13T00:00:00.000Z
+cover: /assets/img/covers/GBC-仁菜和昴.webp
 categories:
   - 人工智能
   - 机器学习
