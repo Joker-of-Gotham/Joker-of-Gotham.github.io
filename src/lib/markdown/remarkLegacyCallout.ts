@@ -81,13 +81,24 @@ function findPreviousRenderableNode(children: MarkdownNode[], index: number) {
   return null;
 }
 
-function processChildren(parent: MarkdownNode) {
+// Walk the ancestor chain (root..parent, oldest first) and return the nearest blockquote.
+// Used when a `{: .prompt-x }` marker is lazy-continued into a blockquote's inner paragraph
+// or list — the class must land on the blockquote, not the inner paragraph/listItem.
+function nearestBlockquoteAncestor(ancestors: MarkdownNode[]) {
+  for (let pointer = ancestors.length - 1; pointer >= 0; pointer -= 1) {
+    if (ancestors[pointer].type === "blockquote") return ancestors[pointer];
+  }
+  return null;
+}
+
+function processChildren(parent: MarkdownNode, ancestors: MarkdownNode[] = []) {
   if (!Array.isArray(parent.children)) return;
   const { children } = parent;
+  const parentAncestors = [...ancestors, parent];
 
   for (let index = 0; index < children.length; index += 1) {
     const child = children[index];
-    processChildren(child);
+    processChildren(child, parentAncestors);
 
     if (!["paragraph", "code"].includes(child.type)) continue;
     const text = toText(child).trim();
@@ -95,10 +106,14 @@ function processChildren(parent: MarkdownNode) {
 
     const markerOnly = text.match(markerOnlyPattern);
     if (markerOnly) {
-      const target =
-        parent.type === "blockquote"
-          ? parent
-          : findPreviousRenderableNode(children, index) ?? (parent.type === "listItem" ? parent : null);
+      // Prefer the nearest blockquote ancestor so the callout style applies to the
+      // blockquote itself even when the marker was absorbed as lazy-continuation into
+      // an inner paragraph or list item.
+      const blockquote =
+        parent.type === "blockquote" ? parent : nearestBlockquoteAncestor(parentAncestors);
+      const target = blockquote
+        ? blockquote
+        : findPreviousRenderableNode(children, index) ?? (parent.type === "listItem" ? parent : null);
       if (target) {
         addClasses(target, parseClassNames(markerOnly[1]));
       }
@@ -111,7 +126,15 @@ function processChildren(parent: MarkdownNode) {
 
     const markerTail = text.match(markerTailPattern);
     if (markerTail) {
-      addClasses(child, parseClassNames(markerTail[1]));
+      // Promote the class to the enclosing blockquote when the marker was lazy-continued
+      // into the paragraph; otherwise keep the legacy behaviour of tagging the paragraph.
+      const blockquote =
+        parent.type === "blockquote" ? parent : nearestBlockquoteAncestor(parentAncestors);
+      if (blockquote) {
+        addClasses(blockquote, parseClassNames(markerTail[1]));
+      } else {
+        addClasses(child, parseClassNames(markerTail[1]));
+      }
       stripMarkerTokens(child);
     }
   }
