@@ -108,9 +108,17 @@ npm run dev
 
 ## 设计系统
 
-完整 design tokens 在 `src/styles/global.css`：
+完整 design tokens 在 `src/styles/tokens.css`（令牌定义）与 `src/styles/global.css`（组件样式）：
 
 - 色彩、阴影、圆角、间距、字体、动效
 - 8pt spacing
-- 状态色 now/next/later/done
-- 响应式断点 mobile/tablet/desktop/wide
+- 状态色 now/next/later/done/blocked
+- 响应式断点 mobile/tablet/desktop
+
+所有内容与呈现规范（frontmatter/标签打法、Markdown 呈现方式、色彩调色板、图片系统）统一收在 [`docs/`](docs/)：
+
+- [docs/README.md](docs/README.md) — 规范索引
+- [docs/frontmatter-and-tags.md](docs/frontmatter-and-tags.md) — frontmatter 与标签
+- [docs/markdown-presentation.md](docs/markdown-presentation.md) — 提示框/代码/数学/图片呈现
+- [docs/design-tokens.md](docs/design-tokens.md) — 色彩调色板与设计令牌
+- [docs/image-guide.md](docs/image-guide.md) — 图片目录/命名/Hero/封面
