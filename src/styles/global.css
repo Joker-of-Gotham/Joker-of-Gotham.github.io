@@ -1450,6 +1450,40 @@ th { color: var(--text-strong); font-weight: 600; }
 .content :where(div, section, article, figure, svg, canvas, iframe, video) { max-width: 100%; min-width: 0; }
 .content :where(pre, table, figure, .katex-display, .mermaid-block) { max-width: 100%; min-width: 0; }
 
+/* ── Image grids (multi-image rows) ── */
+.content .image-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), 1fr);
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+.content .image-grid > figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.content .image-grid > figure > img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-sm);
+  margin: 0;
+}
+.content .image-grid > figure > figcaption {
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  text-align: center;
+}
+@media (max-width: 720px) {
+  .content .image-grid { grid-template-columns: repeat(min(var(--cols, 3), 2), 1fr); }
+}
+@media (max-width: 480px) {
+  .content .image-grid { grid-template-columns: 1fr; }
+}
+
 .content table {
   display: block;
   width: 100%;
