@@ -19,6 +19,7 @@ const blog = defineCollection({
     collection: z.string().optional().default("blog"),
     related_nodes: z.array(z.string()).default([]),
     related_artifacts: z.array(z.string()).default([]),
+    related_posts: z.array(z.string()).default([]),
     reading_time: z.number().int().optional(),
     updated_at: z.coerce.date().optional(),
     draft: z.boolean().optional().default(false),

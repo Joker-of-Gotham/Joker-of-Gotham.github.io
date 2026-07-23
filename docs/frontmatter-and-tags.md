@@ -24,6 +24,7 @@
 | `collection` | string | — | 系列/专栏名，默认 `blog`；需与所在目录一致 |
 | `related_nodes` | string[] | — | 关联的 roadmap 节点 slug（见 §3） |
 | `related_artifacts` | string[] | — | 关联的 artifact slug |
+| `related_posts` | string[] | — | 手动指定的相关博客 slug（不足 4 篇用相似度补全，≥4 篇不自动算；见 §3B） |
 | `summary` | string | — | 摘要；展示在列表与搜索结果，**不填则无摘要** |
 | `cover` | string | — | 封面图，`/assets/img/covers/xxx.webp`（见 image-guide） |
 | `emoji` | string | — | 列表角标 emoji，可选 |
@@ -122,6 +123,30 @@ summary: >-
 1. 一篇文章可关联多个节点；选与主题最相关的 1–3 个即可，不要贪多。
 2. 节点 slug 以 roadmap 文件 frontmatter 的 `slug` 为准，**不要凭印象拼**。
 3. 同样地用 `related_artifacts` 关联 `src/content/artifacts/**` 的 slug。
+
+---
+
+## 三·B、`related_posts`：手动指定相关文章
+
+文章详情页底部的「相关文章」卡片选取规则（见 [src/pages/blog/[slug].astro](../src/pages/blog/[slug].astro)）：
+
+1. **手动优先**：frontmatter `related_posts` 填的是其它博客的 **slug**（`/blog/<slug>/` 里的那段，不是源文件路径）。
+2. **不足 4 篇则自动补全**：手动指定 < 4 时，用 TF-IDF + 余弦相似度（见 [src/lib/content/similarity.ts](../src/lib/content/similarity.ts)）在全部已发布文章里按语义相似度补齐到 4 篇，自动候选会排除已手动指定的。
+3. **≥ 4 篇则不算**：手动指定 ≥ 4 时不做自动计算。
+4. **整体按日期降序**：最终列表（手动 + 自动）按 `date` 从新到旧排。
+
+相似度基于「标题 + 摘要 + tags + categories + 正文（去 markdown 噪声）」做 TF-IDF，中文用字符 bigram、英文按词。纯本地、确定性、不联网。
+
+用法：
+
+```yaml
+related_posts:
+  - 2026-07-20-ontology-02   # 指向另一篇博客的 slug
+  - 2025-07-16-logicnet
+```
+
+- 指定的 slug 必须是**已发布的博客文章** slug；填错或不存在会被静默忽略。
+- 想完全控制相关文章就填满 ≥ 4 个；想让算法推荐就留空或少填。
 
 ---
 

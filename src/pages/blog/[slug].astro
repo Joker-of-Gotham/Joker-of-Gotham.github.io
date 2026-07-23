@@ -4,6 +4,7 @@ import Card from "@/components/ui/Card.astro";
 import Comments from "@/components/ui/Comments.astro";
 import type { CollectionEntry } from "astro:content";
 import { getPublishedBlogPosts, getRoadmapNodes, getArtifacts, normalizeSlug, formatDate, readingTimeFromBody } from "@/lib/content/queries";
+import { computeSimilarPosts } from "@/lib/content/similarity";
 
 export async function getStaticPaths() {
   const posts = await getPublishedBlogPosts();
@@ -34,9 +35,31 @@ const relatedArtifacts = artifacts.filter((artifact) => {
   return explicit || viaNode;
 });
 
-const relatedPosts = posts
-  .filter((post) => post.id !== entry.id && post.data.tags.some((tag: string) => entry.data.tags.includes(tag)))
-  .slice(0, 4);
+// Related posts: manual `related_posts` frontmatter wins; when fewer than 4 are
+// specified, fill the rest with TF-IDF cosine-similarity candidates; when 4+ are
+// specified, no auto-computation. Final list is sorted by date descending.
+const TARGET_RELATED = 4;
+const postBySlug = new Map(posts.map((post) => [normalizeSlug(post), post] as const));
+const manualSlugs = (entry.data.related_posts ?? [])
+  .map((slug: string) => (postBySlug.has(slug) ? slug : null))
+  .filter((slug): slug is string => slug !== null);
+const manualSet = new Set(manualSlugs);
+
+let relatedPosts: typeof posts;
+if (manualSlugs.length >= TARGET_RELATED) {
+  relatedPosts = manualSlugs
+    .map((slug) => postBySlug.get(slug)!)
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+} else {
+  const manualPosts = manualSlugs.map((slug) => postBySlug.get(slug)!);
+  const candidates = computeSimilarPosts(entry, posts, manualSet)
+    .slice(0, TARGET_RELATED - manualPosts.length)
+    .map((cand) => postBySlug.get(cand.slug)!)
+    .filter(Boolean);
+  relatedPosts = [...manualPosts, ...candidates].sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime()
+  );
+}
 
 const currentIndex = posts.findIndex((post) => post.id === entry.id);
 const newerPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
