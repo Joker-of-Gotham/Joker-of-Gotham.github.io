@@ -16,14 +16,12 @@
 
 ### 1.1 机制
 
-在**引用块**末尾单独一行写 `{: .prompt-xxx }`，`remarkLegacyCallout` 会把该 class 附到引用块（`<blockquote>`）上，CSS 再据此上色。被识别为 callout 的引用块不会走普通引用样式。
+在**引用块**末尾单独一行写 `{: .prompt-xxx }`，`remarkLegacyCallout` 会把该 class 附到引用块上，CSS 再据此上色。被识别为 callout 的引用块不会走普通引用样式。
 
 写法有两种：
 
 - **块尾标记**（推荐，最稳）：引用块结束的下一行（或末行）单独写 `{: .prompt-xxx }`。
 - **行尾标记**：写在引用块内最后一行末尾，如 `> 内容 {: .prompt-info }`。
-
-> 插件会把 class 提升到外层 `<blockquote>`，即使标记被 Markdown 解析器当作 lazy-continuation 吸收进引用块内部的段落或列表项，class 仍会落在 `<blockquote>` 上（旧版插件会错位到内部 `<p>`，已修复）。
 
 > 注意：`code` / `inlineCode` / `math` / `inlineMath` 内部的 `{: ... }` 会被忽略，不会被误解析。
 
