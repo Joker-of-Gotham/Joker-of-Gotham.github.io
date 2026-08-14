@@ -21,6 +21,19 @@ related_nodes: []
 
 无独有偶，Anthropic 在文章 [How the agent loop works](https://code.claude.com/docs/en/agent-sdk/agent-loop) 中同样描述了类似的过程：接收提示信息-进行评估并作出响应-执行工具-重复操作-返回结果。文章中写道：“Turns continue until Claude produces output with no tool calls, at which point the loop ends and the final result is delivered.”
 
+两种典型的 Agent Loop 范式如下图所示，左图为 OpenAI 的 Codex 多轮智能体循环，右图为 Anthropic Claude 的 Agent Loop：
+
+<div class="image-grid" style="--cols: 2">
+  <figure>
+    <img src="/assets/images/Agent/orchestration/oai_Unrolling_the_Codex_agent_loop_Multi-turn_agent_loop_desktop-dark.svg" alt="OpenAI Codex 多轮智能体循环示意图" loading="lazy" />
+    <figcaption>OpenAI Codex 多轮智能体循环</figcaption>
+  </figure>
+  <figure>
+    <img src="/assets/images/Agent/orchestration/agent-loop-diagram-dark-claude.svg" alt="Anthropic Claude Agent Loop 示意图" loading="lazy" />
+    <figcaption>Anthropic Claude Agent Loop</figcaption>
+  </figure>
+</div>
+
 但是，这样的建模方式使 Agent Loop 在终止条件的判定上陷入到了严重的形式化洼地：严重依赖模型本身，且实际终止条件不一定满足预期。举一个简单的例子，模型因为不可纠正的格式错误，导致本应是调用 MCP 工具的行为回堕为纯文本输出，该输出是没有 `tool_calls` 的纯文本，因而对话终止(猫猫就在今天使用claude code时遇到了这种情况)。
 
 针对上述问题，猫猫想到了一种最简单的做法： $J(g, r_t) \to [0,1]$，其中 $g$ 是目的， $r_t$ 是回复， $J$ 为一个判分器 (LLM as a Judge)，当评分超过一定阈值则说明 Agent Loop 完成了目标，便可以停止。进一步的，可以得到更有意思的方法，通过探索目的和回复之间的向量空间关系、来去作空间上的预期逼近从而“计算出”差异，进而产生出信号用于判断 Agent Loop 是否应该结束。

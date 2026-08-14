@@ -144,7 +144,8 @@ export async function getCommandPaletteItems() {
   return commandItemsCache;
 }
 
-export function readingTimeFromBody(raw: string) {
+export function readingTimeFromBody(raw?: string | null) {
+  if (!raw) return 1;
   const text = raw.replace(/```[\\s\\S]*?```/g, "").replace(/\s+/g, " ").trim();
   const count = text.length;
   return Math.max(1, Math.round(count / 450));
