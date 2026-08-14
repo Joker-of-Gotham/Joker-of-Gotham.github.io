@@ -79,8 +79,8 @@
 }
 
 @keyframes avatar-glow {
-  0%, 100% { box-shadow: 0 0 0 2px var(--accent-cyan), 0 0 12px rgba(0, 229, 204, 0.15); }
-  50% { box-shadow: 0 0 0 2px var(--accent-cyan), 0 0 20px rgba(0, 229, 204, 0.3); }
+  0%, 100% { box-shadow: 0 0 0 2px var(--accent-cyan), 0 0 12px rgba(111, 179, 173, 0.16); }
+  50% { box-shadow: 0 0 0 2px var(--accent-cyan), 0 0 20px rgba(111, 179, 173, 0.3); }
 }
 
 @keyframes scroll-hint {

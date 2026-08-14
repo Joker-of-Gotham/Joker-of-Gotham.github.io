@@ -1,63 +1,68 @@
 :root {
   color-scheme: dark;
 
-  /* ── Background depth layers ── */
-  --bg-void: #030508;
-  --bg-base: #080d18;
-  --bg-elevated: rgba(14, 22, 38, 0.72);
-  --bg-overlay: rgba(20, 32, 54, 0.55);
+  /* ── Background depth layers (近纯黑) ── */
+  --bg-void: #050608;
+  --bg-base: #08090c;
+  --bg-elevated: rgba(17, 19, 24, 0.74);
+  --bg-overlay: rgba(24, 27, 33, 0.58);
 
   /* Legacy aliases (keep component compat) */
-  --bg-muted: #0c1523;
+  --bg-muted: #0d0f13;
   --bg-surface: var(--bg-elevated);
-  --bg-surface-soft: rgba(18, 30, 48, 0.42);
+  --bg-surface-soft: rgba(20, 23, 29, 0.44);
 
   /* ── Glass tiers (Apple Liquid Glass) ── */
   --glass-blur-thin: blur(8px);
   --glass-blur-regular: blur(16px);
   --glass-blur-thick: blur(24px);
-  --glass-bg-thin: rgba(8, 13, 24, 0.45);
-  --glass-bg-regular: rgba(12, 18, 32, 0.5);
-  --glass-bg-thick: rgba(10, 16, 28, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-border-hover: rgba(255, 255, 255, 0.12);
-  --glass-highlight: rgba(255, 255, 255, 0.03);
+  --glass-blur-elevated: var(--glass-blur-regular);
+  --glass-bg-thin: rgba(8, 9, 12, 0.48);
+  --glass-bg-regular: rgba(13, 15, 19, 0.54);
+  --glass-bg-thick: rgba(11, 13, 17, 0.76);
+  --glass-bg-elevated: var(--glass-bg-regular);
+  --glass-border: rgba(255, 255, 255, 0.07);
+  --glass-border-hover: rgba(255, 255, 255, 0.14);
+  --glass-highlight: rgba(255, 255, 255, 0.04);
 
-  /* ── Text ── */
-  --text-strong: #f4f7fb;
-  --text-default: #d0d8e5;
-  --text-muted: #8899ad;
+  /* ── Text (近纯白, 略降一档避免过亮刺眼) ── */
+  --text-strong: #f7f8fa;
+  --text-default: #e8eaef;
+  --text-muted: #a3a9b5;
 
-  /* ── Accent palette (5-color spectrum) ── */
-  --accent-cyan: #00e5cc;
-  --accent-blue: #3d7dff;
-  --accent-violet: #8b5cf6;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
+  /* ── Accent palette (莫兰迪五色谱, 清透柔和: 明度饱和取中, 不灰不刺眼) ── */
+  --accent-cyan: #6fb3ad;    /* 柔透青 teal */
+  --accent-blue: #7a99cf;    /* 柔透蓝 */
+  --accent-violet: #9485cf;  /* 柔透紫 */
+  --accent-amber: #c2985a;   /* 柔透赭黄 */
+  --accent-rose: #cc8a9a;    /* 柔透玫红 */
+  --accent-green: #7fc093;   /* 柔亮绿 (加粗) */
+  --accent-yellow: #ddc06a;  /* 柔亮黄 (公式) */
 
   /* Legacy aliases */
   --accent-primary: var(--accent-cyan);
   --accent-secondary: var(--accent-blue);
   --accent-warm: var(--accent-amber);
+  --accent-1: var(--accent-cyan);
 
-  /* ── Status ── */
+  /* ── Status (柔透语义色) ── */
   --status-now: var(--accent-cyan);
   --status-next: var(--accent-blue);
-  --status-later: #8899ad;
-  --status-done: #34d399;
-  --status-blocked: #fb923c;
+  --status-later: #8a909c;
+  --status-done: #7fc093;   /* 柔亮绿 */
+  --status-blocked: #c2985a; /* 柔透赭黄 */
 
   /* ── Borders ── */
-  --border-default: rgba(136, 153, 173, 0.18);
-  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-default: rgba(154, 160, 172, 0.18);
+  --border-subtle: rgba(255, 255, 255, 0.05);
 
-  /* ── Shadows (glow + depth) ── */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.35);
-  --shadow-glow-sm: 0 0 20px rgba(0, 229, 204, 0.06), 0 4px 12px rgba(0, 0, 0, 0.25);
-  --shadow-glow-md: 0 0 40px rgba(0, 229, 204, 0.08), 0 12px 40px rgba(0, 0, 0, 0.3);
-  --shadow-glow-lg: 0 0 60px rgba(0, 229, 204, 0.1), 0 24px 60px rgba(0, 0, 0, 0.35);
+  /* ── Shadows (中性深度, 去彩色光晕) ── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.46);
+  --shadow-glow-sm: 0 4px 14px rgba(0, 0, 0, 0.36);
+  --shadow-glow-md: 0 10px 36px rgba(0, 0, 0, 0.42);
+  --shadow-glow-lg: 0 20px 56px rgba(0, 0, 0, 0.5);
 
   /* ── Radius ── */
   --radius-xs: 8px;
@@ -108,54 +113,96 @@
   --about-bg-image: none;
   --hero-bg-overlay: linear-gradient(
     180deg,
-    rgba(3, 5, 8, 0.65) 0%,
-    rgba(3, 5, 8, 0.15) 25%,
-    rgba(3, 5, 8, 0.15) 55%,
-    rgba(3, 5, 8, 0.7) 80%,
-    rgba(3, 5, 8, 0.95) 100%
+    rgba(5, 6, 8, 0.66) 0%,
+    rgba(5, 6, 8, 0.16) 25%,
+    rgba(5, 6, 8, 0.16) 55%,
+    rgba(5, 6, 8, 0.72) 80%,
+    rgba(5, 6, 8, 0.96) 100%
   );
   --about-bg-overlay: linear-gradient(
     180deg,
-    rgba(3, 5, 8, 0.6) 0%,
-    rgba(3, 5, 8, 0.35) 50%,
-    rgba(3, 5, 8, 0.7) 100%
+    rgba(5, 6, 8, 0.6) 0%,
+    rgba(5, 6, 8, 0.35) 50%,
+    rgba(5, 6, 8, 0.72) 100%
   );
 
-  /* ── Placeholder cover gradients (6 palette variants) ── */
-  --cover-grad-1: linear-gradient(135deg, #0c1929 0%, #1a1040 40%, #2d1b4e 100%);
-  --cover-grad-2: linear-gradient(135deg, #0a1628 0%, #0f2847 40%, #163355 100%);
-  --cover-grad-3: linear-gradient(135deg, #0d1520 0%, #1c1036 40%, #351845 100%);
-  --cover-grad-4: linear-gradient(135deg, #091520 0%, #0e2a3d 40%, #183848 100%);
-  --cover-grad-5: linear-gradient(135deg, #10101e 0%, #1e1435 40%, #2a1a48 100%);
-  --cover-grad-6: linear-gradient(135deg, #0b1420 0%, #14283e 40%, #1e3050 100%);
+  /* ── Placeholder cover gradients (6 variants, 莫兰迪灰调微差) ── */
+  --cover-grad-1: linear-gradient(135deg, #0a0b0e 0%, #14171c 40%, #1a1e24 100%);
+  --cover-grad-2: linear-gradient(135deg, #0a0c0f 0%, #15181d 40%, #1b1f26 100%);
+  --cover-grad-3: linear-gradient(135deg, #0b0d10 0%, #16191f 40%, #1d2128 100%);
+  --cover-grad-4: linear-gradient(135deg, #0a0b0e 0%, #14171c 40%, #1b1f26 100%);
+  --cover-grad-5: linear-gradient(135deg, #0a0c0f 0%, #16191e 40%, #1d2128 100%);
+  --cover-grad-6: linear-gradient(135deg, #0a0b0e 0%, #14171c 40%, #1a1e25 100%);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     color-scheme: light;
-    --bg-void: #f0f2f7;
-    --bg-base: #f5f7fb;
+    --bg-void: #eceef2;
+    --bg-base: #f2f3f6;
     --bg-elevated: rgba(255, 255, 255, 0.78);
     --bg-overlay: rgba(255, 255, 255, 0.62);
-    --bg-muted: #edf1f8;
+    --bg-muted: #e9ebef;
     --bg-surface: var(--bg-elevated);
     --bg-surface-soft: rgba(255, 255, 255, 0.52);
     --glass-bg-thin: rgba(255, 255, 255, 0.5);
     --glass-bg-regular: rgba(255, 255, 255, 0.6);
     --glass-bg-thick: rgba(255, 255, 255, 0.78);
+    --glass-bg-elevated: var(--glass-bg-regular);
     --glass-border: rgba(0, 0, 0, 0.06);
     --glass-border-hover: rgba(0, 0, 0, 0.1);
     --glass-highlight: rgba(255, 255, 255, 0.5);
-    --text-strong: #121a26;
-    --text-default: #2f3a4c;
-    --text-muted: #6e7e95;
-    --border-default: rgba(119, 138, 165, 0.22);
+    --text-strong: #1a1d23;
+    --text-default: #363b45;
+    --text-muted: #6c7280;
+    --border-default: rgba(108, 114, 128, 0.2);
     --border-subtle: rgba(0, 0, 0, 0.04);
-    --shadow-sm: 0 2px 8px rgba(39, 52, 74, 0.06);
-    --shadow-md: 0 8px 32px rgba(39, 52, 74, 0.1);
-    --shadow-lg: 0 20px 60px rgba(39, 52, 74, 0.14);
-    --shadow-glow-sm: 0 4px 16px rgba(39, 52, 74, 0.08);
-    --shadow-glow-md: 0 12px 40px rgba(39, 52, 74, 0.12);
-    --shadow-glow-lg: 0 24px 60px rgba(39, 52, 74, 0.16);
+
+    /* ── 莫兰迪 accent (浅底压暗, 柔透保留色相) ── */
+    --accent-cyan: #2f8680;
+    --accent-blue: #3a64b0;
+    --accent-violet: #6450a8;
+    --accent-amber: #9a7520;
+    --accent-rose: #b04865;
+    --accent-green: #2f8a52;
+    --accent-yellow: #9a7820;
+    --accent-1: var(--accent-cyan);
+
+    /* ── Status (浅底压暗) ── */
+    --status-now: var(--accent-cyan);
+    --status-next: var(--accent-blue);
+    --status-later: #6e7480;
+    --status-done: #2f8448;
+    --status-blocked: #9a7520;
+
+    /* ── Cover gradients (浅灰米白) ── */
+    --cover-grad-1: linear-gradient(135deg, #e6e8ec 0%, #dcdee3 40%, #d4d7dd 100%);
+    --cover-grad-2: linear-gradient(135deg, #e7e9ed 0%, #dddfe4 40%, #d5d8de 100%);
+    --cover-grad-3: linear-gradient(135deg, #e6e8eb 0%, #dcdee2 40%, #d3d6dc 100%);
+    --cover-grad-4: linear-gradient(135deg, #e7e9ec 0%, #dddfe3 40%, #d4d7dd 100%);
+    --cover-grad-5: linear-gradient(135deg, #e6e8eb 0%, #dcdee2 40%, #d4d7dc 100%);
+    --cover-grad-6: linear-gradient(135deg, #e7e9ed 0%, #dddfe4 40%, #d5d8de 100%);
+
+    --shadow-sm: 0 2px 8px rgba(26, 29, 35, 0.06);
+    --shadow-md: 0 8px 32px rgba(26, 29, 35, 0.1);
+    --shadow-lg: 0 20px 60px rgba(26, 29, 35, 0.14);
+    --shadow-glow-sm: 0 4px 16px rgba(26, 29, 35, 0.08);
+    --shadow-glow-md: 0 12px 40px rgba(26, 29, 35, 0.12);
+    --shadow-glow-lg: 0 24px 60px rgba(26, 29, 35, 0.16);
+
+    --hero-bg-overlay: linear-gradient(
+      180deg,
+      rgba(242, 243, 246, 0.65) 0%,
+      rgba(242, 243, 246, 0.15) 25%,
+      rgba(242, 243, 246, 0.15) 55%,
+      rgba(242, 243, 246, 0.7) 80%,
+      rgba(242, 243, 246, 0.95) 100%
+    );
+    --about-bg-overlay: linear-gradient(
+      180deg,
+      rgba(242, 243, 246, 0.6) 0%,
+      rgba(242, 243, 246, 0.35) 50%,
+      rgba(242, 243, 246, 0.7) 100%
+    );
   }
 }

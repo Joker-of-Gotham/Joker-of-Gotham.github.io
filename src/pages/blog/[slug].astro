@@ -118,28 +118,48 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
     </header>
 
     {tocHeadings.length > 0 && (
-      <aside class="toc-dock" data-toc-dock>
-        <button class="toc-dock-handle" type="button" aria-label="Toggle table of contents" aria-controls={tocPanelId} aria-expanded="false">
-          <span class="toc-dock-bars">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-          </span>
-        </button>
-        <nav class="toc-dock-panel" id={tocPanelId} aria-label="Table of contents">
-          <p class="sidebar-title">Reading</p>
-          <p class="meta-row">Progress <strong data-toc-progress>0%</strong></p>
-          <ul class="list-clean toc-list">
-            {
-              tocHeadings.map((heading: (typeof tocHeadings)[number]) => (
-                <li data-toc-depth={heading.depth}>
-                  <a href={`#${heading.slug}`} data-toc-link>{heading.text}</a>
+      <aside class="toc-dock" data-toc-dock aria-label="Table of contents">
+        <div class="toc-dock-head">
+          <span class="toc-dock-label">Outline</span>
+          <span class="toc-dock-progress"><strong data-toc-progress>0%</strong></span>
+        </div>
+        <ul class="toc-outline">
+          {tocHeadings.some((h: (typeof tocHeadings)[number]) => h.depth === 1) && <span class="toc-spine" aria-hidden="true"></span>}
+          {
+            tocHeadings.map((heading: (typeof tocHeadings)[number], index: number) => {
+              const depth = heading.depth;
+              const prevDepth = index > 0 ? tocHeadings[index - 1].depth : 0;
+              const nextDepth = index < tocHeadings.length - 1 ? tocHeadings[index + 1].depth : 0;
+              // H2 连续段: 仅当上下邻接同为 H2 才画虚线穿过
+              const inH2Chain = depth === 2 && (prevDepth === 2 || nextDepth === 2);
+              const chainPos =
+                inH2Chain
+                  ? prevDepth === 2 && nextDepth === 2
+                    ? "mid"
+                    : prevDepth === 2
+                      ? "tail"
+                      : "head"
+                  : "solo";
+              // 纵虚线: 仅 H2 连续段; H1 由贯穿脊柱线承担, H3 无线
+              const showDashedVline = inH2Chain;
+              const dotSize = depth === 1 ? "lg" : depth === 2 ? "md" : "sm";
+              return (
+                <li
+                  class={`toc-outline-item depth-${depth}${inH2Chain ? ` h2-chain chain-${chainPos} vline vline-dashed vpos-${chainPos}` : ""}`}
+                  data-toc-depth={depth}
+                >
+                  {showDashedVline && <span class={`toc-vline vline-dashed vpos-${chainPos}`} aria-hidden="true" />}
+                  <a href={`#${heading.slug}`} data-toc-link>
+                    <span class="toc-node" aria-hidden="true">
+                      <span class={`toc-dot dot-${dotSize}`} aria-hidden="true" />
+                    </span>
+                    <span class="toc-outline-text">{heading.text}</span>
+                  </a>
                 </li>
-              ))
-            }
-          </ul>
-        </nav>
+              );
+            })
+          }
+        </ul>
       </aside>
     )}
 
@@ -193,7 +213,6 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
   <script is:inline>
     const tocDock = document.querySelector("[data-toc-dock]");
     if (tocDock) {
-      const toggleButton = tocDock.querySelector(".toc-dock-handle");
       const progressLabel = tocDock.querySelector("[data-toc-progress]");
       const tocLinks = Array.from(tocDock.querySelectorAll("[data-toc-link]"));
       const headingTargets = tocLinks
@@ -206,41 +225,18 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
         })
         .filter(Boolean);
 
-      const syncExpandedState = () => {
-        if (toggleButton) {
-          toggleButton.setAttribute("aria-expanded", tocDock.classList.contains("is-open") ? "true" : "false");
-        }
-      };
-
-      const closeDock = () => {
-        tocDock.classList.remove("is-open");
-        syncExpandedState();
-      };
-
-      toggleButton?.addEventListener("click", (event) => {
-        event.preventDefault();
-        tocDock.classList.toggle("is-open");
-        syncExpandedState();
-      });
-
-      document.addEventListener("click", (event) => {
-        if (!tocDock.contains(event.target)) {
-          closeDock();
-        }
-      });
-
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
-          closeDock();
+          tocDock.classList.remove("is-open");
         }
       });
 
       const updateProgress = () => {
         const doc = document.documentElement;
         const scrollable = Math.max(doc.scrollHeight - window.innerHeight, 1);
-        const progress = Math.min(100, Math.max(0, Math.round((window.scrollY / scrollable) * 100)));
+        const progress = Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100));
         if (progressLabel) {
-          progressLabel.textContent = `${progress}%`;
+          progressLabel.textContent = `${Math.round(progress)}%`;
         }
       };
 
@@ -265,7 +261,6 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
       window.addEventListener("scroll", handleScroll, { passive: true });
       window.addEventListener("resize", handleScroll);
       handleScroll();
-      syncExpandedState();
     }
 
     const legacyMarkerOnlyPattern = /^\{\:\s*(?:\.[A-Za-z0-9_-]+\s*)+\}$/;

@@ -21,9 +21,9 @@ related_nodes: []
 
 无独有偶，Anthropic 在文章 [How the agent loop works](https://code.claude.com/docs/en/agent-sdk/agent-loop) 中同样描述了类似的过程：接收提示信息-进行评估并作出响应-执行工具-重复操作-返回结果。文章中写道：“Turns continue until Claude produces output with no tool calls, at which point the loop ends and the final result is delivered.”
 
-两种典型的 Agent Loop 范式如下图所示，左图为 OpenAI 的 Codex 多轮智能体循环，右图为 Anthropic Claude 的 Agent Loop：
+两种典型的 Agent Loop 范式如下图所示，分别为 OpenAI 的 Codex 多轮智能体循环与 Anthropic Claude 的 Agent Loop：
 
-<div class="image-grid" style="--cols: 2">
+<div class="image-grid" style="--cols:1">
   <figure>
     <img src="/assets/images/Agent/orchestration/oai_Unrolling_the_Codex_agent_loop_Multi-turn_agent_loop_desktop-dark.svg" alt="OpenAI Codex 多轮智能体循环示意图" loading="lazy" />
     <figcaption>OpenAI Codex 多轮智能体循环</figcaption>
@@ -97,7 +97,7 @@ $$x_t = (S_t , A_t , E_t , \Tau_{ \leq t} , R_t )$$
 
 其中，回复只是其中一个分量。否则模型只要说“已经完成”，目标与回复的语义相似度就会非常高，堪称文字版伪造竣工验收。
 
-### 计算目标满足度
+## 计算目标满足度
 
 基于如上建模，每个条件会产生 $q_{i,t}=v_{i}(c_i , x_t ) \in [0,1]$，同时定义证据可信度 $\rho_{i,t} \in [0,1]$，进而可以得到硬条件门：
 
@@ -112,3 +112,7 @@ $$C_t = \frac{\Sigma_{i} w_i q_{i,t} \rho_{i,t} }{\Sigma_{i} w_i}$$
 $$U_t = \frac{\Sigma_{i} w_i (1-\rho_{i,t}) }{\Sigma_{i} w_i}$$
 
 当 $C_t$ 较高则说明完成度较高，但如果同时 $U_t$ 较高则说明不确定度较大，从而需要进入核验环节。
+
+## 开放文本目标
+
+对于“论文论证充分”“报告覆盖完整”等难以写成精确断言的条件，可以使用 embedding，但只把它当作语义传感器。
