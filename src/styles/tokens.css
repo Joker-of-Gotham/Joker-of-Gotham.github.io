@@ -45,11 +45,11 @@
   --accent-warm: var(--accent-amber);
   --accent-1: var(--accent-cyan);
 
-  /* ── Status (柔透语义色) ── */
-  --status-now: var(--accent-cyan);
-  --status-next: var(--accent-blue);
+  /* ── Status (中性灰白语义色, 避免蓝绿) ── */
+  --status-now: var(--text-strong);
+  --status-next: var(--text-default);
   --status-later: #8a909c;
-  --status-done: #7fc093;   /* 柔亮绿 */
+  --status-done: var(--text-strong);
   --status-blocked: #c2985a; /* 柔透赭黄 */
 
   /* ── Borders ── */
@@ -168,11 +168,11 @@
     --accent-yellow: #9a7820;
     --accent-1: var(--accent-cyan);
 
-    /* ── Status (浅底压暗) ── */
-    --status-now: var(--accent-cyan);
-    --status-next: var(--accent-blue);
+    /* ── Status (浅底中性灰白语义色, 避免蓝绿) ── */
+    --status-now: #1a1d23;
+    --status-next: #363b45;
     --status-later: #6e7480;
-    --status-done: #2f8448;
+    --status-done: #1a1d23;
     --status-blocked: #9a7520;
 
     /* ── Cover gradients (浅灰米白) ── */

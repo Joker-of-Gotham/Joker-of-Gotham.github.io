@@ -74,7 +74,7 @@ img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
 
 /* ── Gradient text utility ── */
 .text-gradient {
-  background: linear-gradient(135deg, var(--accent-cyan) 10%, var(--accent-blue) 50%, var(--accent-violet) 90%);
+  background: linear-gradient(135deg, var(--text-strong) 10%, var(--text-default) 60%, var(--text-muted) 95%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -108,7 +108,7 @@ img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
   overflow-x: hidden;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--accent-blue) 30%, transparent) transparent;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 40%, transparent) transparent;
   border-right: 1px solid var(--glass-border);
   background: var(--glass-bg-thick);
   backdrop-filter: var(--glass-blur-thick) saturate(1.4);
@@ -129,10 +129,10 @@ img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
 .sidebar::-webkit-scrollbar-thumb {
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--accent-blue) 30%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 40%, transparent);
 }
 .sidebar::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--accent-blue) 50%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 60%, transparent);
 }
 
 .sidebar-profile {
@@ -479,7 +479,7 @@ img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
 .badge.now { color: var(--status-now); background: color-mix(in srgb, var(--status-now) 14%, transparent); }
 .badge.next { color: var(--status-next); background: color-mix(in srgb, var(--status-next) 14%, transparent); }
 .badge.later { color: var(--status-later); background: color-mix(in srgb, var(--status-later) 16%, transparent); }
-.badge.done { color: var(--status-done); background: color-mix(in srgb, var(--status-done) 14%, transparent); }
+.badge.done { color: var(--text-strong); background: color-mix(in srgb, var(--text-strong) 12%, transparent); }
 .badge.blocked { color: var(--status-blocked); background: color-mix(in srgb, var(--status-blocked) 16%, transparent); }
 
 .tag-chip {
@@ -488,30 +488,29 @@ img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
   gap: 6px;
   padding: 3px 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid color-mix(in srgb, var(--accent-cyan) 22%, var(--border-default));
+  border: 1px solid var(--border-default);
   font-size: 0.78rem;
-  color: color-mix(in srgb, var(--accent-cyan) 78%, var(--text-default));
-  background: color-mix(in srgb, var(--accent-cyan) 8%, var(--glass-bg-thin));
+  color: var(--text-strong);
+  background: var(--glass-bg-thin);
   transition: border-color var(--duration-fast) ease, color var(--duration-fast) ease, background var(--duration-fast) ease;
 }
 
 .tag-chip:hover {
-  border-color: color-mix(in srgb, var(--accent-cyan) 45%, var(--border-default));
-  color: var(--accent-cyan);
-  background: color-mix(in srgb, var(--accent-cyan) 14%, var(--glass-bg-thin));
+  border-color: color-mix(in srgb, var(--text-strong) 40%, var(--border-default));
+  background: color-mix(in srgb, var(--text-strong) 8%, var(--glass-bg-thin));
 }
-.tag-chip.active { border-color: color-mix(in srgb, var(--accent-blue) 45%, var(--border-default)); color: var(--accent-blue); background: color-mix(in srgb, var(--accent-blue) 14%, var(--glass-bg-thin)); }
+.tag-chip.active { border-color: color-mix(in srgb, var(--text-strong) 50%, var(--border-default)); background: color-mix(in srgb, var(--text-strong) 12%, var(--glass-bg-thin)); }
 
 .chip-collection {
-  border-color: color-mix(in srgb, var(--accent-cyan) 38%, var(--border-default));
-  color: var(--accent-cyan);
-  background: color-mix(in srgb, var(--accent-cyan) 14%, transparent);
+  border-color: var(--border-default);
+  color: var(--text-strong);
+  background: var(--glass-bg-thin);
 }
 
 .chip-category {
-  border-color: color-mix(in srgb, var(--accent-blue) 38%, var(--border-default));
-  color: var(--accent-blue);
-  background: color-mix(in srgb, var(--accent-blue) 14%, transparent);
+  border-color: var(--border-default);
+  color: var(--text-strong);
+  background: var(--glass-bg-thin);
 }
 
 /* ═══════════════════════════════════════════
@@ -555,14 +554,14 @@ select {
 .button:active { transform: scale(0.97); }
 
 .button.primary {
-  border-color: color-mix(in srgb, var(--accent-cyan) 35%, transparent);
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
-  box-shadow: 0 0 20px rgba(111, 179, 173, 0.18);
+  border-color: var(--border-default);
+  background: var(--text-strong);
+  box-shadow: var(--shadow-md);
   color: #050608;
 }
 
 .button.primary:hover {
-  box-shadow: 0 0 30px rgba(111, 179, 173, 0.28);
+  box-shadow: var(--shadow-lg);
   transform: scale(1.02);
 }
 
@@ -782,7 +781,7 @@ select {
   font-weight: 700;
   line-height: 0.95;
   letter-spacing: -0.04em;
-  background: linear-gradient(135deg, var(--accent-cyan) 10%, var(--accent-blue) 50%, var(--accent-violet) 90%);
+  background: linear-gradient(135deg, var(--text-strong) 10%, var(--text-default) 60%, var(--text-muted) 95%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -884,14 +883,14 @@ select {
   overflow-y: hidden;
   padding-bottom: 2px;
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--accent-blue) 25%, transparent) transparent;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 40%, transparent) transparent;
 }
 
 .commit-activity-chart::-webkit-scrollbar { height: 6px; }
 .commit-activity-chart::-webkit-scrollbar-track { background: transparent; }
 .commit-activity-chart::-webkit-scrollbar-thumb {
   border-radius: var(--radius-pill);
-  background: color-mix(in srgb, var(--accent-blue) 25%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 40%, transparent);
 }
 
 .commit-activity-months {
@@ -930,10 +929,10 @@ select {
   transition: background var(--duration-fast) ease;
 }
 
-.commit-activity-cell.level-1 { background: color-mix(in srgb, var(--status-done) 24%, var(--bg-muted)); border-color: transparent; }
-.commit-activity-cell.level-2 { background: color-mix(in srgb, var(--status-done) 44%, var(--bg-muted)); border-color: transparent; }
-.commit-activity-cell.level-3 { background: color-mix(in srgb, var(--status-done) 64%, var(--bg-muted)); border-color: transparent; }
-.commit-activity-cell.level-4 { background: color-mix(in srgb, var(--status-done) 82%, var(--bg-muted)); border-color: transparent; }
+.commit-activity-cell.level-1 { background: color-mix(in srgb, var(--text-muted) 22%, var(--bg-muted)); border-color: transparent; }
+.commit-activity-cell.level-2 { background: color-mix(in srgb, var(--text-muted) 42%, var(--bg-muted)); border-color: transparent; }
+.commit-activity-cell.level-3 { background: color-mix(in srgb, var(--text-default) 58%, var(--bg-muted)); border-color: transparent; }
+.commit-activity-cell.level-4 { background: color-mix(in srgb, var(--text-strong) 80%, var(--bg-muted)); border-color: transparent; }
 .commit-activity-cell.outside { opacity: 0.2; }
 
 .commit-activity-legend {
@@ -1021,8 +1020,8 @@ select {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
-  box-shadow: 0 0 12px rgba(111, 179, 173, 0.2);
+  background: var(--text-strong);
+  box-shadow: none;
   animation: progress-fill var(--duration-slow) var(--ease-out) both;
 }
 
@@ -1153,7 +1152,7 @@ select {
   top: 4px;
   bottom: 4px;
   width: 2px;
-  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue), var(--border-default));
+  background: var(--border-default);
   border-radius: var(--radius-pill);
 }
 
@@ -1166,8 +1165,8 @@ select {
   top: 7px;
   width: 9px; height: 9px;
   border-radius: 50%;
-  background: var(--accent-blue);
-  box-shadow: 0 0 8px rgba(122, 153, 207, 0.25);
+  background: var(--text-strong);
+  box-shadow: 0 0 8px rgba(232, 234, 239, 0.2);
 }
 
 .gantt-wrap { display: grid; gap: var(--space-4); }
@@ -1190,7 +1189,7 @@ select {
   height: 24px;
   min-width: 120px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, var(--status-done), var(--accent-blue));
+  background: var(--text-strong);
   color: #050608;
   display: inline-flex;
   align-items: center;
@@ -1233,8 +1232,8 @@ select {
   opacity: 0.7;
 }
 
-.gantt-live-trail.now { color: var(--status-now); background: linear-gradient(90deg, color-mix(in srgb, var(--status-now) 35%, transparent), transparent 80%); }
-.gantt-live-trail.next { color: var(--status-next); background: linear-gradient(90deg, color-mix(in srgb, var(--status-next) 35%, transparent), transparent 80%); }
+.gantt-live-trail.now { color: var(--text-strong); background: linear-gradient(90deg, color-mix(in srgb, var(--text-strong) 30%, transparent), transparent 80%); }
+.gantt-live-trail.next { color: var(--text-muted); background: linear-gradient(90deg, color-mix(in srgb, var(--text-muted) 30%, transparent), transparent 80%); }
 
 .gantt-live-trail-label {
   font-size: 0.76rem;
@@ -1595,7 +1594,7 @@ pre.astro-code[data-lang^="MERMAID"]::before { color: #9dabbe; }
 }
 
 .callout.warn { border-left-color: var(--accent-amber); }
-.callout.success { border-left-color: var(--status-done); }
+.callout.success { border-left-color: var(--text-strong); }
 
 .content .callout, .content blockquote.callout { margin: 0; }
 
@@ -1662,7 +1661,7 @@ pre.astro-code[data-lang^="MERMAID"]::before { color: #9dabbe; }
   top: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue), var(--border-default));
+  background: var(--border-default);
   border-radius: var(--radius-pill);
 }
 
@@ -1678,9 +1677,9 @@ pre.astro-code[data-lang^="MERMAID"]::before { color: #9dabbe; }
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--accent-blue);
+  background: var(--text-strong);
   border: 2px solid var(--bg-base);
-  box-shadow: 0 0 8px rgba(122, 153, 207, 0.25);
+  box-shadow: 0 0 8px rgba(232, 234, 239, 0.2);
   z-index: 1;
 }
 
@@ -1779,12 +1778,12 @@ pre.astro-code[data-lang^="MERMAID"]::before { color: #9dabbe; }
 }
 
 .resume-list--pub::before {
-  background: linear-gradient(180deg, var(--accent-violet), var(--accent-blue), var(--border-default));
+  background: var(--border-default);
 }
 
 .resume-list--pub > .resume-item::before {
-  background: var(--accent-violet);
-  box-shadow: 0 0 8px rgba(148, 133, 207, 0.25);
+  background: var(--text-strong);
+  box-shadow: 0 0 8px rgba(232, 234, 239, 0.2);
 }
 
 .blog-summary {
@@ -1987,7 +1986,7 @@ pre.astro-code[data-lang^="MERMAID"]::before { color: #9dabbe; }
   display: none;
   padding: var(--space-1);
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--accent-blue) 30%, transparent) transparent;
+  scrollbar-color: color-mix(in srgb, var(--text-muted) 40%, transparent) transparent;
 }
 
 .custom-select.is-open .custom-select-dropdown {
