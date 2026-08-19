@@ -150,6 +150,15 @@ flowchart TD
     style LiteralVal fill:#EAEAEA,stroke:#888888,stroke-width:1px
 ```
 
+PROV-O 的 **“限定模式”（Qualified Pattern）** 则旨在解决 RDF 语法无法直接在“关系/边”上附加属性的局限，通过引入中间节点将简单的二元关系转换为可附加丰富元数据的多元结构。这种方法受影响方与影响源之间插入一个“影响类实例”（Influence Instance），建立 **“受影响方 → 影响事件 → 影响源”** 的三段式结构，从而允许在“影响事件”节点上挂载上下文属性。
+
+<div class="image-grid" style="--cols:1">
+  <figure>
+    <img src="/assets/images/Agent/orchestration/prov-o-qualified-pattern.png" alt="PROV-O 限定模式（Qualified Pattern）示意图" loading="lazy" />
+    <figcaption>PROV-O 限定模式：受影响方 → 影响事件 → 影响源</figcaption>
+  </figure>
+</div>
+
 
 
 # Agent Loop 的终止条件
