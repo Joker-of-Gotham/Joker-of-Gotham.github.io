@@ -310,7 +310,7 @@ IEEE XES 中包含了很多细节的基础字段和扩展字段定义，并绘�
 
 [CloudEvents](https://cloudevents.io/) 是一种用于以通用方式描述事件数据的规范。该规范旨在实现不同服务、平台和系统之间的互操作性。该规范定义了一系列术语，如事件(Occurrence)、活动/事件(Event)、生产者(Producer)、消费者(Consumer)、中介(Intermediary)、上下文(Context)等；同时定义了一系列的上下文属性(context attributes)、事件数据(event data)，其代码仓库在 [cloudevents spec](https://github.com/cloudevents/spec) 中。
 
-### Model Context Protocal
+### Model Context Protocol
 
 模型上下文协议（Model Context Protocol，MCP）是一种开放式的协议，能够实现大型语言模型应用程序与外部数据来源和工具的无缝集成。无论是构建基于人工智能的集成开发环境，改进聊天界面，还是创建自定义的人工智能工作流程，MCP 都提供了一种标准化的方式，让大型语言模型能够连接到所需的上下文信息。
 
@@ -328,7 +328,7 @@ MCP 提供了一种标准化的方式，让应用程序能够：
 
 MCP 借鉴了 [Language Server](https://microsoft.github.io/language-server-protocol/) 协议的设计理念，该协议规范了如何在整个开发工具生态系统中添加对各种编程语言的支持。同样地，MCP 也规范了如何将额外的上下文信息和工具集成到 AI 应用生态系统中。
 
-### Agent2Agent Protocal
+### Agent2Agent Protocol
 
 [Agent2Agent（A2A）协议](https://a2a-protocol.org/latest/specification/) 是一种开放标准，旨在促进独立且可能具有不透明特性的 AI 代理系统之间的通信与互操作性。在这样一个由不同框架、语言或来自不同供应商的代理构成的生态系统中，A2A 协议提供了一种通用的交互模型与沟通方式。
 
