@@ -356,6 +356,31 @@ MCP 借鉴了 [Language Server](https://microsoft.github.io/language-server-prot
 
 相关的核心概念、操作等可在A2A文档中具体查看。
 
+## Cantilune Observability
+
+### Cantilune Atomic Observability Core
+
+Cantilune 的原子观测性内核包含三个对象和六条关系：
+
+- **对象 (Object)**
+  - **责任主体 (Principal)**：在观测边界内具有稳定身份，并能够对行为的决策、执行、承载、控制、传输或结果归属承担责任的主体。
+  - **发生过程 (Activity)**：在时间中实际发生的一次操作、过程、交互或转换。
+  - **实体 (Entity)**：能够被稳定标识、引用、传输、保存、比较或追溯的内容、消息、请求、结果、配置、状态或产物。
+- **关系 (Relation)**
+  - `participatesIn(p, a)`：回答“谁参与了这个过程”，Principal 对 Activity 的发生承担某种责任
+  - `informs(a_1, a_2)`：回答“哪个过程影响了哪个过程”，即前一个 Activity 所产生的信息对后一个 Activity 的发生具有影响
+  - `generates(a, e)`/`uses(a, e)`：回答“这个过程产生了什么/这个过程使用了什么”，即Activity 的发生使一个新的 Entity 出现，或Activity 的发生依赖、读取、消费或处理了某个 Entity
+  - `derivedFrom(e_1, e_2)`：回答“这个实体来源于什么”，即当前 Entity 的形成依赖于另一个 Entity
+  - `attributedTo(e, a)`：回答“这个实体归责于谁”，即某 Principal 对该 Entity 的形成或存在承担责任
+  - `onBehalfOf(p_1. p_2)`：回答“责任主体之间的联系”，即其中一个责任主体委托了另一个责任主体。
+
+<div class="image-grid" style="--cols:1">
+  <figure>
+    <img src="/assets/images/Agent/orchestration/cantilune-atom-core.png" alt="Cantilune 原子核模型：对象与关系" loading="lazy" />
+    <figcaption>Cantilune 原子核模型：对象（Principal / Activity / Entity）与关系总览</figcaption>
+  </figure>
+</div>
+
 # Agent Loop 的终止条件
 
 在文章 [深入解析 Codex 智能体循环](https://openai.com/zh-Hans-CN/index/unrolling-the-codex-agent-loop/) 中，OpenAI 归纳了一种最容易的范式用于推进 Agent Loop。在文章中，整个循环停止的条件是，“直至模型不再发起工具调用，转而生成一条面向用户的消息（在 OpenAI 模型中称为助手消息）”。但是其问题在于，以“生成助手消息”为标志判断 Agent Loop 从而终止当前轮对话，本质上是 **“通过形式判断终止”** ，而非 **内容** 。
