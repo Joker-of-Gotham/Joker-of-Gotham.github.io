@@ -23,7 +23,34 @@ related_nodes: []
 
 [OpenInference 规范](https://github.com/Arize-ai/openinference) 是一个建立在 OpenTelemetry 之上的开源语义约定标准，专门用于大语言模型（LLM）和 AI 应用的可观测性。该规范以 Markdown 文件的形式编辑，这些文件位于 [spec 目录](https://github.com/Arize-ai/openinference/tree/main/spec) 中。它旨在深入剖析 LLM 的调用以及相关的应用程序上下文，例如从向量存储中检索数据以及使用外部工具（如搜索引擎或 API）。该规范与传输方式和文件格式无关，旨在与其他规范（例如 JSON、ProtoBuf 和 DataFrames）结合使用。
 
-### PROV-O (PROV Ontology)
+### PROV
+
+PROV 系列文档定义了一个模型、相应的序列化和其他支持性定义，以实现异构环境（例如 Web）中溯源信息的互操作交换。
+
+PROV 的核心是一个概念数据模型（PROV-DM），它定义了一套用于描述溯源信息的通用词汇表。该词汇表通过各种序列化方式进行实例化。这些序列化方式被各种实现用于交换溯源信息。为了帮助开发者和用户表达有效的溯源信息，又定义了一组约束（PROV-Constraints），这些约束可用于实现溯源验证器。此外，还提供了形式语义（PROV-SEM）。最后，为了进一步支持溯源信息的交换，还提供了额外的规范，用于定义溯源信息的定位和访问协议（PROV-AQ）、溯源描述包的连接协议（PROV-Links）、字典式集合的表示协议（PROV-Dictionary）以及定义如何与广泛使用的都柏林核心词汇表（PROV-DC）进行互操作的协议。
+
+<div class="image-grid" style="--cols:1">
+  <figure>
+    <img src="/assets/images/Agent/orchestration/prov-family.png" alt="PROV 系列规范家族结构图" loading="lazy" />
+    <figcaption>PROV 规范家族：PROV-DM 核心、序列化与各支持规范</figcaption>
+  </figure>
+</div>
+
+| 序号 | 观众类型 | 文档类型 | 简述 |
+| :--- | :--- | :--- | :--- |
+| 1 | 用户 | 笔记 | **PROV-PRIMER** 是 PROV 的入门指南，它介绍了溯源数据模型。这是您应该开始学习的地方，对许多人来说，也可能是唯一需要的文档。 |
+| 2 | 开发者 | 推荐 | **PROV-O** 为溯源数据模型定义了一个轻量级的 OWL2 本体。它面向链接数据和语义网社区。 |
+| 3 | 开发者 | 笔记 | **PROV-XML** 定义了溯源数据模型的 XML 模式。它面向需要对 PROV 数据模型进行原生 XML 序列化的开发人员。 |
+| 4 | 先进的 | 推荐 | **PROV-DM** 定义了一个包含 UML 图的溯源概念数据模型。PROV-O、PROV-XML 和 PROV-N 是该概念模型的序列化版本。 |
+| 5 | 先进的 | 推荐 | **PROV-N** 为溯源模型定义了一种易于理解的符号。它用于在概念模型中提供示例，也用于定义 PROV-CONSTRAINTS。 |
+| 6 | 先进的 | 推荐 | **PROV-CONSTRAINTS** 定义了一组针对 PROV 数据模型的约束，用于明确有效溯源的概念。它专门针对验证器的实现者。 |
+| 7 | 开发者 | 笔记 | **PROV-AQ** 定义了如何使用基于 Web 的机制来查找和检索溯源信息。 |
+| 8 | 开发者 | 笔记 | **PROV-DC** 定义了 Dublin Core 和 PROV-O 之间的映射关系。 |
+| 9 | 开发者 | 笔记 | **PROV-DICTIONARY** 定义了用于表达字典式数据结构来源的结构。 |
+| 10 | 先进的 | 笔记 | **PROV-SEM** 根据 PROV 数据模型的一阶逻辑定义了一个声明式规范。 |
+| 11 | 先进的 | 笔记 | **PROV-LINKS** 定义了 PROV 的扩展，以实现跨多个溯源描述包链接溯源信息。 |
+
+**PROV-O (PROV Ontology)**
 
 [PROV-O (PROV Ontology)](https://www.w3.org/TR/prov-o/) 是万维网联盟（W3C）推荐的基于 OWL2 语言构建的标准网络本体，用于用机器可读的格式描述和交换数据溯源（Provenance）信息。它将现实中“谁、在什么时间、通过什么活动、使用了什么输入、生成了什么输出”的来龙去脉结构化为统一的语义网词汇。
 
@@ -159,7 +186,51 @@ PROV-O 的 **“限定模式”（Qualified Pattern）** 则旨在解决 RDF 语
   </figure>
 </div>
 
+**PROV-Constraints**
 
+在构建了 PROV-O 本体后，接下来便需要考虑 [PROV 约束](https://www.w3.org/TR/prov-constraints/)。一个有效 (valid，PROV 实例/文档中的有效在概念上更接近于逻辑上的一致性 (consistency)) 的 PROV 实例对应于一个一致的对象和交互历史记录，可以安全地对其进行逻辑推理。通过指定约束条件来验证 PROV 实例 有效的 PROV 实例必须满足以下条件。这些约束共有四种：唯一性约束 (uniqueness constraints)、事件顺序约束 (event ordering constraints)、不可能性约束 (impossibility constraints) 和类型约束 (type constraints)。
+
+在 PROV 中， **并不假设列出的属性集实体描述并不完整，属性之间也并非相互独立或正交** 。同样，也 **不假设实体的属性能够唯一地标识该实体** 。两个不同的实体如果展现了可能不同的事物的相同方面，则可能拥有相同的属性；这会导致潜在的歧义，而 **使用标识符可以减轻这种歧义** 。
+
+活动并非实体。事实上，实体在其生命周期的任何时刻都完整存在，并持续存在，且保持其固有的特征。与之相反，活动是随着时间推移而发生、展开或发展的事物。这种区别类似于逻辑学中“持续性”和“偶发性”的区别。
+
+PROV 中使用了5种瞬时事件：
+
+- 活动开始和活动结束界定了活动产生与终止的边界
+- 实体产生、实体使用和实体失效事件均作用于实体，其中实体产生和实体失效事件则界定了实体的生命周期
+
+| 关系 | 标识符/参数 | 具有类型... |
+| :--- | :--- | :--- |
+| `entity(e,attrs)` | `e` | `'实体'` |
+| `activity(a,t1,t2,attrs)` | `a` | `'活动'` |
+| `agent(ag,attrs)` | `ag` | `'代理人'` |
+| `used(id; a,e,t,attrs)` | `e`<br>`a` | `'实体'`<br>`'活动'` |
+| `wasGeneratedBy(id; e,a,t,attrs)` | `e`<br>`a` | `'实体'`<br>`'活动'` |
+| `wasInformedBy(id; a2,a1,attrs)` | `a2`<br>`a1` | `'活动'`<br>`'活动'` |
+| `wasStartedBy(id; a2,e,a1,t,attrs)` | `a2`<br>`e`<br>`a1` | `'活动'`<br>`'实体'`<br>`'活动'` |
+| `wasEndedBy(id; a2,e,a1,t,attrs)` | `a2`<br>`e`<br>`a1` | `'活动'`<br>`'实体'`<br>`'活动'` |
+| `wasInvalidatedBy(id; e,a,t,attrs)` | `e`<br>`a` | `'实体'`<br>`'活动'` |
+| `wasDerivedFrom(id; e2,e1,a,g,u,attrs)` | `e2`<br>`e1`<br>`a` | `'实体'`<br>`'实体'`<br>`'活动'` |
+| `wasAttributedTo(id; e,ag,attr)` | `e`<br>`ag` | `'实体'`<br>`'代理人'` |
+| `wasAssociatedWith(id; a,ag,pl,attrs)` | `a`<br>`ag`<br>`pl` | `'活动'`<br>`'代理人'`<br>`'实体'` |
+| `actedOnBehalfOf(id; ag2,ag1,a,attrs)` | `ag2`<br>`ag1`<br>`a` | `'代理人'`<br>`'代理人'`<br>`'活动'` |
+| `alternateOf(e1,e2)` | `e1`<br>`e2` | `'实体'`<br>`'实体'` |
+| `specializationOf(e1,e2)` | `e1`<br>`e2` | `'实体'`<br>`'实体'` |
+| `hadMember(c,e)` | `c`<br>`e` | `'实体'`, `'prov:Collection'`<br>`'实体'` |
+| `entity(c,[prov:type='prov:EmptyCollection',...])` | `c` | `'实体'`, `'prov:Collection'`, `'prov:EmptyCollection'` |
+
+总体来说，PROV 数据变“规范”的过程是：先用类型、时序和逻辑约束进行“健康检查”（Validation），剔除不合规的错误数据；再根据定义与推理规则补充隐含信息、合并重复项（Normalization），最终把一份原始数据加工成标准、完备的 PROV 数据。
+
+<div class="image-grid light-fig" style="--cols:1">
+  <figure>
+    <img src="/assets/images/Agent/orchestration/overview-of-validation-process.svg" alt="PROV 数据 Validation 与 Normalization 流程总览" loading="lazy" />
+    <figcaption>PROV 数据规范化流程总览：Validation（健康检查）与 Normalization（补全合并）</figcaption>
+  </figure>
+</div>
+
+在文档中，各种具体的约束条件被详细定义，且针对各概念和推论提供了标准性的解释，它们也为整个 PROV 体系提供了一致性约束。
+
+另外，PROV 也提供了语义逻辑和语义学的证明 [PROV-SEM](https://www.w3.org/TR/prov-sem/)，主要运用数理逻辑工具，特别是模型论，帮助用户理解 PROV 某些特性背后的意图，也有助于研究人员探索更丰富的溯源推理形式。
 
 # Agent Loop 的终止条件
 

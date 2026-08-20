@@ -1519,6 +1519,14 @@ th { color: var(--text-strong); font-weight: 600; }
   .content .image-grid { grid-template-columns: 1fr; }
 }
 
+/* 为按白底设计、含黑色线条/箭头的图提供浅色画布，避免在深色页面中箭头不可见 */
+.content .image-grid.light-fig > figure > img {
+  background: #f4f3ee;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  box-sizing: border-box;
+}
+
 .content table {
   display: block;
   width: 100%;
