@@ -381,6 +381,167 @@ Cantilune 的原子观测性内核包含三个对象和六条关系：
   </figure>
 </div>
 
+基于 Atomic Core，我们为对象与关系设计了相互对称的“语义类型—具体实例”结构，使内核保持稳定，同时允许 Agent 系统中的具体概念和运行事实持续扩展。 对于三个核心对象类别 `CoreKind`，系统设置： 
+
+- **`SemanticTypeDefinition`**：定义一类对象的具体语义，例如 `Human`、`Agent`、`Shell`、`ToolExecution`、`Prompt` 或 `Dataset`。它负责说明该类型属于 `Principal`、`Activity` 或 `Entity` 中的哪一类，以及类型名称、语义定义、父类型、属性结构和治理状态。 
+- **`AtomInstance`**：表示某个 Semantic Type 在真实 Agent 运行过程中的具体实例，例如某个用户、某个 Shell、某次工具执行或某条实际 Prompt。它通过 `semanticTypeId` 关联对应的 `SemanticTypeDefinition`，并保存该实例自身的名称和属性。 
+
+对于六类核心关系 `CoreRelationKind`，系统设置： 
+
+- **`SemanticRelationTypeDefinition`**：在核心关系之上定义更具体的关系语义，例如某个 Principal 以“执行者”身份参与 Activity、某个 Agent 在特定任务范围内代表 Human 行动，或某个 Entity 是另一个 Entity 的摘要结果。它负责规定关系所属的核心关系、允许连接的语义类型及关系限定信息。 
+- **`RelationInstance`**：表示两个具体 `AtomInstance` 之间实际成立的一条关系。它记录关系类型、起点实例、终点实例，以及角色、作用域、通信通道或派生方式等具体限定信息。 
+
+通过这一结构，`CoreKind` 和 `CoreRelationKind` 提供稳定、最小的语义骨架，Semantic Type 描述“它是什么”，Semantic Relation Type 描述“它们如何关联”，而 Atom Instance 与 Relation Instance 则将这些抽象定义落实为 Agent 系统运行过程中真实发生的对象与关系。
+
+<div class="code-grid" style="--cols:2">
+
+```ts
+interface AtomInstance {
+  /** 当前对象实例的全局稳定标识。 */
+  readonly instanceId: string;
+
+  /**
+   * 当前对象所属的精确 Semantic Type id
+   * 均可通过该标识解析得到。
+   */
+  readonly semanticTypeId: SemanticTypeId;
+
+  /** 当前具体实例的人类可读名称。 */
+  readonly label?: string;
+
+  /**
+   * 对当前具体实例的说明。
+   *
+   * 这不是类型语义定义；
+   * 类型语义已经位于 SemanticTypeDefinition.description。
+   */
+  readonly description?: string;
+
+  /**
+   * 当前实例特有的数据。
+   *
+   * 数据结构由对应 SemanticTypeDefinition.schemaRef 验证。
+   */
+  readonly attributes?: Readonly<Record<string, unknown>>;
+}
+```
+
+```ts
+interface SemanticTypeDefinition {
+  /** 全局稳定、带命名空间的类型标识 */
+  readonly typeId: SemanticTypeId;
+
+  /** 它属于 Atomic Core 中的哪一种对象 */
+  readonly coreKind: CoreKind;
+
+  /** 人类可读名称 */
+  readonly label: string;
+
+  /** 严格的语义定义 */
+  readonly description: string;
+
+  /** 更一般的父类型，可为空 */
+  readonly parentTypeIds?: readonly SemanticTypeId[];
+
+  /** 该类型实例允许/要求携带的数据结构 */
+  readonly schemaRef?: SchemaRef;
+
+  /** 类型定义本身的版本 */
+  readonly version: string;
+
+  /** 生命周期状态，仅用于类型治理 */
+  readonly status: Status;
+}
+```
+
+```ts
+interface SemanticRelationTypeDefinition {
+  /** 全局稳定、带命名空间的关系类型标识。 */
+  readonly relationTypeId: string;
+
+  /**
+   * 当前关系类型所属的 Atomic Core 关系。
+   * 决定最基础的方向和 CoreKind domain/range。
+   */
+  readonly coreRelationKind: CoreRelationKind;
+
+  /** 人类可读名称。 */
+  readonly label: string;
+
+  /** 严格的语义定义 */
+  readonly description: string;
+
+  /** 更一般的父类型，可为空 */
+  readonly parentRelationTypeIds?: readonly string[];
+
+  /** 允许作为 source 的 Semantic Type。*/
+  readonly sourceTypeIds?: readonly SemanticTypeId[];
+
+  /** 允许作为 target 的 Semantic Type。*/
+  readonly targetTypeIds?: readonly SemanticTypeId[];
+
+  /**
+   * 关系实例允许或要求携带的限定信息。
+   */
+  readonly qualifierSchemaRef?: SchemaRef;
+
+  /** 类型定义本身的治理版本。 */
+  readonly version: string;
+
+  /** 关系类型当前的治理状态。 */
+  readonly status: Status;
+
+}
+```
+
+```ts
+interface RelationInstance {
+  /**
+   * 当前关系实例的全局稳定标识。
+   * 不能简单使用 source + target 作为标识，
+   * 因为相同端点之间可以存在多条不同关系。
+   */
+  readonly relationId: string;
+
+  /** 当前关系所属的最具体 Semantic Relation Type。*/
+  readonly semanticRelationTypeId: string;
+
+  /**
+   * 关系起点 AtomInstance 的标识。
+   * 起点和终点方向由 SemanticRelationTypeDefinition
+   * 对应的 coreRelationKind 决定。
+   */
+  readonly sourceAtomId: string;
+
+  /** 关系终点 AtomInstance 的标识。 */
+  readonly targetAtomId: string;
+
+  /**
+   * 当前具体关系携带的限定信息。
+   * 结构由关系类型的 qualifierSchemaRef 验证。
+   */
+  readonly qualifiers?: Readonly<Record<string, unknown>>;
+}
+```
+
+```ts
+type CoreKind =
+  | "principal"
+  | "activity"
+  | "entity";
+```
+
+```ts
+type Status =
+    | "experimental"
+    | "stable"
+    | "deprecated";
+```
+
+</div>
+
+
+
 # Agent Loop 的终止条件
 
 在文章 [深入解析 Codex 智能体循环](https://openai.com/zh-Hans-CN/index/unrolling-the-codex-agent-loop/) 中，OpenAI 归纳了一种最容易的范式用于推进 Agent Loop。在文章中，整个循环停止的条件是，“直至模型不再发起工具调用，转而生成一条面向用户的消息（在 OpenAI 模型中称为助手消息）”。但是其问题在于，以“生成助手消息”为标志判断 Agent Loop 从而终止当前轮对话，本质上是 **“通过形式判断终止”** ，而非 **内容** 。

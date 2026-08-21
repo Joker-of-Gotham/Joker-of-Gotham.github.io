@@ -1592,6 +1592,22 @@ pre.astro-code[data-lang^="MERMAID"]::before { color: #9dabbe; }
 .content .katex-display { overflow-x: auto; overflow-y: hidden; padding: var(--space-2) 0; }
 .content .katex-error { display: block; max-width: 100%; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
 
+/* 双栏代码块：用于成对展示接口/类型定义 */
+.content .code-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  align-items: start;
+}
+.content .code-grid > pre.astro-code {
+  margin: 0;
+  min-width: 0;
+}
+@media (max-width: 720px) {
+  .content .code-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Callouts ── */
 .callout {
   border-left: 3px solid var(--accent-blue);
