@@ -1,237 +1,273 @@
-# 设计令牌与调色板规范
+# Lunar Signal Observatory 设计令牌
 
-本文件规定站点色彩、字体、间距、圆角、阴影等设计令牌（design tokens）的取用方式。
+> 规范意图：[`DESIGN.md`](../DESIGN.md)<br>
+> 实现合同：[`design-system/MASTER.md`](../design-system/MASTER.md)<br>
+> 运行时事实源：[`src/styles/tokens.css`](../src/styles/tokens.css)<br>
+> 快照日期：2026-08-28
 
-**事实源**：[src/styles/tokens.css](../src/styles/tokens.css)（令牌定义）+ [src/styles/global.css](../src/styles/global.css)（组件样式）。本文档与样式冲突时以样式为准。令牌值是**当前快照**，以 tokens.css 为准。
+本文件是令牌注册表与使用指南，不复制组件样式。若文档和值发生漂移，应在同一变更中修正；不得以“现有组件就是这样”为理由绕过令牌系统。
 
----
+## 1. 三层架构
 
-## 一、核心原则
-
-1. **用 token，不要写死十六进制色值**。写组件/改样式时一律引用 `var(--xxx)`。
-2. 深色为默认（`color-scheme: dark`），`@media (prefers-color-scheme: light)` 下自动切换浅色变体——引用背景/文字/边框 token 时会自动跟随，**不要为浅色模式单独写值**。
-3. 新颜色需求优先复用现有调色板；确需新色，先在 tokens.css 加 token，再在本文档登记。
-
----
-
-## 二、背景层（Background depth）
-
-| Token | 深色值 | 用途 |
-|------|------|------|
-| `--bg-void` | `#030508` | 最底层（hero/全屏背景） |
-| `--bg-base` | `#080d18` | 页面基础背景 |
-| `--bg-elevated` | `rgba(14,22,38,0.72)` | 卡片/浮层 |
-| `--bg-overlay` | `rgba(20,32,54,0.55)` | 遮罩层 |
-| `--bg-muted` | `#0c1523` | 弱化背景（legacy 别名） |
-| `--bg-surface` | = `--bg-elevated` | 表面（legacy 别名） |
-| `--bg-surface-soft` | `rgba(18,30,48,0.42)` | 轻表面 |
-
----
-
-## 三、玻璃拟态（Glass tiers）
-
-Apple Liquid Glass 风格。三层 blur + 透明度：
-
-| Token | 值 |
-|------|------|
-| `--glass-blur-thin` | `blur(8px)` |
-| `--glass-blur-regular` | `blur(16px)` |
-| `--glass-blur-thick` | `blur(24px)` |
-| `--glass-bg-thin` | `rgba(8,13,24,0.45)` |
-| `--glass-bg-regular` | `rgba(12,18,32,0.5)` |
-| `--glass-bg-thick` | `rgba(10,16,28,0.72)` |
-| `--glass-border` | `rgba(255,255,255,0.06)` |
-| `--glass-border-hover` | `rgba(255,255,255,0.12)` |
-| `--glass-highlight` | `rgba(255,255,255,0.03)` |
-
----
-
-## 四、文字（Text）
-
-| Token | 深色值 | 用途 |
-|------|------|------|
-| `--text-strong` | `#f4f7fb` | 标题/强调 |
-| `--text-default` | `#d0d8e5` | 正文 |
-| `--text-muted` | `#8899ad` | 次要/说明 |
-
----
-
-## 五、强调色调色板（Accent palette）★
-
-站点核心 5 色谱。**框的颜色、强调字体、图标、链接 hover 等都从这里取。**
-
-| Token | 色号 | 色相 | 典型用途 |
-|------|------|------|------|
-| `--accent-cyan` | `#00e5cc` | 青绿 | 主色（primary）、proof/flow 提示框、status-now、glow |
-| `--accent-blue` | `#3d7dff` | 蓝 | 次色（secondary）、info 提示框、普通引用、status-next |
-| `--accent-violet` | `#8b5cf6` | 紫 | example 提示框、装饰强调 |
-| `--accent-amber` | `#f59e0b` | 琥珀 | attention/warning 提示框、status-blocked |
-| `--accent-rose` | `#f43f5e` | 玫红 | 危险/错误（当前未分配语义类，保留备用） |
-
-### 5.1 与提示框的映射
-
-| 提示框类 | 用色 |
-|------|------|
-| `prompt-info` | `--accent-blue` |
-| `prompt-proof` | `--accent-cyan` |
-| `prompt-flow` | `--accent-cyan` |
-| `prompt-attention` | `--accent-amber` |
-| `prompt-warning` | `--accent-amber`（已弃用，用 attention） |
-| `prompt-example` | `--accent-violet` |
-
-### 5.2 Legacy 别名（仍可用）
-
-- `--accent-primary` = `--accent-cyan`
-- `--accent-secondary` = `--accent-blue`
-- `--accent-warm` = `--accent-amber`
-
-### 5.3 取色技巧（color-mix）
-
-提示框底色用 `color-mix(in srgb, <accent> 8%, transparent)` 配 8% 透明度（见 global.css）。需要更低/更高浓度时照此调百分比，**不要直接写 rgba**：
-
-```css
-background: color-mix(in srgb, var(--accent-violet) 8%, transparent);
-border-left-color: var(--accent-violet);
+```text
+Layer 1 — Base       --primitive-*      OKLCH、字体栈、尺寸、时长
+Layer 2 — Semantic   --color-* 等       background、foreground、primary、motion
+Layer 3 — Component  --component-*      button、card、nav、article、canvas、audio
 ```
 
----
+读取规则：
 
-## 六、状态色（Status）
+- 新组件优先读取 Layer 3；没有组件合同才读取 Layer 2。
+- 禁止组件直接读取 Layer 1。
+- Dark / Light 只重映射 Layer 2 颜色；Layer 1 和组件结构不复制。
+- 历史别名继续可用，但只作为迁移桥，不作为新命名范例。
+- 仓库当前未安装 Tailwind，因此运行时不输出 `@theme`；未来引入 Tailwind v4 时按同名语义 token 一对一映射，不能建立第二套颜色事实源。
 
-用于 roadmap 节点状态。
+## 2. Primitive palette
 
-| Token | 值 | 语义 |
-|------|------|------|
-| `--status-now` | `--accent-cyan` | 正在做 |
-| `--status-next` | `--accent-blue` | 下一个 |
-| `--status-later` | `#8899ad` | 以后 |
-| `--status-done` | `#34d399` | 已完成（绿） |
-| `--status-blocked` | `#fb923c` | 受阻（橙） |
+十六进制仅用于对应已批准 Brief；CSS 中的源值全部为 OKLCH。
 
-对应枚举：`now` / `next` / `later` / `done` / `blocked`（见 frontmatter 规范）。
+### 2.1 Lunar neutral
 
----
+| Token | OKLCH | 用途 |
+|---|---|---|
+| `--primitive-color-void-950` | `oklch(0.1229 0.0108 271.39)` | Void，深空最底层 |
+| `--primitive-color-ink-900` | `oklch(0.1604 0.0152 272.20)` | Ink，深色页面底 |
+| `--primitive-color-ink-850` | `oklch(0.19 0.02 273)` | 深色抬升背景 |
+| `--primitive-color-ink-800` | `oklch(0.2162 0.0241 273.38)` | 深色 surface |
+| `--primitive-color-ink-750` | `oklch(0.2686 0.0323 273.83)` | 浅色正文 / 深色 strong surface |
+| `--primitive-color-ink-700` | `oklch(0.3056 0.0369 273.23)` | 可选深灰阶 |
+| `--primitive-color-ink-600` | `oklch(0.48 0.026 272)` | 浅色 muted text |
+| `--primitive-color-mist-500` | `oklch(0.7338 0.0186 264.45)` | 深色 muted text |
+| `--primitive-color-mist-300` | `oklch(0.8638 0.0187 269.07)` | 深色正文 |
+| `--primitive-color-paper-100` | `oklch(0.9264 0.0092 78.28)` | 浅色深层 / 暖纸 |
+| `--primitive-color-paper-50` | `oklch(0.9618 0.0086 84.57)` | Moon Paper |
+| `--primitive-color-white` | `oklch(1 0 0)` | 仅用于浅色抬升表面 |
 
-## 七、边框（Borders）
+### 2.2 Brand and status
 
-| Token | 值 | 用途 |
-|------|------|------|
-| `--border-default` | `rgba(136,153,173,0.18)` | 常规边框 |
-| `--border-subtle` | `rgba(255,255,255,0.04)` | 极轻分隔 |
+| 色组 | 300 | 500（批准锚点） | 700 | 语义 |
+|---|---|---|---|---|
+| Violet | `0.79 0.125 286` | `0.6642 0.1875 286.04` | `0.4714 0.1734 280.97` | 主信号、关键动作 |
+| Orbit Blue | `0.82 0.095 258.5` | `0.7240 0.1439 258.69` | `0.49 0.145 259` | 链接、轨道、信息 |
+| Afterlight Rose | `0.82 0.075 359` | `0.7371 0.1159 359.13` | `0.5116 0.128 358.13` | 个人彩蛋 |
+| Observatory Gold | `0.84 0.06 85` | `0.7494 0.0826 84.76` | `0.59 0.095 88` | 刻度、警告、稀有强调 |
+| Success | — | `0.72 0.12 165` | `0.49 0.105 165` | 完成 / 成功 |
+| Danger | — | `0.70 0.16 25` | `0.50 0.145 25` | 错误 / 危险 |
 
----
+表中三个数字依次为 OKLCH 的 L / C / H，实际变量含完整 `oklch()`。
 
-## 八、阴影（Shadows）
+## 3. Semantic color mapping
 
-| Token | 用途 |
-|------|------|
-| `--shadow-sm` / `--shadow-md` / `--shadow-lg` | 普通层深阴影 |
-| `--shadow-glow-sm` / `-md` / `-lg` | 带 cyan 辉光的阴影（主色发光） |
+| Semantic token | Void Observatory（暗） | Moon Paper Archive（亮） |
+|---|---|---|
+| `--color-background-deep` | void 950 | paper 100 |
+| `--color-background` | ink 900 | paper 50 |
+| `--color-background-raised` | ink 850 | white |
+| `--color-surface` | ink 800 | white |
+| `--color-surface-strong` | ink 750 | paper 100 |
+| `--color-foreground` | paper 50 | void 950 |
+| `--color-foreground-soft` | mist 300 | ink 750 |
+| `--color-muted` | mist 500 | ink 600 |
+| `--color-primary` | violet 500 | violet 700 |
+| `--color-secondary` | blue 500 | blue 700 |
+| `--color-accent` | rose 500 | rose 700 |
+| `--color-metal` | gold 500 | gold 700 |
+| `--color-link` | blue 300 | violet 700 |
+| `--color-focus-ring` | blue 500 | blue 700 |
+| `--color-success` | success 400 | success 700 |
+| `--color-warning` | gold 500 | gold 700 |
+| `--color-danger` | danger 400 | danger 700 |
+| `--color-info` | blue 500 | blue 700 |
 
-> glow 系列内置 `rgba(0,229,204,...)`（cyan）。需要其它色辉光时另起 token，不要局部改色号。
+每个交互 / 状态色有对应 `*-foreground`。边框通过语义前景色与透明色的 OKLCH 混合得到；普通分隔线不承担唯一状态信息，可交互边界使用 stronger token 和 focus ring。
 
----
+### 3.1 Scene bridge
 
-## 九、圆角（Radius）
+Three.js / WebGL 不复制颜色字面量，而从计算样式读取：
 
-| Token | 值 |
-|------|------|
-| `--radius-xs` | 8px |
-| `--radius-sm` | 12px |
-| `--radius-md` | 16px |
-| `--radius-lg` | 24px |
-| `--radius-xl` | 32px |
-| `--radius-pill` | 999px |
+- `--scene-fog-color`
+- `--scene-signal-color`
+- `--scene-orbit-color`
+- `--scene-afterlight-color`
+- `--scene-metal-color`
+- `--scene-particle-base`
 
-提示框用 `--radius-md`，按钮/标签多用 `--radius-sm` 或 pill。
+主题变化只需更新 CSS 映射。Shader 需要数字向量时，由统一 bridge 转换一次并更新 uniform。
 
----
+## 4. Component tokens
 
-## 十、间距（Spacing，8pt 基线）
+| Family | Tokens | 责任 |
+|---|---|---|
+| Button | `--component-button-primary-*`, `secondary-*`, `border`, `focus-ring` | 按钮状态基线 |
+| Card | `--component-card-bg*`, `border*`, `shadow*` | 卡片 / 档案表面 |
+| Field | `--component-field-bg*`, `edge*` | 开放式内容平面与局部光轨边缘 |
+| Nav | `--component-nav-bg`, `border`, `active` | 悬浮或档案导航 |
+| Form | `--component-form-bg`, `border`, `placeholder` | 输入与筛选 |
+| Article | `--component-article-*`, `--component-code-*` | 正文和代码；代码面固定深色以匹配 Shiki dark 输出 |
+| Canvas | `--component-canvas-*`, `--component-avatar-*` | Poster、2.5D 角色、环境信号 |
+| Audio | `--component-audio-control-*` | 用户主动启用的环境音控制 |
 
-| Token | 值 |
-|------|------|
-| `--space-1` | 4px |
-| `--space-2` | 8px |
-| `--space-3` | 12px |
-| `--space-4` | 16px |
-| `--space-5` | 20px |
-| `--space-6` | 24px |
-| `--space-8` | 32px |
-| `--space-10` | 40px |
-| `--space-12` | 48px |
-| `--space-16` | 64px |
-| `--space-20` | 80px |
-| `--space-24` | 96px |
-| `--space-32` | 128px |
+组件可以在自身作用域重映射 Layer 3 token，但不能把新的 raw 值塞入局部覆盖。例如某重大成果卡需要更强边框时，应将 `--component-card-border` 重映射到现有 `--color-primary` 混合值，而不是写十六进制。
 
----
+## 5. Typography
 
-## 十一、布局（Layout）
+### 5.1 Font stacks
 
-| Token | 值 |
-|------|------|
-| `--sidebar-width` | 280px |
-| `--main-max-width` | 1200px |
-| `--mobile-padding` | 16px |
-| `--tablet-padding` | 24px |
-| `--desktop-padding` | 40px |
+| Token | Stack / intent |
+|---|---|
+| `--font-display` | Space Grotesk；缺失 CJK 字形回退到 Source Han Serif SC / Noto Serif CJK SC |
+| `--font-sans` | Inter；中文回退到 Source Han Sans SC / Noto Sans CJK SC / 系统无衬线 |
+| `--font-mono` | JetBrains Mono → SFMono / Consolas / Liberation Mono |
 
----
+兼容别名：`--font-heading → --font-display`，`--font-body → --font-sans`。
 
-## 十二、字体（Typography）
+### 5.2 Fluid scale
 
-| Token | 字族 |
-|------|------|
-| `--font-body` | `"Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif` |
-| `--font-heading` | `"Space Grotesk", "Inter", "PingFang SC", sans-serif` |
-| `--font-mono` | `"JetBrains Mono", "SFMono-Regular", Consolas, monospace` |
+| Token | Range | Intended use |
+|---|---|---|
+| `--text-xs` | `0.75–0.8125rem` | 元数据、坐标 |
+| `--text-sm` | `0.8125–0.9rem` | UI label、图注 |
+| `--text-base` | `0.975–1.075rem` | 正文 |
+| `--text-lg` | `1.0875–1.25rem` | 导语、小标题 |
+| `--text-xl` | `1.25–1.5rem` | 卡片标题 |
+| `--text-2xl` | `1.5–1.95rem` | 章节次标题 |
+| `--text-3xl` | `1.9–2.65rem` | 页面标题 |
+| `--text-4xl` | `2.5–3.9rem` | 大章节标题 |
+| `--text-5xl` | `3.25–6rem` | 首页主标题 |
 
----
+所有条目由 `clamp()` 实现。行高语义为 `--leading-tight / heading / body / code`。新代码不能在媒体查询里写另一套固定字号。
 
-## 十三、动效（Motion）
+## 6. Spacing, layout, radius, and depth
 
-| Token | 值 |
-|------|------|
-| `--ease-out` | `cubic-bezier(0.16,1,0.3,1)` |
-| `--ease-spring` | `cubic-bezier(0.34,1.56,0.64,1)` |
-| `--ease-smooth` | `cubic-bezier(0.4,0,0.2,1)` |
-| `--duration-fast` | 150ms |
-| `--duration-normal` | 300ms |
-| `--duration-slow` | 500ms |
+### 6.1 Spacing
 
----
+四点基线：`--space-1/2/3/4/5/6/8/10/12/16/20/24/32` 对应 `0.25rem` 至 `8rem`。历史“8pt 基线”描述已废弃；偶数步仍自然落在 8pt 节奏上，奇数步用于细部对齐。
 
-## 十四、图片背景槽与占位
+### 6.2 Layout
 
-| Token | 用途 |
-|------|------|
-| `--about-bg-image` | About 横幅背景，默认 `none` |
-| `--hero-bg-overlay` | Hero 遮罩渐变（控制背景图明暗） |
-| `--about-bg-overlay` | About 遮罩渐变 |
-| `--cover-grad-1` … `--cover-grad-6` | 6 种无封面时的占位渐变 |
+| Token | Value | Role |
+|---|---:|---|
+| `--layout-reading-width` | `44rem` | 文章正文 |
+| `--layout-content-width` | `75rem` | 常规页面 |
+| `--layout-cinematic-width` | `100rem` | 电影化章节 |
+| `--layout-page-inline` | fluid `1–3.5rem` | 页面安全边距 |
+| `--layout-section-block` | fluid `4–9rem` | 章节节奏 |
+| `--layout-grid-gap` | fluid `1–2rem` | 网格间距 |
 
-调 Hero 遮罩透明度见 [image-guide.md](image-guide.md)。
+### 6.3 Radius
 
----
+`xs 6px`、`sm 10px`、`md 16px`、`lg 24px`、`xl 32px`、`orbit/full` 近似无限圆角。`--radius-pill` 与 `--radius-full` 都映射到 orbit，保留旧组件兼容。
 
-## 十五、浅色模式
+线条使用 `--line-hairline`（1px）或 `--line-emphasis`（2px）；组件不得自行发明第三种常规边框宽度。
 
-`@media (prefers-color-scheme: light)` 下自动覆盖以下 token（其余继承深色）：
+### 6.4 Depth
 
-- 背景：`--bg-void` / `--bg-base` / `--bg-elevated` / `--bg-overlay` / `--bg-muted` / `--bg-surface` / `--bg-surface-soft`
-- 玻璃：`--glass-bg-*` / `--glass-border*` / `--glass-highlight`
-- 文字：`--text-strong` / `--text-default` / `--text-muted`
-- 边框：`--border-default` / `--border-subtle`
-- 阴影：`--shadow-*` / `--shadow-glow-*`
+`--shadow-sm/md/lg` 对应普通表面、仪器浮层和对话层。Glow shadow 使用语义 primary 的透明混合，不再内嵌旧 cyan RGB。Glass blur 保留 thin 8px、regular 16px、thick 24px，但只有确实叠在场景 / 图像上方时才可用。
 
-**强调色 `--accent-*`、状态色 `--status-done/blocked`、圆角、间距、字体在浅色下不变**，因此彩色提示框/标签在两套主题下观感一致。
+## 7. Motion and reduced motion
 
----
+| Semantic token | Default | Use |
+|---|---:|---|
+| `--motion-duration-instant` | `0ms` | 即时状态 |
+| `--motion-duration-fast` | `120ms` | hover / tooltip |
+| `--motion-duration-normal` | `220ms` | 菜单 / 聚焦 |
+| `--motion-duration-slow` | `420ms` | 局部转场 |
+| `--motion-duration-cinematic` | `900ms` | 角色聚合 / 主题形态 |
 
-## 十六、新增/修改令牌的流程
+Easing：`standard` 用于状态，`out` 用于进入和反馈，`in` 用于离开，`spring` 只用于小位移弹性反馈。
 
-1. 在 [src/styles/tokens.css](../src/styles/tokens.css) 增改 token；若涉浅色，在 light media block 同步覆盖。
-2. 在 [src/styles/global.css](../src/styles/global.css) 用到的地方引用。
-3. 回到本文件登记 token 名、色号、用途、典型用法。
-4. 如该 token 对应提示框类，同步更新 [markdown-presentation.md](markdown-presentation.md) 的映射表。
+`prefers-reduced-motion: reduce` 或 `data-motion="reduced"` 会将有效时长设为 `1ms`、位移设为 `0px`，并将视差、粒子漂移、持续动画开关设为 0。运行时代码必须读取 `--motion-continuous-enabled`；不能只依赖 CSS 停掉一部分动画。
+
+兼容别名 `--duration-fast/normal/slow` 与 `--ease-out/spring/smooth` 已指向新的语义层。
+
+## 8. Theme application
+
+```html
+<!-- explicit user choice -->
+<html data-theme="light">
+
+<!-- manual accessibility choice -->
+<html data-motion="reduced">
+```
+
+没有 `data-theme` 时跟随系统；显式属性优先。默认 CSS 为深色，系统浅色映射使用 `:root:not([data-theme])`，因此不会覆盖手动深色。未来增加主题脚本时需在首屏绘制前应用已保存的属性，避免闪烁。
+
+## 9. Compatibility alias registry
+
+| Legacy token | Current mapping |
+|---|---|
+| `--bg-void/base/muted` | semantic backgrounds |
+| `--bg-elevated/surface` | card contract |
+| `--text-strong/default/muted` | semantic foreground roles |
+| `--accent-violet` | primary Signal Violet |
+| `--accent-blue` | secondary Orbit Blue |
+| `--accent-cyan` | secondary Orbit Blue（仅历史名称，已无 cyan primitive） |
+| `--accent-rose` | Afterlight accent |
+| `--accent-amber/yellow` | Observatory Gold / warning |
+| `--accent-green` | success |
+| `--status-*` | semantic status colors |
+| `--glass-*` | semantic surfaces and borders |
+| `--cover-grad-1…6` | theme-aware semantic gradients |
+| `--hero-bg-overlay`, `--about-bg-overlay` | theme-aware semantic overlays |
+
+删除兼容别名前必须用 `rg` 证明没有消费者，并执行检查与生产构建。不能盲目替换 `--text-*`：旧的 `--text-strong` 是颜色，而新的 `--text-xs…5xl` 是字号。
+
+## 10. Usage examples
+
+```css
+/* Preferred: Layer 3 contract */
+.signal-card {
+  color: var(--color-foreground);
+  background: var(--component-card-bg);
+  border: var(--line-hairline) solid var(--component-card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--component-card-shadow);
+}
+
+/* Acceptable: semantic role when no component contract exists */
+.observation-coordinate {
+  color: var(--color-muted);
+  font: var(--text-sm) / var(--leading-body) var(--font-mono);
+}
+
+/* Forbidden: primitive and raw visual value inside a component */
+.bad-example {
+  color: var(--primitive-color-violet-500);
+  background: #05060a;
+  margin: 18px;
+}
+```
+
+## 11. Contrast report
+
+The following core opaque pairs were calculated from the declared OKLCH anchors by conversion to clamped sRGB and WCAG 2.x relative luminance on 2026-08-28:
+
+| Pair | Ratio | Result |
+|---|---:|---|
+| Dark heading / background | 17.37:1 | AA / AAA |
+| Dark body / background | 12.83:1 | AA / AAA |
+| Dark muted / background | 8.23:1 | AA / AAA |
+| Dark primary text / primary | 6.23:1 | AA |
+| Dark secondary text / secondary | 8.23:1 | AA / AAA |
+| Dark accent text / accent | 8.23:1 | AA / AAA |
+| Dark warning text / warning | 9.05:1 | AA / AAA |
+| Light heading / background | 18.13:1 | AA / AAA |
+| Light body / background | 13.59:1 | AA / AAA |
+| Light muted / background | 5.87:1 | AA |
+| Light primary text / primary | 6.48:1 | AA |
+| Light secondary text / secondary | 5.70:1 | AA |
+| Light accent text / accent | 5.49:1 | AA |
+| Light warning text / warning | 4.91:1 | AA |
+| Light link / background | 6.48:1 | AA |
+
+This arithmetic check does not validate translucent glass, gradients, imagery, focus-ring adjacency, font rendering, P3 gamut mapping, or real component states. Those remain **unverified** until browser-level visual/accessibility testing.
+
+## 12. Change checklist
+
+1. Does the value express an existing semantic role?
+2. If not, is a new role justified across more than one component?
+3. Are dark, light, reduced motion, and static/no-WebGL states defined?
+4. Are all new assets/dependencies recorded in `docs/asset-provenance.md`?
+5. Were `DESIGN.md`, `MASTER.md`, this registry, and CSS kept consistent?
+6. Were only actually executed checks reported?
