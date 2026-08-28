@@ -19,6 +19,15 @@ test("homepage exposes the complete six-chapter observatory", async ({ page }) =
 
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Chika Komari");
   await expect(page.locator("[data-observatory-canvas]")).toHaveCount(1);
+  await expect(page.locator("#site-sidebar")).toHaveCount(1);
+  const drawerToggle = page.locator("#drawer-toggle");
+  await expect(drawerToggle).toBeVisible();
+  await expect(drawerToggle).toHaveAttribute("aria-expanded", "false");
+  await drawerToggle.click();
+  await expect(page.locator("#site-sidebar")).toHaveClass(/open/);
+  await expect(drawerToggle).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#site-sidebar")).not.toHaveClass(/open/);
 
   for (const chapterId of chapterIds) {
     await expect(page.locator(`[data-observatory-chapter="${chapterId}"]`)).toHaveCount(1);
@@ -155,11 +164,12 @@ test("live observatory canvas uses a resident procedural runtime without reloads
 
   await expect(root).toHaveAttribute("data-render-state", /ready|suspended|degraded/);
   await expect(page.locator("[data-observatory-canvas]")).toHaveCount(1);
-  await expect(root).toHaveAttribute("data-world-version", "4");
-  await expect(root).toHaveAttribute("data-avatar-representation", "procedural-threejs-articulated-volume", {
+  await expect(root).toHaveAttribute("data-world-version", "5");
+  await expect(root).toHaveAttribute("data-avatar-representation", "chapter-pose-raster", {
     timeout: 12_000,
   });
   await expect(root).toHaveAttribute("data-avatar-state", "ready");
+  await expect(page.locator("[data-observatory-character-layer] [data-character-slot]")).toHaveCount(2);
   await expect(page.locator("[data-observatory-world-plate]")).toHaveCSS("opacity", "0");
   const afterMotionProbe = await page.evaluate(() => {
     const probe = window.__observatoryMotionProbe as {
@@ -200,6 +210,21 @@ test("live observatory canvas uses a resident procedural runtime without reloads
   expect(requestedUrls.some((url) => /\/assets\/observatory\//iu.test(url))).toBe(false);
   expect(requestsDuringMotion.some((url) => /controller\.[^/]+\.js$/.test(url))).toBe(false);
   expect(requestsDuringMotion.some((url) => /\/assets\/img\/observatory\/.*\.(?:webp|png)(?:[?#]|$)/iu.test(url))).toBe(false);
+});
+
+test("desktop chapter guide crossfades between authored raster poses", async ({ page }) => {
+  await page.goto(homeUrl);
+  const root = page.locator("[data-observatory-root]");
+  await expect(root).toHaveAttribute("data-render-state", /ready|static|failed/, { timeout: 12_000 });
+  test.skip(await root.getAttribute("data-render-state") !== "ready", "Realtime WebGL unavailable");
+
+  const activeSlot = page.locator("[data-observatory-character-layer] [data-character-slot='active']");
+  await expect(root).toHaveAttribute("data-avatar-representation", "chapter-pose-raster");
+  await expect(activeSlot).toHaveAttribute("src", /guide-pose-dark-present\.webp|guide-pose-light-present\.webp/);
+
+  await page.locator("#observe").scrollIntoViewIfNeeded();
+  await expect(activeSlot).toHaveAttribute("src", /guide-pose-dark-point-up\.webp|guide-pose-light-point-up\.webp/);
+  await expect(activeSlot).toHaveAttribute("data-pose-state", "settled");
 });
 
 test("rapid viewport churn coalesces to one canvas backing-store resize", async ({ page }) => {
@@ -407,8 +432,24 @@ test("mobile layout has no horizontal overflow and keeps primary controls reacha
   const stageImage = await stages.first().locator(".observatory-mobile-actor-figure").evaluate(
     (element) => getComputedStyle(element).backgroundImage
   );
-  expect(stageImage).toContain("poses-runtime.webp");
+  expect(stageImage).toContain("guide-pose-");
   await context.close();
+});
+
+test("artifact cover title uses a transparent image scrim instead of an opaque card", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4321/artifacts/alignment-between-the-minds-icml-2026/");
+  const copy = page.locator(".archive-document-cover--image .archive-document-cover-copy");
+  await expect(copy).toBeVisible();
+  await expect(copy).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(copy).toHaveCSS("box-shadow", "none");
+  await expect(copy).toHaveCSS("backdrop-filter", "none");
+  const coverPixels = await page.locator(".archive-document-cover--image img").evaluate((image: HTMLImageElement) => {
+    const rect = image.getBoundingClientRect();
+    return { width: Math.round(rect.width), height: Math.round(rect.height), opacity: getComputedStyle(image).opacity };
+  });
+  expect(coverPixels.width).toBeGreaterThan(1000);
+  expect(coverPixels.height).toBeGreaterThan(280);
+  expect(coverPixels.opacity).toBe("1");
 });
 
 for (const viewport of [

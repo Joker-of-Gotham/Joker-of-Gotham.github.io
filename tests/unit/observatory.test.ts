@@ -106,7 +106,7 @@ describe("observatory chapter timeline", () => {
   });
 });
 
-describe("observatory world-v3 director", () => {
+describe("observatory world-v5 director", () => {
   it("travels a fixed macro world on independent camera and look splines", () => {
     const length = getObservatoryCameraRouteLength();
     const start = sampleObservatoryCameraRoute(0);
@@ -153,15 +153,27 @@ describe("observatory world-v3 director", () => {
     const initialQuaternion = world.group.quaternion.clone();
 
     world.update(interpolateObservatoryTimeline(4.2), 9, 1 / 30);
-    expect(world.group.name).toBe("ObservatoryWorldV4FullRealtime");
+    expect(world.group.name).toBe("ObservatoryWorldV5ArchitecturalRealtime");
+    expect(world.group.userData.worldVersion).toBe(5);
     expect(world.group.userData.fixedWorldCoordinates).toBe(true);
     expect(world.group.userData.livePlateDependency).toBe(false);
+    expect(world.group.userData.characterParticles).toBe(false);
+    expect(world.group.userData.referenceExamples).toEqual([
+      "webgpu_postprocessing_dof_basic",
+      "webgl_animation_keyframes",
+      "webgl_lightprobes_sponza",
+      "webgl_loader_3dtiles",
+    ]);
     expect(world.group.position).toEqual(initialPosition);
     expect(world.group.quaternion.angleTo(initialQuaternion)).toBeCloseTo(0);
     expect(world.group.getObjectByName("TerrainFieldSurface")).toBeTruthy();
     expect(world.group.getObjectByName("AtmosphericLunarSkyDome")).toBeTruthy();
     expect(world.group.getObjectByName("AtmosphericHorizonGlowBand")).toBeTruthy();
     expect(world.group.getObjectByName("TerrainContourAtmosphericLines")).toBeTruthy();
+    expect(world.group.getObjectByName("InteriorDepthOfFieldRoom")).toBeTruthy();
+    expect(world.group.getObjectByName("KeyframedSignalArchitecture")).toBeTruthy();
+    expect(world.group.getObjectByName("SponzaInspiredArchivePalace")).toBeTruthy();
+    expect(world.group.getObjectByName("ThreeDTilesInspiredTownField")).toBeTruthy();
     expect(world.group.getObjectByName("PeriapsisHeroDishAssembly")).toBeTruthy();
     expect(world.group.getObjectByName("OrbitalLatticeMegastructure")).toBeTruthy();
     expect(world.group.getObjectByName("TerracedObservatoryCity")).toBeTruthy();
@@ -246,5 +258,27 @@ describe("observatory multi-pose atlas director", () => {
     expect(resolveObservatoryAvatarPose(4.21, "back-look", -1)).toBe("back-look");
     expect(resolveObservatoryAvatarPose(4.12, "back-look", -1)).toBe("quick-turn");
     expect(resolveObservatoryAvatarPose(3.95, "present", 1, "low")).toBe("back-look");
+  });
+});
+
+describe("observatory authored raster guide assets", () => {
+  it("maps each chapter to a project-local transparent pose image", async () => {
+    const { OBSERVATORY_CHAPTER_GUIDE_POSES } = await import("../../src/lib/observatory/chapter-guide-poses");
+
+    expect(Object.keys(OBSERVATORY_CHAPTER_GUIDE_POSES)).toEqual([
+      "signal-gate",
+      "observe",
+      "structure",
+      "orchestrate",
+      "embodiment",
+      "archive-afterlight",
+    ]);
+
+    for (const pose of Object.values(OBSERVATORY_CHAPTER_GUIDE_POSES)) {
+      expect(pose.dark).toMatch(/^\/assets\/img\/observatory\/guide-pose-dark-[a-z-]+\.webp$/);
+      expect(pose.light).toMatch(/^\/assets\/img\/observatory\/guide-pose-light-[a-z-]+\.webp$/);
+      expect(pose.width).toBeGreaterThanOrEqual(768);
+      expect(pose.height).toBeGreaterThanOrEqual(1152);
+    }
   });
 });
