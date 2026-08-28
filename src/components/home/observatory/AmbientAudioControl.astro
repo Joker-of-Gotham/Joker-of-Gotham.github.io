@@ -1,0 +1,21 @@
+<div class="observatory-audio" data-observatory-audio data-audio-state="muted">
+  <button
+    class="observatory-control observatory-audio-toggle"
+    type="button"
+    data-audio-toggle
+    aria-pressed="false"
+    aria-label="开启环境音"
+  >
+    <span class="observatory-control-symbol" aria-hidden="true">
+      <span class="observatory-sound-wave"></span>
+      <span class="observatory-sound-wave"></span>
+      <span class="observatory-sound-wave"></span>
+    </span>
+    <span class="observatory-control-label">Ambient</span>
+  </button>
+  <label class="observatory-volume">
+    <span class="observatory-sr-only">环境音音量</span>
+    <input data-audio-volume type="range" min="0" max="100" step="1" value="42" aria-label="环境音音量" />
+  </label>
+  <span class="observatory-sr-only" data-audio-status aria-live="polite">环境音默认关闭</span>
+</div>

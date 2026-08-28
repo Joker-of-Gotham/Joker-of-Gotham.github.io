@@ -1,0 +1,58 @@
+---
+import AmbientAudioControl from "./AmbientAudioControl.astro";
+
+const chapters = [
+  { id: "signal-gate", label: "Gate", coordinate: "00" },
+  { id: "observe", label: "Observe", coordinate: "01" },
+  { id: "structure", label: "Structure", coordinate: "02" },
+  { id: "orchestrate", label: "Orchestrate", coordinate: "03" },
+  { id: "embodiment", label: "Embodiment", coordinate: "04" },
+  { id: "archive-afterlight", label: "Afterlight", coordinate: "05" }
+] as const;
+---
+
+<header class="observatory-nav-shell">
+  <a class="observatory-brand" href="#signal-gate" aria-label="返回月面信号观测站入口">
+    <span class="observatory-brand-mark" aria-hidden="true"></span>
+    <span>
+      <strong>Lunar Signal</strong>
+      <small>Observatory</small>
+    </span>
+  </a>
+
+  <nav class="observatory-chapter-nav" aria-label="首页章节">
+    <ol>
+      {chapters.map((chapter, index) => (
+        <li>
+          <a
+            href={`#${chapter.id}`}
+            data-observatory-nav-link
+            aria-current={index === 0 ? "location" : undefined}
+          >
+            <span aria-hidden="true">{chapter.coordinate}</span>
+            <strong>{chapter.label}</strong>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <div class="observatory-nav-actions">
+    <a class="observatory-control" href="/search/" aria-label="搜索研究档案">
+      <span class="observatory-control-symbol" aria-hidden="true">⌕</span>
+      <span class="observatory-control-label">Search</span>
+    </a>
+    <button
+      class="observatory-control"
+      type="button"
+      data-theme-toggle
+      data-observatory-theme-toggle
+      aria-label="切换主题"
+      aria-pressed="false"
+    >
+      <span class="observatory-control-symbol observatory-theme-symbol" aria-hidden="true"></span>
+      <span class="observatory-control-label" data-theme-label>Theme</span>
+    </button>
+    <AmbientAudioControl />
+  </div>
+</header>

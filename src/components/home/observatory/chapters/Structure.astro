@@ -1,0 +1,52 @@
+---
+import type { ObservatoryTrack } from "@/lib/observatory/types";
+import MobileActorStage from "../MobileActorStage.astro";
+
+interface Props {
+  tracks: ObservatoryTrack[];
+}
+
+const { tracks } = Astro.props;
+---
+
+<section
+  class="observatory-chapter observatory-chapter--structure"
+  id="structure"
+  data-observatory-chapter="structure"
+  aria-labelledby="structure-title"
+>
+  <div class="observatory-chapter-frame observatory-chapter-frame--wide">
+    <header class="observatory-section-heading">
+      <p class="observatory-kicker"><span aria-hidden="true">LSO / 02</span>Structure</p>
+      <h2 id="structure-title">将研究路线组织成一张可追踪的星图</h2>
+      <p>每条轨道都连接问题、阶段、证据与下一步，而不是只展示一个抽象进度数字。</p>
+    </header>
+    <MobileActorStage pose="walk-profile" chapter="GUIDE / 02" cue="ENTER THE ORBIT" />
+    {
+      tracks.length > 0 ? (
+        <div class="observatory-track-grid">
+          {tracks.map((track, index) => {
+            const progress = Math.min(100, Math.max(0, track.progress ?? 0));
+            const content = (
+              <>
+                <div class="observatory-track-head">
+                  <span aria-hidden="true">0{index + 1}</span>
+                  {track.status && <small>{track.status}</small>}
+                </div>
+                <h3>{track.title}</h3>
+                {track.summary && <p>{track.summary}</p>}
+                <div class="observatory-progress" role="progressbar" aria-label={`${track.title} 进度`} aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress}>
+                  <span style={`--track-progress:${progress}%;`}></span>
+                </div>
+              </>
+            );
+            return track.href ? <a class="observatory-track" href={track.href}>{content}</a> : <article class="observatory-track">{content}</article>;
+          })}
+        </div>
+      ) : (
+        <p class="observatory-empty">路线图节点将在接入内容查询后显示；完整路线图仍可直接访问。</p>
+      )
+    }
+    <a class="observatory-text-link" href="/roadmap/">打开完整研究路线图 <span aria-hidden="true">↗</span></a>
+  </div>
+</section>

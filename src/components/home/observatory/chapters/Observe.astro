@@ -1,0 +1,41 @@
+---
+import type { ObservatoryMetric } from "@/lib/observatory/types";
+import MobileActorStage from "../MobileActorStage.astro";
+
+interface Props {
+  metrics: ObservatoryMetric[];
+}
+
+const { metrics } = Astro.props;
+---
+
+<section
+  class="observatory-chapter observatory-chapter--observe"
+  id="observe"
+  data-observatory-chapter="observe"
+  aria-labelledby="observe-title"
+>
+  <div class="observatory-chapter-frame observatory-chapter-frame--trailing">
+    <div class="observatory-copy observatory-panel">
+      <p class="observatory-kicker"><span aria-hidden="true">LSO / 01</span>Observe</p>
+      <h2 id="observe-title">从复杂网络中听见微弱但可行动的信号</h2>
+      <p class="observatory-description">结构、语义与心理信号并不是三座孤岛；它们共同指向更可靠、更个性化的决策系统。</p>
+      <MobileActorStage pose="point-up" chapter="GUIDE / 01" cue="TRACE THE SIGNAL" />
+      {
+        metrics.length > 0 ? (
+          <dl class="observatory-metrics">
+            {metrics.map((metric) => (
+              <div>
+                <dt>{metric.label}</dt>
+                <dd>{metric.value}</dd>
+                {metric.detail && <dd class="observatory-metric-detail">{metric.detail}</dd>}
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p class="observatory-empty">观测指标正在校准，研究内容仍可从档案入口访问。</p>
+        )
+      }
+    </div>
+  </div>
+</section>

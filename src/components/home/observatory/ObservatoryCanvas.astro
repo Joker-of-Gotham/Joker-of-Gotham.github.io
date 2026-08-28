@@ -1,0 +1,58 @@
+---
+interface Props {
+  posterDark?: string;
+  posterLight?: string;
+  worldPlateDark?: string;
+  worldPlateLight?: string;
+  worldPlateDarkCompact?: string;
+  worldPlateLightCompact?: string;
+}
+
+const {
+  posterDark = "/assets/img/observatory/signal-guide-dark-poster.webp",
+  posterLight = "/assets/img/observatory/signal-guide-light-poster.webp",
+  worldPlateDark = "/assets/img/observatory/observatory-world-dark.webp",
+  worldPlateLight = "/assets/img/observatory/observatory-world-light.webp",
+  worldPlateDarkCompact = "/assets/img/observatory/observatory-world-dark-compact.webp",
+  worldPlateLightCompact = "/assets/img/observatory/observatory-world-light-compact.webp"
+} = Astro.props;
+---
+
+<div class="observatory-visual" data-observatory-visual aria-hidden="true">
+  <img
+    class="observatory-world-plate"
+    data-observatory-themed-visual
+    data-observatory-world-plate
+    data-dark-source={worldPlateDark}
+    data-light-source={worldPlateLight}
+    data-dark-compact-source={worldPlateDarkCompact}
+    data-light-compact-source={worldPlateLightCompact}
+    src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+    alt=""
+    width="1774"
+    height="887"
+    decoding="async"
+    fetchpriority="high"
+  />
+  <div class="observatory-poster-field">
+    <span class="observatory-poster-orbit observatory-poster-orbit--outer"></span>
+    <span class="observatory-poster-orbit observatory-poster-orbit--inner"></span>
+    <span class="observatory-poster-moon"></span>
+    <img
+      class="observatory-poster-avatar"
+      data-observatory-themed-visual
+      data-observatory-poster
+      data-dark-source={posterDark}
+      data-light-source={posterLight}
+      src={posterDark}
+      alt=""
+      width="1024"
+      height="1536"
+      decoding="async"
+      fetchpriority="high"
+    />
+  </div>
+  <canvas class="observatory-canvas" data-observatory-canvas aria-hidden="true"></canvas>
+  <div class="observatory-visual-vignette"></div>
+  <div class="observatory-visual-grid"></div>
+</div>

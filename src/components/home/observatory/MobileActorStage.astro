@@ -1,0 +1,20 @@
+---
+import type { ObservatoryAvatarPose } from "@/lib/observatory/types";
+
+interface Props {
+  pose: ObservatoryAvatarPose;
+  chapter: string;
+  cue: string;
+}
+
+const { pose, chapter, cue } = Astro.props;
+---
+
+<div class="observatory-mobile-actor-stage" data-pose={pose} aria-hidden="true">
+  <span class="observatory-mobile-actor-meta">
+    <small>{chapter}</small>
+    <strong>{cue}</strong>
+  </span>
+  <span class="observatory-mobile-actor-orbit"></span>
+  <span class="observatory-mobile-actor-figure"></span>
+</div>

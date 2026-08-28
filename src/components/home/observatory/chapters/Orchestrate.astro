@@ -1,0 +1,46 @@
+---
+import type { ObservatoryEntry } from "@/lib/observatory/types";
+import MobileActorStage from "../MobileActorStage.astro";
+
+interface Props {
+  artifacts: ObservatoryEntry[];
+}
+
+const { artifacts } = Astro.props;
+---
+
+<section
+  class="observatory-chapter observatory-chapter--orchestrate"
+  id="orchestrate"
+  data-observatory-chapter="orchestrate"
+  aria-labelledby="orchestrate-title"
+>
+  <div class="observatory-chapter-frame observatory-chapter-frame--orchestrate">
+    <div class="observatory-copy">
+      <p class="observatory-kicker"><span aria-hidden="true">LSO / 03</span>Orchestrate</p>
+      <h2 id="orchestrate-title">让模型、数据、Agent 与证据形成可复用的工作流</h2>
+      <p class="observatory-description">成果不是孤立的展示柜，而是可以回到研究路径中继续运转的仪器。</p>
+    </div>
+    <MobileActorStage pose="quick-turn" chapter="GUIDE / 03" cue="ORCHESTRATE" />
+    {
+      artifacts.length > 0 ? (
+        <div class="observatory-entry-stack">
+          {artifacts.slice(0, 4).map((entry, index) => (
+            <a class="observatory-entry" href={entry.href}>
+              <span class="observatory-entry-index" aria-hidden="true">A-{String(index + 1).padStart(2, "0")}</span>
+              <span>
+                <strong>{entry.title}</strong>
+                {entry.summary && <small>{entry.summary}</small>}
+              </span>
+              {entry.meta && <em>{entry.meta}</em>}
+              <span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="observatory-empty">成果档案正在同步，可从完整档案页继续浏览。</p>
+      )
+    }
+    <a class="observatory-text-link" href="/artifacts/">浏览全部成果档案 <span aria-hidden="true">↗</span></a>
+  </div>
+</section>

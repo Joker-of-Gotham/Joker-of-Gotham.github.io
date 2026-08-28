@@ -1,0 +1,43 @@
+---
+import type { ObservatoryHeroCopy } from "@/lib/observatory/types";
+import MobileActorStage from "../MobileActorStage.astro";
+
+interface Props {
+  hero: ObservatoryHeroCopy;
+}
+
+const { hero } = Astro.props;
+---
+
+<section
+  class="observatory-chapter observatory-chapter--gate is-active"
+  id="signal-gate"
+  data-observatory-chapter="signal-gate"
+  aria-labelledby="signal-gate-title"
+>
+  <div class="observatory-chapter-frame observatory-chapter-frame--leading">
+    <div class="observatory-copy observatory-copy--hero">
+      <p class="observatory-kicker"><span aria-hidden="true">LSO / 00</span>{hero.eyebrow ?? "Signal acquired"}</p>
+      <h1 id="signal-gate-title">{hero.title}</h1>
+      {hero.subtitle && <p class="observatory-lede">{hero.subtitle}</p>}
+      <MobileActorStage pose="present" chapter="GUIDE / 00" cue="SIGNAL RECEIVED" />
+      {hero.description && <p class="observatory-description">{hero.description}</p>}
+      {(hero.primaryAction || hero.secondaryAction) && (
+        <div class="observatory-actions">
+          {hero.primaryAction && <a class="observatory-button observatory-button--primary" href={hero.primaryAction.href}>{hero.primaryAction.label}</a>}
+          {hero.secondaryAction && <a class="observatory-button observatory-button--secondary" href={hero.secondaryAction.href}>{hero.secondaryAction.label}</a>}
+        </div>
+      )}
+    </div>
+
+    <aside class="observatory-coordinate" aria-label="当前观测坐标">
+      <span>SELENE ARC</span>
+      <strong>00° · 27′</strong>
+      <small>Implicit signal online</small>
+    </aside>
+  </div>
+  <a class="observatory-scroll-cue" href="#observe">
+    <span>进入观测轨道</span>
+    <span aria-hidden="true">↓</span>
+  </a>
+</section>

@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-08-28",
+  "assets": [
+    {
+      "output": "/assets/img/observatory/observatory-world-dark.webp",
+      "theme": "dark",
+      "sourceFile": "exec-2d8b4c62-cbf3-4049-8828-0b355bd8c07d.png",
+      "sourceSha256": "f83ac1a65eb855c61a554814d1ba492dcf62d8f4895e3f3f9e0b8deeebeb0156",
+      "width": 1774,
+      "height": 887,
+      "bytes": 194302,
+      "sha256": "ccc9bbd7a449433bbc2c4a628603ea84b4ac1233c682af6cdacf765aed09d250"
+    },
+    {
+      "output": "/assets/img/observatory/observatory-world-light.webp",
+      "theme": "light",
+      "sourceFile": "exec-3bf44cd3-a5d4-4cd3-a796-a9314f423ba8.png",
+      "sourceSha256": "455fe3243f452b6928d5501f0b491309eba4658f42a41f6a1dbbfcbf902c6726",
+      "width": 1774,
+      "height": 887,
+      "bytes": 291022,
+      "sha256": "9b4e9cdb2ae3f463e31e5a9f4c2b60fdd36c1ee047709c39ca3f5a3687bcbea9"
+    }
+  ]
+}

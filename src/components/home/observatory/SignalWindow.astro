@@ -1,0 +1,47 @@
+---
+import type { ObservatorySignalWindow } from "@/lib/observatory/types";
+
+interface Props extends ObservatorySignalWindow {
+  priority?: boolean;
+}
+
+const {
+  src,
+  alt,
+  caption = "",
+  eyebrow = "Memory signal",
+  href,
+  focalPosition = "center",
+  priority = false
+} = Astro.props;
+---
+
+<figure class="observatory-signal-window" style={`--signal-focal-position:${focalPosition};`}>
+  {
+    href ? (
+      <a href={href} class="observatory-signal-link">
+        <img
+          src={src}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          fetchpriority={priority ? "high" : "auto"}
+        />
+      </a>
+    ) : (
+      <img
+        src={src}
+        alt={alt}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        fetchpriority={priority ? "high" : "auto"}
+      />
+    )
+  }
+  {(eyebrow || caption) && (
+    <figcaption>
+      {eyebrow && <small>{eyebrow}</small>}
+      {caption && <span>{caption}</span>}
+    </figcaption>
+  )}
+</figure>

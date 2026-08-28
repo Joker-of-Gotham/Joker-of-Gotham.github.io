@@ -1,0 +1,95 @@
+{
+  "generatedAt": "2026-08-28",
+  "assets": [
+    {
+      "output": "/assets/img/observatory/signal-bocchi.webp",
+      "source": "public/assets/img/heroes/孤独摇滚-波奇.webp",
+      "width": 1217,
+      "height": 800,
+      "hasAlpha": false,
+      "bytes": 108318,
+      "sha256": "198668b10849535a49469f8c595b172a2ee38f9c9b56d77313910d50a3c00a13"
+    },
+    {
+      "output": "/assets/img/observatory/signal-april.webp",
+      "source": "public/assets/img/heroes/四月是你的谎言-薰和有马.webp",
+      "width": 1280,
+      "height": 721,
+      "hasAlpha": false,
+      "bytes": 113118,
+      "sha256": "e27e02b4d877098965f15f567dfefef2ec96487941c7f72a0458dbb306222bda"
+    },
+    {
+      "output": "/assets/img/observatory/signal-gbc.webp",
+      "source": "public/assets/img/heroes/GBC-五人合照2.webp",
+      "width": 1280,
+      "height": 720,
+      "hasAlpha": false,
+      "bytes": 165816,
+      "sha256": "c53f7bf940376b605162e11ee6ecb82ee13ec816727f637219d46203a39a4a76"
+    },
+    {
+      "output": "/assets/img/observatory/signal-komari.webp",
+      "source": "public/assets/img/heroes/败犬女主-小鞠知花.webp",
+      "width": 1280,
+      "height": 720,
+      "hasAlpha": false,
+      "bytes": 19660,
+      "sha256": "dce7d3244f11904981cf6c975d43622f529503adc1e289ed377338a3a969bc3f"
+    },
+    {
+      "output": "/assets/img/observatory/signal-kaguya.webp",
+      "source": "public/assets/img/heroes/超时空辉夜姬壁纸-二人合照3.webp",
+      "width": 1262,
+      "height": 800,
+      "hasAlpha": false,
+      "bytes": 71416,
+      "sha256": "0974bd723fa794bfd40ec485f824e3eb3de1cd17ef70b2ecdd6ecd34baafcf0e"
+    },
+    {
+      "output": "/assets/img/observatory/signal-guide-dark-sample.webp",
+      "source": "public/assets/img/observatory/signal-guide-dark.png",
+      "width": 480,
+      "height": 720,
+      "hasAlpha": true,
+      "bytes": 37104,
+      "sha256": "868251425d2c378878210c086d6cf616e385caa3145f8ea804f15cbd399d37cf"
+    },
+    {
+      "output": "/assets/img/observatory/signal-guide-light-sample.webp",
+      "source": "public/assets/img/observatory/signal-guide-light.png",
+      "width": 480,
+      "height": 720,
+      "hasAlpha": true,
+      "bytes": 40004,
+      "sha256": "250ca2a24cde41dc32a2d44feb0b93a03a0ce28c34703f81e433ca64eb7e4b0a"
+    },
+    {
+      "output": "/assets/img/observatory/signal-guide-dark-poster.webp",
+      "source": "public/assets/img/observatory/signal-guide-dark.png",
+      "width": 768,
+      "height": 1152,
+      "hasAlpha": true,
+      "bytes": 74112,
+      "sha256": "cce322b27e757b53ee3f484ff1617b1a929ac2900d7fcc5145a01b4a79652d48"
+    },
+    {
+      "output": "/assets/img/observatory/signal-guide-light-poster.webp",
+      "source": "public/assets/img/observatory/signal-guide-light.png",
+      "width": 768,
+      "height": 1152,
+      "hasAlpha": true,
+      "bytes": 80126,
+      "sha256": "1cc3999b8b636dd9d53137fb370946931d75a6a6411061d6d5097c4097ec6f51"
+    },
+    {
+      "output": "/assets/img/observatory/profile-avatar.webp",
+      "source": "public/assets/img/profile.png",
+      "width": 128,
+      "height": 128,
+      "hasAlpha": false,
+      "bytes": 5010,
+      "sha256": "319af8ab63628c7edcd3ec3582fb2d4a099933cc39142c37ad646120d5a24bd1"
+    }
+  ]
+}

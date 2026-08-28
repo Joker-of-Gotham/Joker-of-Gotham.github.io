@@ -1,270 +1,204 @@
-﻿---
+---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import Badge from "@/components/ui/Badge.astro";
-import Icon from "@/components/ui/Icon.astro";
 import CommitActivity from "@/components/home/CommitActivity.astro";
-import { getArtifacts, getPublishedBlogPosts, getRoadmapNodes, getSiteConfig, normalizeSlug, formatDate } from "@/lib/content/queries";
+import LunarObservatory from "@/components/home/observatory/LunarObservatory.astro";
+import {
+  formatDate,
+  getArtifacts,
+  getPublishedBlogPosts,
+  getRoadmapNodes,
+  getSiteConfig,
+  normalizeSlug,
+} from "@/lib/content/queries";
 import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
+import type {
+  ObservatoryEntry,
+  ObservatoryHeroCopy,
+  ObservatoryMetric,
+  ObservatorySignalWindow,
+  ObservatoryTrack,
+} from "@/lib/observatory/types";
 
 const [{ home }, posts, nodes, artifacts] = await Promise.all([
   getSiteConfig(),
   getPublishedBlogPosts(),
   getRoadmapNodes(),
-  getArtifacts()
+  getArtifacts(),
 ]);
-
-const featuredArtifacts = artifacts.filter((entry) => home?.featured_artifacts.includes(normalizeSlug(entry))).slice(0, 3);
-const latestPosts = posts.slice(0, 5);
-const githubUrl = home?.quick_links.find((item) => item.label.toLowerCase().includes("github"))?.url ?? "https://github.com/Joker-of-Gotham";
-const githubUsername = githubUrl.split("/").filter(Boolean).pop() ?? "Joker-of-Gotham";
-
-const summary = computeRoadmapPointSummary(nodes);
-const rootSlugSet = summary.rootSlugs;
 
 const normalizeCardSummary = (input: string) =>
   input
     .replace(/\r\n?/g, "\n")
     .replace(/<[^>]*>/g, " ")
-    .replace(/<[^>\n]*$/g, " ")
     .replace(/^\s{0,3}>\s?/gm, " ")
     .replace(/^\s{0,3}#{1,6}\s+/gm, " ")
     .replace(/^\s*\{:\s*(?:\.[a-zA-Z0-9_-]+\s*)+\}\s*$/gm, " ")
-    .replace(/\{:\s*(?:\.[a-zA-Z0-9_-]+\s*)+\}/g, " ")
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/\$\$[\s\S]*?\$\$/g, " ")
-    .replace(/\$\$[^$]*$/g, " ")
-    .replace(/\$[^$\n]+\$/g, " ")
-    .replace(/\$[^\n]*$/g, " ")
     .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/[*_`~#>]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
-const toCardSummary = (source: string, limit = 120) => {
+const toCardSummary = (source: string, limit = 132) => {
   const normalized = normalizeCardSummary(source);
-  if (normalized.length <= limit) return normalized;
-  return `${normalized.slice(0, limit).trim()}…`;
+  return normalized.length <= limit ? normalized : `${normalized.slice(0, limit).trim()}…`;
 };
+
 const fallbackHero = {
   system_label: "Implicit Signal Mining for Personalized Decision Systems",
   name: "Chika Komari",
   tagline: "A unified path across structural, semantic, and psychological signal mining",
   intro: "I focus on implicit signal mining in complex information networks for risk-aware and personalized decision systems.",
-  now: ["Advancing O1-KR1, O1-KR2, and O2-KR1 milestones"]
+  now: ["Advancing structural, semantic, and psychological signal-mining milestones"],
 };
-const hero = home?.hero
-  ? {
-      ...fallbackHero,
-      ...home.hero
-    }
-  : fallbackHero;
-const fallbackHeroMetrics = [
-  { label: "Publications / Preprint", value: "3", detail: "1 under review · 1 accepted · 1 preprint", icon: "paper" },
-  { label: "GPA / Rank", value: "4.04/5.00 · 15/154", detail: "Sun Yat-sen University", icon: "chart" },
-  { label: "Kaggle Models Views / Downloads", value: "2.7K+ / 1.0K+", detail: "CSIRO series", icon: "download" },
-  { label: "Internship", value: "Evolution Asset Management", detail: "AI Intern since Apr 2025", icon: "repo" }
-];
-const heroMetrics = home?.hero?.metrics?.length ? home.hero.metrics : fallbackHeroMetrics;
 
-const trackRows = Array.from(
+const hero = home?.hero ? { ...fallbackHero, ...home.hero } : fallbackHero;
+const currentObservation = hero.now?.[0]?.trim();
+
+const observatoryHero: ObservatoryHeroCopy = {
+  eyebrow: hero.system_label,
+  title: hero.name,
+  subtitle: hero.tagline,
+  description: [hero.intro, currentObservation ? `Current orbit — ${currentObservation}` : ""].filter(Boolean).join(" "),
+  primaryAction: {
+    label: home?.hero?.cta_primary_label?.trim() || "进入研究档案",
+    href: home?.hero?.cta_primary_url?.trim() || "/artifacts/",
+  },
+  secondaryAction: {
+    label: home?.hero?.cta_secondary_label?.trim() || "阅读最新文章",
+    href: home?.hero?.cta_secondary_url?.trim() || "/blog/",
+  },
+};
+
+const fallbackMetrics: ObservatoryMetric[] = [
+  { label: "Publications / Preprint", value: "3", detail: "1 under review · 1 accepted · 1 preprint" },
+  { label: "GPA / Rank", value: "4.04/5.00 · 15/154", detail: "Sun Yat-sen University" },
+  { label: "Kaggle Models", value: "2.7K+ / 1.0K+", detail: "Views / downloads across the CSIRO series" },
+  { label: "Current Role", value: "AI Intern", detail: "Evolution Asset Management · since Apr 2025" },
+];
+
+const observatoryMetrics: ObservatoryMetric[] = home?.hero?.metrics?.length
+  ? home.hero.metrics.map(({ label, value, detail }) => ({ label, value, detail })).slice(0, 6)
+  : fallbackMetrics;
+
+const summary = computeRoadmapPointSummary(nodes);
+const rootSlugSet = summary.rootSlugs;
+type RoadmapNode = (typeof nodes)[number];
+
+const observatoryTracks: ObservatoryTrack[] = Array.from(
   nodes.reduce((map, node) => {
     const list = map.get(node.data.track) ?? [];
     list.push(node);
     map.set(node.data.track, list);
     return map;
-  }, new Map<string, typeof nodes>()).entries()
+  }, new Map<string, typeof nodes>()).entries(),
 )
   .map(([track, list]) => {
+    const roots = list
+      .filter((node: RoadmapNode) => rootSlugSet.has(normalizeSlug(node)))
+      .sort((a: RoadmapNode, b: RoadmapNode) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+    const firstRoot = roots[0];
     const trackMetric = summary.trackMetrics.get(track);
-    const progress = trackMetric?.progress ?? 0;
 
     return {
-      track,
-      progress,
-      totalNodes: trackMetric?.nodeCount ?? list.length,
-      rootCount: trackMetric?.rootCount ?? 0,
-      nodes: list
-        .filter((node: (typeof list)[number]) => rootSlugSet.has(normalizeSlug(node)))
-        .sort((a: (typeof list)[number], b: (typeof list)[number]) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0))
+      title: track,
+      progress: trackMetric?.progress ?? 0,
+      summary: firstRoot
+        ? `${firstRoot.data.title} · ${trackMetric?.rootCount ?? roots.length} roots / ${trackMetric?.nodeCount ?? list.length} nodes`
+        : `${trackMetric?.nodeCount ?? list.length} active research nodes`,
+      href: firstRoot ? `/roadmap/${normalizeSlug(firstRoot)}/` : "/roadmap/",
+      status: firstRoot?.data.status,
     };
   })
-  .filter((row) => row.nodes.length > 0)
-  .sort((a, b) => a.track.localeCompare(b.track, "zh-CN"));
+  .filter((track) => track.title)
+  .sort((a, b) => a.title.localeCompare(b.title, "zh-CN"));
+
+const featuredSlugs = new Set(home?.featured_artifacts ?? []);
+const featuredArtifacts = artifacts.filter((entry) => featuredSlugs.has(normalizeSlug(entry))).slice(0, 4);
+
+const observatoryArtifacts: ObservatoryEntry[] = featuredArtifacts.map((entry) => ({
+  title: entry.data.title,
+  summary: toCardSummary(entry.data.summary),
+  href: `/artifacts/${normalizeSlug(entry)}/`,
+  meta: entry.data.type,
+  cover: entry.data.cover,
+}));
+
+const observatoryPosts: ObservatoryEntry[] = posts.slice(0, 5).map((entry) => ({
+  title: entry.data.title,
+  summary: toCardSummary(entry.data.summary?.trim() || entry.body.slice(0, 900)),
+  href: `/blog/${normalizeSlug(entry)}/`,
+  meta: formatDate(entry.data.date),
+  cover: entry.data.cover,
+}));
+
+const signals: ObservatorySignalWindow[] = [
+  {
+    src: "/assets/img/observatory/signal-bocchi.webp",
+    alt: "舞台灯光下抱着吉他的粉发少女",
+    eyebrow: "Band signal",
+    caption: "孤独并不等于沉默",
+    href: "/blog/",
+    focalPosition: "center 20%",
+  },
+  {
+    src: "/assets/img/observatory/signal-april.webp",
+    alt: "夕光中的少年与金发少女",
+    eyebrow: "Memory signal",
+    caption: "四月留下的共振",
+    focalPosition: "center 30%",
+  },
+  {
+    src: "/assets/img/observatory/signal-gbc.webp",
+    alt: "舞台灯光下并肩而立的少女乐队成员",
+    eyebrow: "Band signal",
+    caption: "把噪声写成自己的歌",
+    focalPosition: "center 25%",
+  },
+  {
+    src: "/assets/img/observatory/signal-komari.webp",
+    alt: "教室窗边的黑发少女",
+    eyebrow: "Daily signal",
+    caption: "日常是最微弱也最持久的观测",
+    focalPosition: "center 20%",
+  },
+  {
+    src: "/assets/img/observatory/signal-kaguya.webp",
+    alt: "暖色月光中的两位少女",
+    eyebrow: "Afterlight",
+    caption: "月光之后，信号仍在",
+    focalPosition: "right 20%",
+  },
+];
+
+const githubUrl = home?.quick_links.find((item) => item.label.toLowerCase().includes("github"))?.url
+  ?? "https://github.com/Joker-of-Gotham";
+const githubUsername = githubUrl.split("/").filter(Boolean).pop() ?? "Joker-of-Gotham";
 ---
 
-<BaseLayout title="Home">
-  <section slot="full-bleed" class="hero hero-modern">
-    <div class="hero-carousel" id="hero-carousel">
-      {[
-        { src: "/assets/img/heroes/孤独摇滚-波奇.webp", pos: "center 20%" },
-        { src: "/assets/img/heroes/四月是你的谎言-薰和有马.webp", pos: "center 30%" },
-        { src: "/assets/img/heroes/GBC-五人合照2.webp", pos: "center 25%" },
-        { src: "/assets/img/heroes/败犬女主-小鞠知花.webp", pos: "center 20%" },
-        { src: "/assets/img/heroes/超时空辉夜姬壁纸-二人合照3.webp", pos: "right 20%" },
-      ].map((slide, i) => (
-        <div class={`hero-carousel-slide${i === 0 ? " is-active" : ""}`}>
-          <img src={slide.src} alt="" loading={i === 0 ? "eager" : "lazy"} decoding="async" style={`object-position: ${slide.pos};`} />
-        </div>
-      ))}
-    </div>
-    <div class="hero-carousel-dots" id="hero-carousel-dots">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <button class={`hero-carousel-dot${i === 0 ? " is-active" : ""}`} data-idx={String(i)} aria-label={`Slide ${i + 1}`} />
-      ))}
-    </div>
-    <div class="hero-copy">
-      <div class="hero-kicker">
-        <Icon name="spark" size={14} />
-        <span>{hero.system_label}</span>
+<BaseLayout
+  title="Lunar Signal Observatory"
+  description="A cinematic research observatory for implicit signal mining, engineering systems, and afterlight archives."
+  variant="observatory"
+>
+  <LunarObservatory
+    slot="full-bleed"
+    hero={observatoryHero}
+    metrics={observatoryMetrics}
+    tracks={observatoryTracks}
+    artifacts={observatoryArtifacts}
+    posts={observatoryPosts}
+    signals={signals}
+  >
+    <section slot="supplement" class="observatory-supplement" aria-labelledby="commit-activity-title">
+      <div class="observatory-supplement-copy">
+        <p class="observatory-kicker"><span aria-hidden="true">LSO / LIVE</span>Public telemetry</p>
+        <h2 id="commit-activity-title">持续工作的轨迹，也是一种可验证信号</h2>
+        <p>当外部数据源不可用时，这一模块会保留清晰的降级状态，并始终提供 GitHub 原始入口。</p>
       </div>
-      <h1 class="hero-title">{hero.name}</h1>
-      <p class="hero-subtitle">{hero.tagline}</p>
-      <p class="hero-intro">{hero.intro}</p>
-
-      <div class="meta-row" style="animation: hero-entrance 600ms var(--ease-out) 450ms both; justify-content: center;">
-        {(hero.now ?? []).map((item: string) => (
-          <span class="tag-chip">
-            <Icon name="status-now" size={12} />
-            <span>{item}</span>
-          </span>
-        ))}
-      </div>
-    </div>
-
-    <div class="hero-metrics-grid">
-      {heroMetrics.map((metric, index: number) => (
-        <article class="card hero-metric" data-animate="fade-scale" style={`animation-delay:${150 + index * 100}ms`}>
-          <div class="card-body">
-            <div class="hero-metric-head">
-              <span class="hero-metric-icon"><Icon name={metric.icon ?? "spark"} size={16} /></span>
-              <p class="meta-row">{metric.label}</p>
-            </div>
-            <strong class="hero-metric-value">{metric.value}</strong>
-            {metric.detail && <p class="meta-row">{metric.detail}</p>}
-          </div>
-        </article>
-      ))}
-    </div>
-
-    <div class="scroll-indicator" aria-hidden="true">
-      <span>Scroll</span>
-      <svg class="scroll-indicator-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-        <path d="M12 5v14M5 12l7 7 7-7" />
-      </svg>
-    </div>
-  </section>
-
-  <div data-animate>
-    <CommitActivity username={githubUsername} githubUrl={githubUrl} />
-  </div>
-
-  <section class="section-stack section-spread" data-animate>
-    <div class="section-heading-row">
-      <h2>Roadmap Snapshot</h2>
-      <a class="text-link link-hover-line" href="/roadmap/">
-        View Full Roadmap
-        <Icon name="arrow-right" size={14} />
-      </a>
-    </div>
-
-    <div class="snapshot-scroll">
-      {trackRows.map((row) => (
-        <section class="snapshot-track" data-animate>
-          <div class="snapshot-head">
-            <h3>{row.track}</h3>
-            <span class="meta-row">Avg. progress {row.progress}% · {row.rootCount} roots / {row.totalNodes} nodes</span>
-          </div>
-          <div class="progress-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={row.progress}>
-            <span style={`width:${row.progress}%`} />
-          </div>
-          <div class="snapshot-node-row">
-            {row.nodes.map((node: (typeof row.nodes)[number]) => (
-              <a class="snapshot-node" href={`/roadmap/${normalizeSlug(node)}/`}>
-                <Badge status={node.data.status} />
-                <span>{node.data.title}</span>
-              </a>
-            ))}
-          </div>
-        </section>
-      ))}
-    </div>
-  </section>
-
-  <section class="section-stack section-spread" data-animate>
-    <div class="section-heading-row">
-      <h2>Featured Artifacts</h2>
-      <a class="text-link link-hover-line" href="/artifacts/">
-        Browse All Artifacts
-        <Icon name="arrow-right" size={14} />
-      </a>
-    </div>
-
-    <div class="editorial-grid">
-      {
-        featuredArtifacts.map((entry, idx) => (
-          <a class={`card ${idx === 0 ? "card--hero card--overlay" : ""}`} data-animate href={`/artifacts/${normalizeSlug(entry)}/`}>
-            {
-              entry.data.cover ? (
-                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading={idx === 0 ? "eager" : "lazy"} />
-              ) : (
-                <div class="card-cover placeholder-cover" data-variant={((idx % 6) + 1).toString()}><Icon name="repo" size={idx === 0 ? 32 : 20} /></div>
-              )
-            }
-            <div class="card-body">
-              <h3>{entry.data.title}</h3>
-              <p>{toCardSummary(entry.data.summary, idx === 0 ? 200 : 120)}</p>
-              <div class="meta-row">
-                <span class="tag-chip">{entry.data.type}</span>
-                {entry.data.tags.slice(0, 2).map((tag: string) => <span class="tag-chip">{tag}</span>)}
-              </div>
-            </div>
-          </a>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="section-stack section-spread" data-animate>
-    <div class="section-heading-row">
-      <h2>Latest Updates</h2>
-      <a class="text-link link-hover-line" href="/blog/">
-        Open Blog
-        <Icon name="arrow-right" size={14} />
-      </a>
-    </div>
-
-    <div class="editorial-grid-wide">
-      {
-        latestPosts.map((entry, idx) => (
-          <a class={`card ${idx === 0 ? "card--hero card--overlay" : ""}`} data-animate href={`/blog/${normalizeSlug(entry)}/`}>
-            {
-              entry.data.cover ? (
-                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading={idx === 0 ? "eager" : "lazy"} />
-              ) : (
-                <div class="card-cover placeholder-cover" data-variant={(((idx + 3) % 6) + 1).toString()}><Icon name="blog" size={idx === 0 ? 32 : 20} /></div>
-              )
-            }
-            <div class="card-body">
-              <h3>{entry.data.title}</h3>
-              <p>{toCardSummary(entry.data.summary?.trim().length ? entry.data.summary : entry.body.slice(0, 800), idx === 0 ? 200 : 132)}</p>
-              <div class="meta-row">
-                <span>{formatDate(entry.data.date)}</span>
-                <span class="tag-chip">{entry.data.collection}</span>
-              </div>
-            </div>
-          </a>
-        ))
-      }
-    </div>
-
-    <ul class="line-list" data-animate>
-      {(home?.changelog ?? []).map((item: string) => (
-        <li>
-          <Icon name="spark" size={14} />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  </section>
+      <CommitActivity username={githubUsername} githubUrl={githubUrl} />
+    </section>
+  </LunarObservatory>
 </BaseLayout>

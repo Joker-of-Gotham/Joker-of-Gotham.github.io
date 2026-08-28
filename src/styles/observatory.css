@@ -1,0 +1,1744 @@
+/* Lunar Signal Observatory homepage — B primary brand, A reading layer, C afterlight accent. */
+
+.observatory {
+  position: relative;
+  isolation: isolate;
+  width: 100vw;
+  max-width: none;
+  margin-inline: calc(50% - 50vw);
+  overflow: clip;
+  color: var(--color-foreground-soft);
+  background: var(--component-canvas-bg);
+  font-family: var(--font-sans);
+}
+
+.observatory *,
+.observatory *::before,
+.observatory *::after {
+  box-sizing: border-box;
+}
+
+.observatory a {
+  color: inherit;
+}
+
+.observatory-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.observatory-skip-link {
+  position: fixed;
+  inset-block-start: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: 100;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  color: var(--component-button-primary-text);
+  background: var(--component-button-primary-bg);
+  box-shadow: var(--shadow-md);
+  transform: translateY(calc(-100% - var(--space-6)));
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.observatory-skip-link:focus {
+  transform: translateY(0);
+}
+
+/* Fixed visual stage. It never owns pointer or semantic interaction. */
+.observatory-visual {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--component-canvas-poster-bg);
+}
+
+.observatory-canvas,
+.observatory-world-plate,
+.observatory-poster-field,
+.observatory-visual-vignette,
+.observatory-visual-grid {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.observatory-world-plate {
+  z-index: 0;
+  display: block;
+  max-width: none;
+  object-fit: cover;
+  object-position: 54% 50%;
+  opacity: 0.95;
+  filter: saturate(0.94) contrast(1.1) brightness(0.88);
+  transform: scale(1.1) translate3d(2%, 1%, 0);
+  transform-origin: center;
+  transition:
+    opacity var(--motion-duration-cinematic) var(--motion-ease-out),
+    filter var(--motion-duration-cinematic) var(--motion-ease-out),
+    transform 1.4s var(--motion-ease-out);
+}
+
+.observatory[data-resolved-theme="light"] .observatory-world-plate {
+  opacity: 0.96;
+  filter: saturate(0.9) contrast(1.1) brightness(0.98);
+}
+
+.observatory[data-active-chapter="observe"] .observatory-world-plate {
+  transform: scale(1.15) translate3d(-1%, 0, 0);
+}
+
+.observatory[data-active-chapter="structure"] .observatory-world-plate {
+  transform: scale(1.2) translate3d(-4%, -1%, 0);
+}
+
+.observatory[data-active-chapter="orchestrate"] .observatory-world-plate {
+  transform: scale(1.24) translate3d(-7%, 1%, 0);
+}
+
+.observatory[data-active-chapter="embodiment"] .observatory-world-plate {
+  transform: scale(1.28) translate3d(-10%, 3%, 0);
+}
+
+.observatory[data-active-chapter="archive-afterlight"] .observatory-world-plate {
+  transform: scale(1.16) translate3d(-5%, -2%, 0);
+}
+
+.observatory-canvas {
+  z-index: 1;
+  display: block;
+  opacity: 0;
+  transition: opacity var(--motion-duration-cinematic) var(--motion-ease-out);
+}
+
+.observatory-poster-field {
+  z-index: 2;
+  overflow: hidden;
+  opacity: 1;
+  transition: opacity var(--motion-duration-cinematic) var(--motion-ease-out),
+    filter var(--motion-duration-cinematic) var(--motion-ease-out);
+}
+
+.observatory-poster-field::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 72% 34%, color-mix(in oklch, var(--scene-signal-color) 22%, transparent), transparent 28%),
+    radial-gradient(circle at 18% 18%, color-mix(in oklch, var(--scene-orbit-color) 16%, transparent), transparent 32%),
+    radial-gradient(circle at 58% 82%, color-mix(in oklch, var(--scene-afterlight-color) 11%, transparent), transparent 30%);
+}
+
+.observatory-poster-avatar {
+  position: absolute;
+  inset-block-end: -13vh;
+  inset-inline-end: clamp(-8rem, -3vw, -1rem);
+  width: min(54vw, 46rem);
+  max-width: none;
+  height: auto;
+  border-radius: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 2rem 5rem color-mix(in oklch, var(--scene-signal-color) 18%, transparent));
+}
+
+.observatory-poster-moon {
+  position: absolute;
+  inset-block-start: 9vh;
+  inset-inline-start: 7vw;
+  width: clamp(10rem, 23vw, 23rem);
+  aspect-ratio: 1;
+  border: var(--line-hairline) solid color-mix(in oklch, var(--scene-particle-base) 24%, transparent);
+  border-radius: var(--radius-full);
+  background:
+    radial-gradient(circle at 34% 32%, color-mix(in oklch, var(--scene-particle-base) 42%, transparent), transparent 8%),
+    radial-gradient(circle at 62% 58%, color-mix(in oklch, var(--scene-fog-color) 38%, transparent), transparent 19%),
+    color-mix(in oklch, var(--scene-particle-base) 14%, transparent);
+  box-shadow: 0 0 5rem color-mix(in oklch, var(--scene-orbit-color) 11%, transparent);
+}
+
+.observatory-poster-orbit {
+  position: absolute;
+  inset-block-start: 45%;
+  inset-inline-start: 50%;
+  border: var(--line-hairline) solid color-mix(in oklch, var(--scene-orbit-color) 25%, transparent);
+  border-radius: var(--radius-full);
+  transform: translate(-50%, -50%) rotate(-13deg);
+}
+
+.observatory-poster-orbit--outer {
+  width: min(86vw, 76rem);
+  height: min(36vw, 29rem);
+}
+
+.observatory-poster-orbit--inner {
+  width: min(59vw, 50rem);
+  height: min(23vw, 18rem);
+  transform: translate(-50%, -50%) rotate(21deg);
+  border-color: color-mix(in oklch, var(--scene-metal-color) 23%, transparent);
+}
+
+.observatory-visual-vignette {
+  z-index: 3;
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 76%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 48%, transparent), transparent 26%, color-mix(in oklch, var(--color-background-deep) 68%, transparent));
+}
+
+.observatory[data-resolved-theme="light"] .observatory-visual-vignette {
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 48%, transparent), transparent 60%),
+    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 28%, transparent), transparent 28%, color-mix(in oklch, var(--color-background-deep) 52%, transparent));
+}
+
+.observatory-visual-grid {
+  z-index: 4;
+  opacity: 0.14;
+  background-image:
+    linear-gradient(color-mix(in oklch, var(--color-border) 36%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklch, var(--color-border) 36%, transparent) 1px, transparent 1px);
+  background-size: clamp(3rem, 7vw, 7rem) clamp(3rem, 7vw, 7rem);
+  mask-image: linear-gradient(90deg, transparent, transparent 35%, var(--color-background) 100%);
+}
+
+.observatory[data-render-state="ready"] .observatory-canvas,
+.observatory[data-render-state="suspended"] .observatory-canvas,
+.observatory[data-render-state="degraded"] .observatory-canvas {
+  opacity: 1;
+}
+
+.observatory[data-render-state="ready"] .observatory-poster-field,
+.observatory[data-render-state="suspended"] .observatory-poster-field {
+  opacity: 0;
+  filter: blur(var(--motion-distance-md));
+}
+
+.observatory[data-render-state="degraded"] .observatory-poster-field {
+  opacity: 0.34;
+}
+
+/* Floating navigation. */
+.observatory-nav-shell {
+  position: fixed;
+  inset-block-start: var(--space-4);
+  inset-inline: var(--layout-page-inline);
+  z-index: 45;
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) auto minmax(10rem, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 3.5rem;
+  padding: var(--space-2) var(--space-3);
+  border: var(--line-hairline) solid var(--component-nav-border);
+  border-radius: var(--radius-lg);
+  background: var(--component-nav-bg);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: var(--glass-blur-regular) saturate(1.14);
+}
+
+.observatory-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: max-content;
+  text-decoration: none;
+}
+
+.observatory-brand-mark {
+  position: relative;
+  width: 1.9rem;
+  aspect-ratio: 1;
+  border: var(--line-hairline) solid var(--scene-orbit-color);
+  border-radius: var(--radius-full);
+}
+
+.observatory-brand-mark::before,
+.observatory-brand-mark::after {
+  content: "";
+  position: absolute;
+  inset: 50%;
+  border-radius: var(--radius-full);
+  transform: translate(-50%, -50%);
+}
+
+.observatory-brand-mark::before {
+  width: 0.55rem;
+  aspect-ratio: 1;
+  background: var(--scene-signal-color);
+  box-shadow: 0 0 1.2rem color-mix(in oklch, var(--scene-signal-color) 66%, transparent);
+}
+
+.observatory-brand-mark::after {
+  width: 2.4rem;
+  height: 0.75rem;
+  border: var(--line-hairline) solid color-mix(in oklch, var(--scene-metal-color) 55%, transparent);
+  transform: translate(-50%, -50%) rotate(-19deg);
+}
+
+.observatory-brand > span:last-child {
+  display: grid;
+  line-height: 1.05;
+}
+
+.observatory-brand strong {
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  letter-spacing: 0.02em;
+}
+
+.observatory-brand small {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.observatory-chapter-nav ol {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.observatory-chapter-nav a {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 0fr;
+  align-items: center;
+  gap: 0;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding-inline: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color var(--motion-duration-fast) var(--motion-ease-out),
+    background var(--motion-duration-fast) var(--motion-ease-out),
+    grid-template-columns var(--motion-duration-normal) var(--motion-ease-out),
+    gap var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+.observatory-chapter-nav a span {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.observatory-chapter-nav a strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.observatory-chapter-nav a[aria-current="location"] {
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2);
+  color: var(--color-foreground);
+  background: color-mix(in oklch, var(--component-nav-active) 13%, transparent);
+}
+
+.observatory-chapter-nav a[aria-current="location"]::after {
+  content: "";
+  position: absolute;
+  inset-inline: var(--space-2);
+  inset-block-end: 0;
+  height: var(--line-emphasis);
+  border-radius: var(--radius-full);
+  background: var(--component-nav-active);
+}
+
+.observatory-nav-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.observatory-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border: var(--line-hairline) solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--component-audio-control-text);
+  background: transparent;
+  font: inherit;
+  font-size: var(--text-xs);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--motion-duration-fast) var(--motion-ease-out),
+    border-color var(--motion-duration-fast) var(--motion-ease-out),
+    background var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.observatory-control:hover,
+.observatory-control:active,
+.observatory-control[aria-pressed="true"] {
+  color: var(--color-foreground);
+  border-color: var(--component-button-border);
+  background: var(--component-audio-control-bg);
+}
+
+.observatory-control-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1rem;
+  color: var(--scene-orbit-color);
+  font-size: var(--text-lg);
+  line-height: 1;
+}
+
+.observatory-theme-symbol {
+  width: 0.9rem;
+  aspect-ratio: 1;
+  border: var(--line-hairline) solid currentColor;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+
+.observatory-audio {
+  display: flex;
+  align-items: center;
+}
+
+.observatory-audio-toggle {
+  min-width: 2.75rem;
+}
+
+.observatory-sound-wave {
+  display: block;
+  width: var(--line-emphasis);
+  height: 0.45rem;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  transform: scaleY(0.42);
+  transition: transform var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+.observatory-sound-wave:nth-child(2) {
+  height: 0.85rem;
+}
+
+.observatory-audio[data-audio-state="playing"] .observatory-sound-wave:first-child,
+.observatory-audio[data-audio-state="playing"] .observatory-sound-wave:last-child {
+  transform: scaleY(0.72);
+}
+
+.observatory-audio[data-audio-state="playing"] .observatory-sound-wave:nth-child(2) {
+  transform: scaleY(1);
+}
+
+.observatory-volume {
+  display: grid;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: width var(--motion-duration-normal) var(--motion-ease-out),
+    opacity var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+.observatory-audio:focus-within .observatory-volume,
+.observatory-audio[data-audio-state="playing"] .observatory-volume,
+.observatory-audio[data-audio-state="suspended"] .observatory-volume {
+  width: 4.5rem;
+  opacity: 1;
+}
+
+.observatory-volume input {
+  width: 4rem;
+  accent-color: var(--component-avatar-signal);
+}
+
+.observatory :where(a, button, input):focus-visible {
+  outline: var(--line-emphasis) solid var(--component-button-focus-ring);
+  outline-offset: 0.2rem;
+}
+
+/* Semantic narrative chapters. */
+.observatory-chapters {
+  position: relative;
+  z-index: 2;
+}
+
+.observatory-chapter {
+  position: relative;
+  display: grid;
+  align-items: center;
+  min-height: 112svh;
+  padding: var(--layout-section-block) var(--layout-page-inline);
+  scroll-margin-top: var(--space-32);
+}
+
+/* The two data-dense chapters use compact editorial grids below. Keeping them
+   vertically centred preserves a deliberate cinematic shot instead of making
+   their headings drift under the fixed instrument bar at the section centre. */
+.observatory-chapter--orchestrate,
+.observatory-chapter--afterlight {
+  align-items: center;
+}
+
+.observatory-chapter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background: linear-gradient(180deg, transparent, color-mix(in oklch, var(--color-background-deep) 55%, transparent), transparent);
+}
+
+.observatory-chapter-frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--layout-grid-gap);
+  width: min(100%, var(--layout-cinematic-width));
+  margin-inline: auto;
+}
+
+.observatory[data-render-state="ready"] .observatory-chapter-frame > * {
+  transition:
+    opacity var(--motion-duration-cinematic) var(--motion-ease-out),
+    transform var(--motion-duration-cinematic) var(--motion-ease-out),
+    filter var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+.observatory[data-render-state="ready"] .observatory-chapter:not(.is-active) .observatory-chapter-frame > * {
+  opacity: 0.48;
+  filter: saturate(0.72);
+  transform: translateY(var(--motion-distance-md));
+}
+
+.observatory-chapter-frame--leading > * {
+  grid-column: 1 / span 6;
+}
+
+.observatory-chapter-frame--trailing > * {
+  grid-column: 7 / -1;
+}
+
+.observatory-chapter-frame--wide > * {
+  grid-column: 1 / -1;
+}
+
+.observatory-chapter-frame--orchestrate {
+  align-items: start;
+}
+
+.observatory-chapter-frame--orchestrate > .observatory-copy {
+  grid-column: 1 / span 5;
+  grid-row: 1 / span 2;
+  padding-inline-end: var(--space-4);
+}
+
+.observatory-chapter-frame--orchestrate > .observatory-entry-stack {
+  grid-column: 6 / span 5;
+  grid-row: 1;
+  align-self: center;
+  margin-block-start: 0;
+}
+
+.observatory-chapter-frame--orchestrate > .observatory-text-link {
+  grid-column: 6 / span 5;
+  grid-row: 2;
+  margin-block-start: var(--space-3);
+}
+
+.observatory-chapter-frame--afterlight {
+  align-items: start;
+}
+
+.observatory-chapter-frame--afterlight > .observatory-section-heading {
+  grid-column: 1 / span 4;
+  grid-row: 1;
+}
+
+.observatory-chapter-frame--afterlight > .observatory-afterlight-layout {
+  grid-column: 5 / -1;
+  grid-row: 1 / span 2;
+}
+
+.observatory-chapter-frame--afterlight > .observatory-final-signal {
+  grid-column: 1 / span 4;
+  grid-row: 2;
+  align-self: end;
+}
+
+.observatory-chapter-frame--afterlight .observatory-section-heading h2 {
+  font-size: clamp(2.35rem, 3.7vw, 4.35rem);
+}
+
+.observatory-copy,
+.observatory-section-heading {
+  display: grid;
+  gap: var(--space-5);
+  align-content: center;
+  max-width: 47rem;
+}
+
+.observatory-copy--hero {
+  max-width: 50rem;
+}
+
+.observatory-copy h1,
+.observatory-copy h2,
+.observatory-section-heading h2 {
+  margin: 0;
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.observatory-copy h1 {
+  max-width: 10ch;
+  font-size: var(--text-5xl);
+}
+
+.observatory-copy h2,
+.observatory-section-heading h2 {
+  font-size: var(--text-4xl);
+}
+
+.observatory-kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  color: var(--color-foreground-soft);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.observatory-kicker span {
+  color: var(--color-foreground-soft);
+  font-weight: 600;
+}
+
+.observatory-lede {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-heading);
+  text-wrap: balance;
+}
+
+.observatory-description,
+.observatory-section-heading > p:last-child {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--color-foreground-soft);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+}
+
+.observatory-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-block-start: var(--space-3);
+}
+
+.observatory-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: var(--space-3) var(--space-5);
+  border: var(--line-hairline) solid var(--component-button-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out),
+    background var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.observatory-button:hover {
+  transform: translateY(calc(-1 * var(--motion-distance-sm)));
+}
+
+.observatory-button--primary {
+  color: var(--component-button-primary-text);
+  background: var(--component-button-primary-bg);
+}
+
+.observatory-button--primary:hover {
+  color: var(--component-button-primary-text);
+  background: var(--component-button-primary-bg-hover);
+}
+
+.observatory-button--secondary {
+  color: var(--component-button-secondary-text);
+  background: var(--component-button-secondary-bg);
+}
+
+.observatory-coordinate {
+  grid-column: 9 / -1 !important;
+  align-self: end;
+  justify-self: end;
+  display: grid;
+  gap: var(--space-1);
+  padding-inline-start: var(--space-4);
+  border-inline-start: var(--line-hairline) solid var(--scene-metal-color);
+  font-family: var(--font-mono);
+  text-align: end;
+}
+
+.observatory-coordinate span,
+.observatory-coordinate small {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+}
+
+.observatory-coordinate strong {
+  color: var(--color-foreground);
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.observatory-scroll-cue {
+  position: absolute;
+  inset-block-end: var(--space-8);
+  inset-inline-start: 50%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.75rem;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-decoration: none;
+  transform: translateX(-50%);
+}
+
+.observatory-panel {
+  position: relative;
+  padding: clamp(var(--space-6), 4vw, var(--space-10));
+  border: 0;
+  border-radius: 0;
+  background: var(--component-field-bg);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.observatory-panel::before,
+.observatory-panel::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  background: var(--component-field-edge);
+}
+
+.observatory-panel::before {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: min(72%, 34rem);
+  block-size: var(--line-hairline);
+}
+
+.observatory-panel::after {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: var(--line-hairline);
+  block-size: min(68%, 18rem);
+  background: linear-gradient(180deg, var(--color-secondary), transparent);
+}
+
+.observatory-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  padding: 0;
+  margin: var(--space-3) 0 0;
+}
+
+.observatory-metrics > div {
+  display: grid;
+  gap: var(--space-1);
+  padding-block-start: var(--space-3);
+  border-block-start: var(--line-hairline) solid var(--component-card-border);
+}
+
+.observatory-metrics dt {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.observatory-metrics dd {
+  margin: 0;
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.observatory-metrics .observatory-metric-detail {
+  margin: 0;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  line-height: var(--leading-heading);
+}
+
+.observatory-section-heading {
+  max-width: 61rem;
+  margin-block-end: var(--space-10);
+}
+
+.observatory-track-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(var(--space-5), 3vw, var(--space-10));
+}
+
+.observatory-track {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  min-height: 16rem;
+  padding: var(--space-6) var(--space-4) var(--space-5);
+  border: 0;
+  border-block-start: var(--line-hairline) solid var(--component-card-border);
+  border-radius: 0;
+  background: var(--component-field-bg);
+  box-shadow: none;
+  text-decoration: none;
+  transition:
+    transform var(--motion-duration-normal) var(--motion-ease-out),
+    border-color var(--motion-duration-normal) var(--motion-ease-out),
+    background var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+.observatory-track::before {
+  content: "";
+  position: absolute;
+  inset-block-start: calc(-1 * var(--line-hairline));
+  inset-inline-start: 0;
+  inline-size: 28%;
+  block-size: var(--line-emphasis);
+  background: var(--component-field-edge-active);
+  transform: scaleX(0.22);
+  transform-origin: left;
+  transition: transform var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+.observatory-track:hover {
+  transform: translateX(var(--motion-distance-sm));
+  border-color: var(--component-card-border-hover);
+  background: var(--component-field-bg-hover);
+}
+
+.observatory-track:hover::before,
+.observatory-track:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.observatory-track-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.observatory-track h3 {
+  margin: 0;
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+}
+
+.observatory-track p {
+  margin: 0;
+  color: var(--color-foreground-soft);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.observatory-progress {
+  align-self: end;
+  height: var(--line-emphasis);
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+}
+
+.observatory-progress span {
+  display: block;
+  width: var(--track-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--scene-signal-color);
+}
+
+.observatory-entry-stack {
+  display: grid;
+  gap: var(--space-2);
+  margin-block-start: var(--space-5);
+}
+
+.observatory-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 4.7rem;
+  padding: var(--space-3) var(--space-4);
+  border-block-start: var(--line-hairline) solid var(--component-card-border);
+  text-decoration: none;
+  transition:
+    padding-inline var(--motion-duration-normal) var(--motion-ease-out),
+    background var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+.observatory-entry::before {
+  content: "";
+  position: absolute;
+  inset-block: var(--space-3);
+  inset-inline-start: 0;
+  inline-size: var(--line-emphasis);
+  background: linear-gradient(180deg, transparent, var(--color-secondary), transparent);
+  opacity: 0;
+  transform: scaleY(0.2);
+  transition:
+    opacity var(--motion-duration-normal) var(--motion-ease-out),
+    transform var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+.observatory-entry:hover {
+  padding-inline: var(--space-5) var(--space-3);
+  background: var(--component-field-bg-hover);
+}
+
+.observatory-entry:hover::before,
+.observatory-entry:focus-visible::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+.observatory-entry-index {
+  color: var(--scene-metal-color);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.observatory-entry > span:nth-child(2) {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.observatory-entry strong {
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-heading);
+}
+
+.observatory-entry small,
+.observatory-entry em {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-style: normal;
+}
+
+.observatory-entry small {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.observatory-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  width: max-content;
+  margin-block-start: var(--space-5);
+  color: var(--color-link) !important;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.observatory-identity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-3) 0 0;
+}
+
+.observatory-identity-grid > div {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-inline-start: var(--line-hairline) solid var(--component-card-border);
+  border-radius: 0;
+  background: var(--component-field-bg);
+}
+
+.observatory-identity-grid dt {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+}
+
+.observatory-identity-grid dd {
+  margin: 0;
+  color: var(--color-foreground);
+  font-size: var(--text-sm);
+}
+
+.observatory-identity-panel {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklch, var(--color-background) 76%, transparent),
+    color-mix(in oklch, var(--color-background) 94%, transparent) 24%,
+    color-mix(in oklch, var(--color-background) 90%, transparent)
+  );
+  backdrop-filter: var(--glass-blur-regular);
+}
+
+.observatory-afterlight-layout {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.28fr);
+  gap: var(--layout-grid-gap);
+  align-items: start;
+}
+
+.observatory-post-list {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.observatory-post-list > a:not(.observatory-text-link) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 3.5rem;
+  padding: var(--space-3) 0;
+  border-block-end: var(--line-hairline) solid var(--component-card-border);
+  text-decoration: none;
+}
+
+.observatory-post-list > a > span,
+.observatory-post-list time {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.observatory-post-list strong {
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+}
+
+.observatory-signal-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.observatory-signal-window {
+  position: relative;
+  grid-column: span 2;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-block-start: var(--line-hairline) solid var(--component-card-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.observatory-signal-window:first-child,
+.observatory-signal-window:nth-child(2) {
+  grid-column: span 3;
+}
+
+.observatory-signal-window img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  object-fit: cover;
+  object-position: var(--signal-focal-position, center);
+  filter: saturate(0.82) contrast(1.03);
+  transition: transform var(--motion-duration-slow) var(--motion-ease-out),
+    filter var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+.observatory-signal-window:hover img {
+  transform: scale(1.025);
+  filter: saturate(0.98) contrast(1.03);
+}
+
+.observatory-signal-link {
+  display: block;
+}
+
+.observatory-signal-window figcaption {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  background: var(--component-field-bg);
+}
+
+.observatory-signal-window figcaption small {
+  color: var(--scene-afterlight-color);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.observatory-signal-window figcaption span {
+  color: var(--color-foreground);
+  font-size: var(--text-sm);
+}
+
+.observatory-final-signal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  align-items: flex-start;
+  flex-direction: column;
+  margin-block-start: var(--space-8);
+  padding-block-start: var(--space-5);
+  border-block-start: var(--line-hairline) solid var(--scene-afterlight-color);
+}
+
+/* Live telemetry coda: part of the observatory world, but outside the six authored chapters. */
+.observatory-supplement {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  gap: var(--layout-grid-gap);
+  width: min(100%, var(--layout-cinematic-width));
+  margin-inline: auto;
+  padding: 0 var(--layout-page-inline) var(--layout-section-block);
+}
+
+.observatory-supplement-copy {
+  align-self: start;
+  display: grid;
+  gap: var(--space-4);
+  padding-block-start: var(--space-4);
+}
+
+.observatory-supplement-copy h2 {
+  max-width: 14ch;
+  margin: 0;
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-display);
+}
+
+.observatory-supplement-copy > p:last-child {
+  max-width: 46ch;
+  margin: 0;
+  color: var(--color-foreground-soft);
+  line-height: var(--leading-body);
+}
+
+.observatory-supplement > .section-stack {
+  min-width: 0;
+  margin: 0;
+}
+
+.observatory-supplement .commit-activity-card {
+  border-color: var(--component-card-border);
+  background: var(--component-card-bg);
+  box-shadow: var(--component-card-shadow);
+  backdrop-filter: var(--glass-blur-regular);
+}
+
+.observatory-final-signal span {
+  color: var(--scene-afterlight-color);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+}
+
+.observatory-final-signal strong {
+  color: var(--color-foreground);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+}
+
+.observatory-empty {
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--line-hairline) dashed var(--component-card-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.observatory-mobile-actor-stage {
+  display: none;
+}
+
+/* Responsive collision handling. */
+@media (max-width: 1199px) {
+  .observatory-nav-shell {
+    grid-template-columns: auto 1fr auto;
+  }
+
+  .observatory-chapter-nav {
+    justify-self: center;
+  }
+
+  .observatory-control-label {
+    display: none;
+  }
+
+  .observatory-poster-avatar {
+    inset-inline-end: -12rem;
+    width: min(64vw, 43rem);
+  }
+
+  .observatory-world-plate {
+    object-position: 64% 50%;
+    transform: scale(1.18);
+  }
+
+  .observatory[data-active-chapter="observe"] .observatory-world-plate {
+    transform: scale(1.2) translate3d(-1%, 0, 0);
+  }
+
+  .observatory[data-active-chapter="structure"] .observatory-world-plate {
+    transform: scale(1.24) translate3d(-3%, -1%, 0);
+  }
+
+  .observatory[data-active-chapter="orchestrate"] .observatory-world-plate {
+    transform: scale(1.28) translate3d(-5%, 1%, 0);
+  }
+
+  .observatory[data-active-chapter="embodiment"] .observatory-world-plate {
+    transform: scale(1.31) translate3d(-7%, 2%, 0);
+  }
+
+  .observatory[data-active-chapter="archive-afterlight"] .observatory-world-plate {
+    transform: scale(1.21) translate3d(-3%, -1%, 0);
+  }
+
+  .observatory-chapter-frame--leading > * {
+    grid-column: 1 / span 7;
+  }
+
+  .observatory-chapter-frame--trailing > * {
+    grid-column: 6 / -1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .observatory-nav-shell {
+    inset-inline: var(--space-4);
+  }
+
+  .observatory-brand small {
+    display: none;
+  }
+
+  .observatory-chapter-nav a[aria-current="location"] {
+    grid-template-columns: auto 0fr;
+    gap: 0;
+  }
+
+  .observatory-chapter-frame--leading > *,
+  .observatory-chapter-frame--trailing > * {
+    grid-column: 1 / span 8;
+  }
+
+  .observatory-chapter-frame--trailing > * {
+    grid-column: 5 / -1;
+  }
+
+  .observatory-track-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .observatory-track:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .observatory-chapter-frame--afterlight > .observatory-section-heading,
+  .observatory-chapter-frame--afterlight > .observatory-afterlight-layout,
+  .observatory-chapter-frame--afterlight > .observatory-final-signal {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .observatory-afterlight-layout {
+    grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.28fr);
+  }
+
+  .observatory-supplement {
+    grid-template-columns: 1fr;
+  }
+
+  .observatory-supplement-copy h2 {
+    max-width: 22ch;
+  }
+}
+
+@media (max-width: 767px) {
+  .observatory-nav-shell {
+    inset-block-start: var(--space-2);
+    inset-inline: var(--space-2);
+    grid-template-columns: 1fr auto;
+    min-height: 3.25rem;
+    border-radius: var(--radius-md);
+    /* A backdrop-filter establishes a fixed-position containing block. The
+       chapter navigator is fixed to the viewport on mobile, so keep its
+       ancestor unfiltered and use the opaque tokenized surface instead. */
+    backdrop-filter: none;
+  }
+
+  .observatory-brand > span:last-child,
+  .observatory-volume {
+    display: none;
+  }
+
+  .observatory-chapter-nav {
+    position: fixed;
+    inset-block-end: var(--space-3);
+    inset-inline: var(--space-4);
+    z-index: 46;
+    padding: var(--space-2);
+    border: var(--line-hairline) solid var(--component-nav-border);
+    border-radius: var(--radius-lg);
+    background: var(--component-nav-bg);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: var(--glass-blur-regular);
+  }
+
+  .observatory-chapter-nav ol {
+    justify-content: space-between;
+  }
+
+  .observatory-chapter-nav a {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    justify-content: center;
+  }
+
+  .observatory-nav-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .observatory-chapter {
+    min-height: 100svh;
+    padding-block: clamp(6rem, 16vh, 9rem);
+  }
+
+  .observatory-chapter--orchestrate,
+  .observatory-chapter--afterlight {
+    padding-block-start: var(--space-32);
+  }
+
+  .observatory-chapter:last-child {
+    padding-block-end: 8rem;
+  }
+
+  .observatory-chapter-frame {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .observatory-chapter-frame--leading > *,
+  .observatory-chapter-frame--trailing > *,
+  .observatory-chapter-frame--wide > *,
+  .observatory-chapter-frame--orchestrate > .observatory-copy,
+  .observatory-chapter-frame--orchestrate > .observatory-entry-stack,
+  .observatory-chapter-frame--orchestrate > .observatory-text-link {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .observatory-chapter-frame--orchestrate > .observatory-copy {
+    padding-inline-end: 0;
+  }
+
+  .observatory-chapter-frame--orchestrate > .observatory-entry-stack {
+    margin-block-start: var(--space-5);
+  }
+
+  .observatory-afterlight-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .observatory-copy h1 {
+    font-size: var(--text-4xl);
+  }
+
+  .observatory-copy h2,
+  .observatory-section-heading h2 {
+    font-size: var(--text-3xl);
+  }
+
+  .observatory-lede {
+    font-size: var(--text-xl);
+  }
+
+  .observatory-coordinate {
+    display: none;
+  }
+
+  .observatory-scroll-cue {
+    inset-block-end: 5.25rem;
+  }
+
+  .observatory-poster-avatar {
+    inset-block-end: -2rem;
+    inset-inline-end: -38vw;
+    width: min(116vw, 40rem);
+    opacity: 0.56;
+  }
+
+  .observatory-poster-moon {
+    inset-block-start: 14vh;
+    inset-inline-start: -12vw;
+    width: 52vw;
+  }
+
+  .observatory-visual-vignette {
+    background:
+      linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 72%, transparent), transparent 28%, color-mix(in oklch, var(--color-background-deep) 79%, transparent)),
+      linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 56%, transparent), transparent);
+  }
+
+  .observatory-panel {
+    padding: var(--space-5);
+  }
+
+  .observatory-metrics,
+  .observatory-identity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .observatory-track-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .observatory-track:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+
+  .observatory-entry {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .observatory-entry em {
+    display: none;
+  }
+
+  .observatory-signal-strip {
+    display: flex;
+    gap: var(--space-3);
+    padding-block-end: var(--space-2);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  .observatory-signal-window,
+  .observatory-signal-window:first-child,
+  .observatory-signal-window:nth-child(2) {
+    flex: 0 0 min(78vw, 21rem);
+    scroll-snap-align: center;
+  }
+
+  .observatory-final-signal {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-block-start: var(--space-10);
+  }
+}
+
+@media (max-width: 479px) {
+  .observatory-control {
+    padding-inline: var(--space-2);
+  }
+
+  .observatory-nav-actions > a:first-child {
+    display: none;
+  }
+
+  .observatory-nav-actions {
+    gap: var(--space-4);
+  }
+
+  .observatory-chapter-nav {
+    inset-block-start: calc(var(--space-2) + 3.25rem + var(--space-2));
+    inset-block-end: auto;
+    inset-inline: var(--space-2);
+  }
+
+  .observatory-chapter-nav a {
+    min-width: 2.5rem;
+  }
+
+  .observatory-chapter {
+    padding-block-start: 8.75rem;
+  }
+
+  .observatory-chapter:not(.observatory-chapter--gate) {
+    padding-block-start: 12rem;
+    padding-block-end: var(--space-16);
+  }
+
+  .observatory-scroll-cue {
+    display: none;
+  }
+
+  .observatory-copy--hero {
+    gap: var(--space-4);
+  }
+
+  .observatory-copy--hero .observatory-lede {
+    font-size: var(--text-lg);
+  }
+}
+
+@media (min-width: 768px) and (max-height: 820px) {
+  .observatory-chapter--observe {
+    align-items: start;
+    padding-block-start: 10rem;
+    padding-block-end: var(--space-16);
+  }
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .observatory-nav-shell {
+    inset-block-start: var(--space-2);
+  }
+
+  .observatory-chapter {
+    min-height: max(34rem, 118svh);
+    padding-block: var(--space-24) var(--space-20);
+  }
+
+  .observatory-copy h1 {
+    font-size: var(--text-4xl);
+  }
+
+  .observatory-copy h2,
+  .observatory-section-heading h2 {
+    font-size: var(--text-3xl);
+  }
+
+  .observatory-scroll-cue {
+    display: none;
+  }
+
+  .observatory-chapter-nav {
+    inset-block-start: auto;
+    inset-block-end: var(--space-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .observatory-canvas {
+    display: none;
+  }
+
+  .observatory-poster-field {
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .observatory :where(*, *::before, *::after) {
+    scroll-behavior: auto !important;
+  }
+}
+
+@media (max-width: 820px) and (orientation: portrait) {
+  .observatory-poster-avatar {
+    display: none;
+  }
+
+  .observatory-mobile-actor-stage {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-column: 1 / -1;
+    width: 100%;
+    height: clamp(12rem, 34svh, 15rem);
+    margin-block: var(--space-3) var(--space-5);
+    overflow: hidden;
+    border-block: var(--line-hairline) solid color-mix(in oklch, var(--scene-orbit-color) 32%, transparent);
+    background:
+      radial-gradient(circle at 78% 52%, color-mix(in oklch, var(--scene-signal-color) 18%, transparent), transparent 34%),
+      linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 34%, transparent), transparent 78%);
+  }
+
+  .observatory-mobile-actor-stage::before {
+    content: "";
+    position: absolute;
+    inset: 16% -18% 10% 35%;
+    z-index: -1;
+    border: var(--line-hairline) solid color-mix(in oklch, var(--scene-orbit-color) 30%, transparent);
+    border-radius: var(--radius-full);
+    transform: rotate(-12deg);
+  }
+
+  .observatory-mobile-actor-meta {
+    align-self: end;
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-5) 48% var(--space-5) 0;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+  }
+
+  .observatory-mobile-actor-meta small {
+    font-size: var(--text-xs);
+  }
+
+  .observatory-mobile-actor-meta strong {
+    color: var(--scene-signal-color);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .observatory-mobile-actor-orbit {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 48%;
+    height: var(--line-hairline);
+    background: linear-gradient(90deg, var(--scene-orbit-color), transparent 72%);
+    opacity: 0.5;
+  }
+
+  .observatory-mobile-actor-figure {
+    --mobile-pose-x: 0%;
+    --mobile-pose-y: 0%;
+    position: absolute;
+    inset-inline-end: clamp(0.75rem, 7vw, 2rem);
+    inset-block-end: -0.6rem;
+    width: min(42vw, 10rem);
+    aspect-ratio: 3 / 4;
+    background-image: url("/assets/img/observatory/signal-guide-dark-poses-runtime.webp");
+    background-repeat: no-repeat;
+    background-position: var(--mobile-pose-x) var(--mobile-pose-y);
+    background-size: 400% 200%;
+    filter: drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 28%, transparent));
+    transform-origin: center bottom;
+    animation: observatory-mobile-guide-breathe 5.4s ease-in-out infinite;
+  }
+
+  .observatory[data-resolved-theme="light"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/signal-guide-light-poses-runtime.webp");
+  }
+
+  .observatory[data-quality-tier="poster"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/signal-guide-dark-poster.webp");
+    background-position: center bottom;
+    background-size: contain;
+    animation: none;
+  }
+
+  .observatory[data-quality-tier="poster"][data-resolved-theme="light"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/signal-guide-light-poster.webp");
+  }
+
+  .observatory-mobile-actor-stage[data-pose="quarter-turn"] .observatory-mobile-actor-figure {
+    --mobile-pose-x: 33.333%;
+  }
+
+  .observatory-mobile-actor-stage[data-pose="walk-profile"] .observatory-mobile-actor-figure {
+    --mobile-pose-x: 66.667%;
+  }
+
+  .observatory-mobile-actor-stage[data-pose="back-look"] .observatory-mobile-actor-figure {
+    --mobile-pose-x: 100%;
+  }
+
+  .observatory-mobile-actor-stage[data-pose="point-up"] .observatory-mobile-actor-figure {
+    --mobile-pose-y: 100%;
+  }
+
+  .observatory-mobile-actor-stage[data-pose="present"] .observatory-mobile-actor-figure {
+    --mobile-pose-x: 33.333%;
+    --mobile-pose-y: 100%;
+  }
+
+  .observatory-mobile-actor-stage[data-pose="quick-turn"] .observatory-mobile-actor-figure {
+    --mobile-pose-x: 66.667%;
+    --mobile-pose-y: 100%;
+  }
+
+  .observatory-mobile-actor-stage[data-pose="settle"] .observatory-mobile-actor-figure {
+    --mobile-pose-x: 100%;
+    --mobile-pose-y: 100%;
+  }
+}
+
+@keyframes observatory-mobile-guide-breathe {
+  0%, 100% { transform: translateY(0) rotate(-0.35deg); }
+  50% { transform: translateY(-0.28rem) rotate(0.35deg); }
+}
+
+:root[data-motion="reduced"] .observatory-canvas {
+  display: none;
+}
+
+:root[data-motion="reduced"] .observatory-poster-field {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+:root[data-motion="reduced"] .observatory-mobile-actor-figure {
+  animation: none;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .observatory-nav-shell,
+  .observatory-panel,
+  .observatory-chapter-nav {
+    background: var(--color-surface);
+  }
+}

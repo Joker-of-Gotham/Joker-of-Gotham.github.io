@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-08-28",
+  "purpose": "mobile, reduced-motion and Save-Data fallback",
+  "assets": [
+    {
+      "theme": "dark",
+      "source": "/assets/img/observatory/observatory-world-dark.webp",
+      "sourceSha256": "ccc9bbd7a449433bbc2c4a628603ea84b4ac1233c682af6cdacf765aed09d250",
+      "output": "/assets/img/observatory/observatory-world-dark-compact.webp",
+      "width": 896,
+      "height": 448,
+      "bytes": 35292,
+      "sha256": "b84f2e534ce7c079252c8e6e897f392e21b30ac122a7d5b19cac77d5d007d990"
+    },
+    {
+      "theme": "light",
+      "source": "/assets/img/observatory/observatory-world-light.webp",
+      "sourceSha256": "9b4e9cdb2ae3f463e31e5a9f4c2b60fdd36c1ee047709c39ca3f5a3687bcbea9",
+      "output": "/assets/img/observatory/observatory-world-light-compact.webp",
+      "width": 896,
+      "height": 448,
+      "bytes": 47192,
+      "sha256": "604525b0de574c482aef9978b139fbf7fe519e6e6cc7e49e097cd1d87511b17c"
+    }
+  ]
+}

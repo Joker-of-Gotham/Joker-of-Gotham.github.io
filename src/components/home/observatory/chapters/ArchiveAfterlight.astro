@@ -1,0 +1,52 @@
+---
+import type { ObservatoryEntry, ObservatorySignalWindow } from "@/lib/observatory/types";
+import SignalWindow from "../SignalWindow.astro";
+import MobileActorStage from "../MobileActorStage.astro";
+
+interface Props {
+  posts: ObservatoryEntry[];
+  signals: ObservatorySignalWindow[];
+}
+
+const { posts, signals } = Astro.props;
+---
+
+<section
+  class="observatory-chapter observatory-chapter--afterlight"
+  id="archive-afterlight"
+  data-observatory-chapter="archive-afterlight"
+  aria-labelledby="afterlight-title"
+>
+  <div class="observatory-chapter-frame observatory-chapter-frame--afterlight">
+    <header class="observatory-section-heading">
+      <p class="observatory-kicker"><span aria-hidden="true">LSO / 05</span>Archive / Afterlight</p>
+      <h2 id="afterlight-title">研究归档之后，仍有乐队、日常与相遇留下的余辉</h2>
+      <p>这里保留最近写作，也保留塑造审美与情绪节奏的记忆信号。</p>
+    </header>
+    <MobileActorStage pose="settle" chapter="GUIDE / 05" cue="AFTERLIGHT" />
+
+    <div class="observatory-afterlight-layout">
+      <div class="observatory-post-list" aria-label="最近文章">
+        {
+          posts.length > 0 ? posts.slice(0, 5).map((post, index) => (
+            <a href={post.href}>
+              <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+              <strong>{post.title}</strong>
+              {post.meta && <time>{post.meta}</time>}
+            </a>
+          )) : <p class="observatory-empty">最近文章将在内容查询接入后显示。</p>
+        }
+        <a class="observatory-text-link" href="/blog/">进入 Nocturne Research Archive <span aria-hidden="true">↗</span></a>
+      </div>
+
+      <div class="observatory-signal-strip" aria-label="个人记忆信号">
+        {signals.slice(0, 5).map((signal) => <SignalWindow {...signal} />)}
+      </div>
+    </div>
+
+    <footer class="observatory-final-signal">
+      <span>END OF CURRENT ORBIT</span>
+      <strong>Signal remains. The archive keeps listening.</strong>
+    </footer>
+  </div>
+</section>
