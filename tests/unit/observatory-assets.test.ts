@@ -115,6 +115,51 @@ describe("observatory production assets", () => {
     }
   });
 
+  it("keeps all twelve authored chapter guide cutouts transparent and reproducible", async () => {
+    const manifestPath = resolve(root, "public/assets/img/observatory/chapter-guide-pose-manifest.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      assets: Array<{
+        theme: "dark" | "light";
+        pose: string;
+        source: string;
+        sourceSha256: string;
+        output: string;
+        bytes: number;
+        sha256: string;
+        width: number;
+        height: number;
+        hasAlpha: boolean;
+      }>;
+    };
+
+    expect(manifest.assets).toHaveLength(12);
+    expect(new Set(manifest.assets.map((asset) => asset.theme))).toEqual(new Set(["dark", "light"]));
+    expect(new Set(manifest.assets.map((asset) => asset.pose))).toEqual(
+      new Set(["present", "point-up", "walk-profile", "quick-turn", "back-look", "settle"]),
+    );
+
+    for (const asset of manifest.assets) {
+      const sourcePath = resolve(root, asset.source);
+      const outputPath = resolve(root, "public", asset.output.replace(/^\/assets\//, "assets/"));
+      const metadata = await sharp(outputPath).metadata();
+      const stats = await sharp(outputPath).stats();
+      const alpha = stats.channels[3];
+
+      expect(metadata.format).toBe("webp");
+      expect(metadata.width).toBe(asset.width);
+      expect(metadata.height).toBe(asset.height);
+      expect(metadata.width).toBeGreaterThanOrEqual(768);
+      expect(metadata.height).toBeGreaterThanOrEqual(1152);
+      expect(metadata.hasAlpha).toBe(true);
+      expect(asset.hasAlpha).toBe(true);
+      expect(alpha?.min).toBe(0);
+      expect(alpha?.max).toBe(255);
+      expect(await sha256(sourcePath)).toBe(asset.sourceSha256);
+      expect((await stat(outputPath)).size).toBe(asset.bytes);
+      expect(await sha256(outputPath)).toBe(asset.sha256);
+    }
+  });
+
   it("keeps both cinematic world plates and their manifest in sync", async () => {
     const manifestPath = resolve(root, "public/assets/img/observatory/world-plate-manifest.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
