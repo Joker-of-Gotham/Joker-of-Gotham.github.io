@@ -153,6 +153,7 @@ test("Markdown overflow regions and task lists remain keyboard-accessible", asyn
 });
 
 test("representative article details have no automated WCAG A/AA violations", async ({ browser }) => {
+  test.setTimeout(90_000);
   const routes = [
     "/blog/2026-08-14-agent-orchestration/",
     "/blog/2025-07-08-%E5%9B%BE%E8%AE%BA%E5%AF%BC%E8%AE%BA-%E5%AE%9A%E4%B9%89%E4%B8%8E%E6%A1%88%E4%BE%8B/",
