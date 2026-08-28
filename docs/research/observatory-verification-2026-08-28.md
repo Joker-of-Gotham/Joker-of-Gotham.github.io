@@ -5,9 +5,9 @@
 - **DRI:** Blog frontend upgrade task
 - **Governance routing:** Project work object · S2 · target QA-L3 · M3 at intake
 - **Candidate:** production build completed at 18:57:55; browser suite completed afterward against that build
-- **Release state:** locally verified; public release remains Stop-Ship under `docs/asset-provenance.md`
+- **Release state:** Conditional Go for `origin/main` after Owner/DRI rights attestation recorded in `docs/asset-provenance.md`
 
-This record contains only checks that were actually executed. It is not a Lighthouse report, a real-device field study, a remote-CI result, an asset-rights approval, or proof that known dependency advisories are unexploitable.
+This record contains only checks that were actually executed. It is not a Lighthouse report, a real-device field study, a remote-CI result, an independent legal validation of the Owner's rights statement, or proof that known dependency advisories are unexploitable.
 
 ## Delivered system under test
 
@@ -93,4 +93,12 @@ Known P2: renderer construction still produced a roughly 206–255 ms post-FCP l
 
 `npm audit --json` on the verified lockfile reported 4 findings: 2 low and 2 high, all on the Astro 5 dependency path. The available automated remediation crosses to Astro 7. ADR-0002 keeps this static build on Astro 5 temporarily, prohibits the affected dynamic/server patterns, and requires a separately tested major migration. This is a documented risk acceptance boundary, not a claim of remediation.
 
-Public push/deployment is **Stop-Ship** because the asset ledger still contains unprovenanced anime screenshots/profile imagery and provisional generated-image service terms. Local commits may be created to preserve the reviewed implementation, but `origin/main` must not be updated until the owner provides authoritative rights/license evidence or replaces the gated assets and records release approval.
+## Release Quality Report
+
+- **Decision:** Conditional Go for the current `main` push.
+- **Approver:** Owner/DRI `Joker-of-Gotham`, 2026-08-28.
+- **Rights decision:** the Owner explicitly confirmed that all release images have obtained authorization. The statement and its scope are recorded in `docs/asset-provenance.md`; underlying legal documents were not independently inspected by the agent.
+- **Accepted technical risk:** the documented Astro 5 dependency advisories remain constrained to a static-only deployment boundary under ADR-0002; the transient actor-overlap P2 and post-FCP renderer-init long task remain non-blocking follow-up items.
+- **Rollback:** revert the release commits with ordinary Git revert commits and allow the static Pages pipeline to redeploy the preceding known-good revision. No data migration or persistent server state is involved.
+- **Staged rollout:** push `main`, confirm the remote branch SHA, observe the GitHub Pages workflow, then smoke-check the live homepage and a representative archive/article route in both responsive and static-fallback behavior where available.
+- **Post-deploy status:** pending remote push and Pages verification at the time of this record update.

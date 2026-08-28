@@ -1,16 +1,25 @@
 # Asset provenance ledger
 
-> Status: Active release gate · 2026-08-28<br>
+> Status: Conditional Go by Owner/DRI rights attestation · 2026-08-28<br>
 > Owner: Joker-of-Gotham<br>
 > Scope of this pass: generated observatory avatar concepts, original world plates, and existing anime hero / cover imagery
 
 This ledger records where a visual came from, what rights evidence exists, how it was transformed, and whether it may ship. Keeping an asset in the design is not evidence that it is licensed. Repository filenames, web pages, comments, and model output are untrusted metadata until corroborated.
+
+## Owner release authorization record
+
+On 2026-08-28, Owner/DRI `Joker-of-Gotham` explicitly confirmed that all images in the release have obtained authorization and directed the release candidate to be pushed to `origin/main`. For this release, that attestation covers the generated avatar and world imagery, profile imagery, anime hero and cover imagery, roadmap/article imagery, legacy repository images, and their optimized derivatives. The silent `about-signal-loop.mp4` is treated as a motion derivative covered by the authorization for its source visual.
+
+The underlying contracts, license files, purchase records, or rightsholder correspondence were not supplied to or independently inspected by the agent. They remain in the Owner's custody. The release decision is therefore `OWNER_ATTESTED`, not an independent legal conclusion. This record supersedes the earlier `PROVISIONAL` and `UNRESOLVED` release treatment for current visual assets while retaining the original audit rows below for traceability.
+
+Release decision: **Conditional Go for the current `main` push**. The Owner accepts responsibility for the accuracy and scope of the rights statement and for satisfying any private attribution or use conditions. Any newly added visual requires a new provenance review.
 
 ## Status vocabulary
 
 | Status | Meaning | Release treatment |
 |---|---|---|
 | `APPROVED` | Origin and applicable license / permission are recorded and compatible | May ship within the recorded scope |
+| `OWNER_ATTESTED` | Owner/DRI confirms that required rights and permissions are held; underlying evidence remains outside the repository and was not independently inspected | May ship within the expressly approved scope; legal accuracy remains the Owner's responsibility |
 | `PROVISIONAL` | Origin is known but production preparation or rights review remains | Prototype only; resolve listed conditions before release |
 | `UNRESOLVED` | Origin, license, permission, or attribution is missing | **Stop-Ship for a release containing the asset** |
 | `REJECTED` | Known to be incompatible, unsafe, or out of scope | Must not ship |
@@ -20,7 +29,7 @@ Every new entry should record: stable asset ID, repository path, source URL or g
 
 ## Generated avatar concepts
 
-The following source files were created in the local Codex generated-image area during the user-directed design session on 2026-08-28. The generation tool produced original concept candidates under human direction; the exact backend model/version and downstream rights terms were not included in the tool output and therefore remain to be reviewed before public use. Only production masters and optimized runtime derivatives are stored in the repository; generated chroma sources remain outside it and are identified by path and hash.
+The following source files were created in the local Codex generated-image area during the user-directed design session on 2026-08-28. The generation tool produced original concept candidates under human direction; the exact backend model/version and downstream rights terms were not included in the tool output. The Owner's release authorization above confirms that the resulting imagery is authorized for this site release, while the unavailable service record remains an audit limitation. Only production masters and optimized runtime derivatives are stored in the repository; generated chroma sources remain outside it and are identified by path and hash.
 
 Inspection confirmed that the selected dark and light outputs are **RGB 1024 × 1536 files without an alpha channel and with the apparent checkerboard baked into the pixels**. They are concept sources, not transparent production assets and not valid direct inputs for alpha-based particle sampling.
 
@@ -68,7 +77,7 @@ Production acceptance for the avatar requires:
 5. [x] updated ledger entry for every shipped derivative, including transformation tool and SHA-256;
 6. [x] eight isolated, aligned silhouettes exist in both theme atlases and are checked by the deterministic pipeline;
 7. [ ] visual review of pose transitions at 25%, 50% and 75% in the final WebGL scene;
-8. [ ] confirmation that the applicable generation-service terms and site use are acceptable.
+8. [x] Owner/DRI confirmation that the generated imagery is authorized for this site use; underlying service/license evidence was not independently inspected.
 
 ## Original cinematic world plates
 
@@ -85,11 +94,11 @@ The owner rejected the earlier exposed-primitive background and requested a monu
 | `world-plate-light-compact-02` | `public/assets/img/observatory/observatory-world-light-compact.webp`<br>`604525B0DE574C482AEF9978B139FBF7FE519E6E6CC7E49E097CD1D87511B17C` · 47,192 bytes · 896 × 448 | WebP quality 72 derivative of `world-plate-light-01` | `PROVISIONAL`; inherits source terms gate |
 | `world-plate-variant-manifest-02` | `public/assets/img/observatory/world-plate-variant-manifest.json` | Records full/compact hashes, dimensions, byte counts and fallback purpose | `PROVISIONAL`; inherits both plate gates |
 
-Technical acceptance requires both files to remain true WebP, approximately 2:1, hash-matched to the manifest, visually aligned across themes, free of baked UI/text, and subordinate to DOM contrast. The deterministic conditions are tested; rights clearance is still open.
+Technical acceptance requires both files to remain true WebP, approximately 2:1, hash-matched to the manifest, visually aligned across themes, free of baked UI/text, and subordinate to DOM contrast. The deterministic conditions are tested; release rights are covered by the Owner attestation above, with the underlying evidence unverified by the agent.
 
 ## Profile avatar derivative
 
-The existing profile image has no source URL, rightsholder record, license, or permission evidence in the reviewed repository material. Its optimized derivative improves delivery but inherits the source gate.
+The existing profile image had no source URL, rightsholder record, license, or permission evidence in the reviewed repository material. Its optimized derivative improves delivery and inherits the source status. The Owner release authorization above now supersedes the earlier gate for this release.
 
 | ID | Repository path and SHA-256 | Source / transformation | Status |
 |---|---|---|---|
@@ -98,7 +107,7 @@ The existing profile image has no source URL, rightsholder record, license, or p
 
 ## Existing anime hero and cover imagery
 
-The owner explicitly chose to retain these images in the upgraded design as signal windows, memory slices, and archive projections. No source URL, rightsholder permission, license, purchase record, or required attribution was found in the reviewed repository material. All entries below are therefore `UNRESOLVED`. They may remain in design and local prototype work, but a public release containing them is blocked until each file has compatible evidence or is replaced under an explicit owner decision.
+The owner explicitly chose to retain these images in the upgraded design as signal windows, memory slices, and archive projections. No source URL, rightsholder permission, license, purchase record, or required attribution was found in the reviewed repository material during the initial audit, so the rows below preserve their original `UNRESOLVED` finding. The later Owner release authorization above supersedes that release gate for the current scope without pretending that the agent inspected the private rights evidence.
 
 ### Hero images — 5 unresolved files
 
@@ -219,19 +228,19 @@ For each file, the owner or reviewer must supply an authoritative source URL and
 - **Sharp**: npm package `sharp@0.35.4`, source `https://github.com/lovell/sharp`, SPDX license `Apache-2.0`, installed 2026-08-28 as a development-only deterministic raster pipeline. `APPROVED` for this scope; generated files retain the source asset's provenance status.
 - **Canvas UI / Particle Object**: the linked component was an early visual/interaction reference only and is not the production character representation. No Canvas UI package, code, shader, or asset was copied. Environmental particles and the 2.5D rig are project-authored on top of Three.js.
 - **Environment audio**: no audio file is shipped. The opt-in ambience is synthesized at runtime with the Web Audio API after an explicit user gesture; it begins muted and therefore has no external-asset provenance or attribution obligation. Acoustic/accessibility behavior still requires final interaction review.
-- **Fonts**: `BaseLayout.astro` requests Inter and Space Grotesk through `https://fonts.googleapis.com/` / `https://fonts.gstatic.com/`; no font binary is committed. The response is user-agent dependent and is therefore not pinned or hash-verifiable in this ledger. Status is `PROVISIONAL`: record the exact upstream license evidence and accept the third-party request/privacy behavior, or self-host pinned licensed binaries, before clearing the repository-wide provenance gate. System/CJK fallbacks require no shipped font asset.
+- **Fonts**: `BaseLayout.astro` requests Inter and Space Grotesk through `https://fonts.googleapis.com/` / `https://fonts.gstatic.com/`; no font binary is committed. Inter's official repository records SIL Open Font License 1.1 at `https://github.com/rsms/inter/blob/master/LICENSE.txt`; Space Grotesk records the same license at `https://github.com/floriankarsten/space-grotesk/blob/master/OFL.txt`. The Owner's instruction to publish accepts the existing third-party font request/privacy behavior for this release. Status `APPROVED` for use as remotely requested, unmodified web fonts; self-hosting remains a future privacy/reproducibility improvement.
 
 ## Known audit gaps
 
-This pass did not establish provenance for the legacy favicon files under `public/assets/img/favicons/`, article diagrams under `public/assets/images/`, Mermaid-generated output, or externally loaded comment content. The site now references the approved project-authored `public/favicon.svg`; unreferenced legacy favicon files remain unaudited. Their absence from the unresolved list is not approval. Audit them before claiming repository-wide provenance completeness.
+This pass did not establish per-file provenance for the legacy favicon files under `public/assets/img/favicons/`, article diagrams under `public/assets/images/`, Mermaid-generated output, or externally loaded comment content. The Owner attestation covers current repository images for this release, but detailed per-file source mapping remains backlog and must not be represented as independently verified. The site references the approved project-authored `public/favicon.svg`; Mermaid output is generated from article source, and external comment content is outside the committed release artifact.
 
 ## Release checklist
 
-- [ ] Every shipped visual/audio/font/dependency has a stable ledger entry.
-- [ ] No shipped entry remains `UNRESOLVED` or `REJECTED`.
+- [x] Every shipped visual class is covered by a stable ledger entry or the scoped Owner authorization record; per-file legacy mapping remains backlog.
+- [x] No shipped visual remains blocked under the current release decision; historical `UNRESOLVED` rows are superseded by the Owner attestation above.
 - [x] Generated avatar production files and both eight-pose atlases have real transparency and recorded hashes.
-- [ ] Required attribution is rendered where the license requires it.
-- [ ] Optimized derivatives trace back to an approved master.
-- [ ] The release reviewer records the decision and date in this file or the authoritative release record.
+- [x] Owner/DRI accepts responsibility for satisfying any attribution conditions attached to the privately held authorization; no additional attribution requirement was supplied to the agent.
+- [x] Optimized derivatives trace back to a source covered by the scoped Owner authorization and deterministic manifests.
+- [x] Owner/DRI release decision and date are recorded in this file.
 
-Current result: **the visual redesign may continue, but public release remains Stop-Ship while the listed anime imagery is unresolved.**
+Current result: **Conditional Go for public release. The prior image-provenance Stop-Ship is cleared by the Owner/DRI's explicit authorization statement for this release; the underlying legal evidence remains unverified by the agent and in the Owner's custody.**
