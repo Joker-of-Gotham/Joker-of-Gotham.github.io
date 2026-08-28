@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+const homeUrl = "http://127.0.0.1:4321/";
+
 const chapterIds = [
   "signal-gate",
   "observe",
@@ -11,7 +13,7 @@ const chapterIds = [
 ] as const;
 
 test("homepage exposes the complete six-chapter observatory", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(homeUrl);
 
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Chika Komari");
   await expect(page.locator("[data-observatory-canvas]")).toHaveCount(1);
@@ -25,8 +27,281 @@ test("homepage exposes the complete six-chapter observatory", async ({ page }) =
   await expect(audioToggle).toHaveAttribute("aria-label", "开启环境音");
 });
 
+test("live observatory canvas uses a resident procedural runtime without reloads through motion", async ({ page }) => {
+  const requestedUrls: string[] = [];
+  await page.addInitScript(() => {
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    const widthDescriptor = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "width");
+    const heightDescriptor = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "height");
+    const probe = {
+      contextLost: 0,
+      webglContexts: 0,
+      widthWrites: 0,
+      heightWrites: 0,
+      canvasAdded: 0,
+      canvasRemoved: 0,
+      canvas: null as HTMLCanvasElement | null,
+      observer: null as MutationObserver | null,
+    };
+    Object.defineProperty(window, "__observatoryMotionProbe", {
+      configurable: true,
+      value: probe,
+    });
+    HTMLCanvasElement.prototype.getContext = function patchedGetContext(
+      this: HTMLCanvasElement,
+      contextId: string,
+      ...args: unknown[]
+    ) {
+      if (this.matches?.("[data-observatory-canvas]") && /^webgl2?$/u.test(contextId)) {
+        probe.webglContexts += 1;
+      }
+      return originalGetContext.call(this, contextId, ...args as []) as RenderingContext | null;
+    } as typeof HTMLCanvasElement.prototype.getContext;
+    if (widthDescriptor?.get && widthDescriptor.set) {
+      Object.defineProperty(HTMLCanvasElement.prototype, "width", {
+        configurable: true,
+        get: widthDescriptor.get,
+        set(this: HTMLCanvasElement, value: number) {
+          if (this.matches?.("[data-observatory-canvas]") && this.width !== value) probe.widthWrites += 1;
+          widthDescriptor.set?.call(this, value);
+        },
+      });
+    }
+    if (heightDescriptor?.get && heightDescriptor.set) {
+      Object.defineProperty(HTMLCanvasElement.prototype, "height", {
+        configurable: true,
+        get: heightDescriptor.get,
+        set(this: HTMLCanvasElement, value: number) {
+          if (this.matches?.("[data-observatory-canvas]") && this.height !== value) probe.heightWrites += 1;
+          heightDescriptor.set?.call(this, value);
+        },
+      });
+    }
+    window.addEventListener("webglcontextlost", () => {
+      probe.contextLost += 1;
+    });
+  });
+  page.on("request", (request) => requestedUrls.push(request.url()));
+  await page.goto(homeUrl);
+  const root = page.locator("[data-observatory-root]");
+  await expect(root).toHaveAttribute("data-render-state", /ready|static|failed/, { timeout: 12_000 });
+
+  const renderState = await root.getAttribute("data-render-state");
+  test.skip(renderState !== "ready", `Realtime WebGL unavailable in this browser: ${renderState ?? "unknown"}`);
+
+  await page.locator("[data-observatory-canvas]").evaluate((canvas: HTMLCanvasElement) => {
+    const probe = window.__observatoryMotionProbe as {
+      canvas: HTMLCanvasElement | null;
+      observer: MutationObserver | null;
+      canvasAdded: number;
+      canvasRemoved: number;
+    };
+    probe.canvas = canvas;
+    probe.observer?.disconnect();
+    probe.observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (node instanceof HTMLCanvasElement && node.matches("[data-observatory-canvas]")) probe.canvasAdded += 1;
+        }
+        for (const node of record.removedNodes) {
+          if (node instanceof HTMLCanvasElement && node.matches("[data-observatory-canvas]")) probe.canvasRemoved += 1;
+        }
+      }
+    });
+    probe.observer.observe(canvas.parentElement ?? document.body, { childList: true, subtree: true });
+  });
+
+  const canvasPixels = await page.locator("[data-observatory-canvas]").evaluate((canvas: HTMLCanvasElement) => {
+    const probe = document.createElement("canvas");
+    probe.width = 64;
+    probe.height = 64;
+    const context = probe.getContext("2d");
+    if (!context) return 0;
+    context.drawImage(canvas, 0, 0, probe.width, probe.height);
+    const pixels = context.getImageData(0, 0, probe.width, probe.height).data;
+    let visible = 0;
+    for (let index = 0; index < pixels.length; index += 4) {
+      if (pixels[index + 3] > 4 && pixels[index] + pixels[index + 1] + pixels[index + 2] > 12) visible += 1;
+    }
+    return visible;
+  });
+  expect(canvasPixels).toBeGreaterThan(96);
+  const requestCountBeforeMotion = requestedUrls.length;
+  const beforeMotionProbe = await page.evaluate(() => {
+    const probe = window.__observatoryMotionProbe as {
+      webglContexts: number;
+      widthWrites: number;
+      heightWrites: number;
+      contextLost: number;
+    };
+    const canvas = document.querySelector("[data-observatory-canvas]") as HTMLCanvasElement;
+    return {
+      webglContexts: probe.webglContexts,
+      widthWrites: probe.widthWrites,
+      heightWrites: probe.heightWrites,
+      contextLost: probe.contextLost,
+      backingWidth: canvas.width,
+      backingHeight: canvas.height,
+    };
+  });
+
+  for (let index = 0; index < 16; index += 1) {
+    await page.mouse.move(90 + index * 28, 140 + (index % 5) * 42);
+  }
+  await page.mouse.wheel(0, 900);
+  await page.waitForTimeout(250);
+
+  await expect(root).toHaveAttribute("data-render-state", /ready|suspended|degraded/);
+  await expect(page.locator("[data-observatory-canvas]")).toHaveCount(1);
+  await expect(root).toHaveAttribute("data-world-version", "4");
+  await expect(root).toHaveAttribute("data-avatar-representation", "procedural-threejs-articulated-volume", {
+    timeout: 12_000,
+  });
+  await expect(root).toHaveAttribute("data-avatar-state", "ready");
+  await expect(page.locator("[data-observatory-world-plate]")).toHaveCSS("opacity", "0");
+  const afterMotionProbe = await page.evaluate(() => {
+    const probe = window.__observatoryMotionProbe as {
+      canvas: HTMLCanvasElement | null;
+      canvasAdded: number;
+      canvasRemoved: number;
+      contextLost: number;
+      webglContexts: number;
+      widthWrites: number;
+      heightWrites: number;
+    };
+    const canvas = document.querySelector("[data-observatory-canvas]") as HTMLCanvasElement;
+    return {
+      sameCanvas: probe.canvas === canvas,
+      canvasAdded: probe.canvasAdded,
+      canvasRemoved: probe.canvasRemoved,
+      contextLost: probe.contextLost,
+      webglContexts: probe.webglContexts,
+      widthWrites: probe.widthWrites,
+      heightWrites: probe.heightWrites,
+      backingWidth: canvas.width,
+      backingHeight: canvas.height,
+    };
+  });
+  const requestsDuringMotion = requestedUrls.slice(requestCountBeforeMotion);
+
+  expect(afterMotionProbe).toMatchObject({
+    sameCanvas: true,
+    canvasAdded: 0,
+    canvasRemoved: 0,
+    contextLost: 0,
+    backingWidth: beforeMotionProbe.backingWidth,
+    backingHeight: beforeMotionProbe.backingHeight,
+  });
+  expect(afterMotionProbe.webglContexts).toBe(beforeMotionProbe.webglContexts);
+  expect(afterMotionProbe.widthWrites).toBe(beforeMotionProbe.widthWrites);
+  expect(afterMotionProbe.heightWrites).toBe(beforeMotionProbe.heightWrites);
+  expect(requestedUrls.some((url) => /\/assets\/observatory\//iu.test(url))).toBe(false);
+  expect(requestsDuringMotion.some((url) => /controller\.[^/]+\.js$/.test(url))).toBe(false);
+  expect(requestsDuringMotion.some((url) => /\/assets\/img\/observatory\/.*\.(?:webp|png)(?:[?#]|$)/iu.test(url))).toBe(false);
+});
+
+test("rapid viewport churn coalesces to one canvas backing-store resize", async ({ page }) => {
+  await page.addInitScript(() => {
+    const widthDescriptor = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "width");
+    const heightDescriptor = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "height");
+    const probe = {
+      widthWrites: 0,
+      heightWrites: 0,
+      contexts: 0,
+      canvas: null as HTMLCanvasElement | null,
+    };
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    Object.defineProperty(window, "__observatoryResizeProbe", { configurable: true, value: probe });
+    HTMLCanvasElement.prototype.getContext = function patchedGetContext(
+      this: HTMLCanvasElement,
+      contextId: string,
+      ...args: unknown[]
+    ) {
+      if (this.matches?.("[data-observatory-canvas]") && /^webgl2?$/u.test(contextId)) probe.contexts += 1;
+      return originalGetContext.call(this, contextId, ...args as []) as RenderingContext | null;
+    } as typeof HTMLCanvasElement.prototype.getContext;
+    if (widthDescriptor?.get && widthDescriptor.set) {
+      Object.defineProperty(HTMLCanvasElement.prototype, "width", {
+        configurable: true,
+        get: widthDescriptor.get,
+        set(this: HTMLCanvasElement, value: number) {
+          if (this.matches?.("[data-observatory-canvas]") && this.width !== value) probe.widthWrites += 1;
+          widthDescriptor.set?.call(this, value);
+        },
+      });
+    }
+    if (heightDescriptor?.get && heightDescriptor.set) {
+      Object.defineProperty(HTMLCanvasElement.prototype, "height", {
+        configurable: true,
+        get: heightDescriptor.get,
+        set(this: HTMLCanvasElement, value: number) {
+          if (this.matches?.("[data-observatory-canvas]") && this.height !== value) probe.heightWrites += 1;
+          heightDescriptor.set?.call(this, value);
+        },
+      });
+    }
+  });
+
+  await page.goto(homeUrl);
+  const root = page.locator("[data-observatory-root]");
+  await expect(root).toHaveAttribute("data-render-state", /ready|static|failed/, { timeout: 12_000 });
+  test.skip(await root.getAttribute("data-render-state") !== "ready", "Realtime WebGL unavailable");
+
+  const canvas = page.locator("[data-observatory-canvas]");
+  await canvas.evaluate((element: HTMLCanvasElement) => {
+    const probe = window.__observatoryResizeProbe as { canvas: HTMLCanvasElement | null };
+    probe.canvas = element;
+  });
+  const before = await page.evaluate(() => {
+    const probe = window.__observatoryResizeProbe as {
+      widthWrites: number;
+      heightWrites: number;
+      contexts: number;
+    };
+    return { widthWrites: probe.widthWrites, heightWrites: probe.heightWrites, contexts: probe.contexts };
+  });
+
+  for (const height of [896, 872, 848, 824, 800, 824, 848, 872, 896]) {
+    await page.setViewportSize({ width: 1280, height });
+  }
+  await page.waitForTimeout(350);
+
+  const after = await page.evaluate(() => {
+    const probe = window.__observatoryResizeProbe as {
+      widthWrites: number;
+      heightWrites: number;
+      contexts: number;
+      canvas: HTMLCanvasElement | null;
+    };
+    return {
+      widthWrites: probe.widthWrites,
+      heightWrites: probe.heightWrites,
+      contexts: probe.contexts,
+      sameCanvas: probe.canvas === document.querySelector("[data-observatory-canvas]"),
+    };
+  });
+  await expect(canvas).toHaveCount(1);
+  expect(after.sameCanvas).toBe(true);
+  expect(after.contexts).toBe(before.contexts);
+  expect(after.widthWrites - before.widthWrites).toBeLessThanOrEqual(1);
+  expect(after.heightWrites - before.heightWrites).toBeLessThanOrEqual(1);
+});
+
+test("canvas-ui magnify is lazy and scoped to the primary signal window", async ({ page }) => {
+  await page.goto(homeUrl);
+  const lens = page.locator("canvas-signal-lens");
+  await expect(lens).toHaveCount(1);
+  await lens.scrollIntoViewIfNeeded();
+  await lens.hover();
+  await expect(lens).toHaveAttribute("data-lens-policy", /interactive-fine-pointer|no-webgl2/, { timeout: 8_000 });
+  const policy = await lens.getAttribute("data-lens-policy");
+  test.skip(policy !== "interactive-fine-pointer", `Canvas UI lens unavailable in this browser: ${policy ?? "unknown"}`);
+  await expect(lens).toHaveAttribute("data-lens-state", "ready", { timeout: 8_000 });
+  await expect(lens.locator("[data-signal-lens-output]")).toBeVisible();
+});
+
 test("ambient audio starts only after an explicit gesture and can be muted again", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(homeUrl);
   const audioToggle = page.locator("[data-audio-toggle]");
   const audioRoot = page.locator("[data-observatory-audio]");
 
@@ -41,7 +316,7 @@ test("ambient audio starts only after an explicit gesture and can be muted again
 test("homepage remains complete without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
-  await page.goto("/");
+  await page.goto(homeUrl);
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.locator("[data-observatory-poster]")).toBeVisible();
@@ -55,7 +330,7 @@ test("reduced motion selects the static poster tier", async ({ browser }) => {
     viewport: { width: 390, height: 844 },
   });
   const page = await context.newPage();
-  await page.goto("/");
+  await page.goto(homeUrl);
 
   await expect(page.locator("[data-observatory-root]")).toHaveAttribute("data-quality-tier", "poster");
   await expect(page.locator("[data-observatory-root]")).toHaveAttribute("data-render-state", /static|ready/);
@@ -72,7 +347,7 @@ test("reduced motion selects the static poster tier", async ({ browser }) => {
 test("chapter navigation stays synchronized in the static fallback", async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: "reduce" });
   const page = await context.newPage();
-  await page.goto("/");
+  await page.goto(homeUrl);
 
   const afterlightLink = page.locator('[data-observatory-nav-link][href="#archive-afterlight"]');
   await afterlightLink.click();
@@ -97,7 +372,7 @@ test("Save-Data keeps the poster fallback and never requests the Three controlle
     resources.push(request.url());
     if (request.resourceType() === "script") scripts.push(request.url());
   });
-  await page.goto("/");
+  await page.goto(homeUrl);
   await expect(page.locator("[data-observatory-root]")).toHaveAttribute("data-quality-tier", "poster");
   await expect(page.locator("[data-observatory-root]")).toHaveAttribute("data-render-reason", "save-data");
   await expect(page.locator("[data-observatory-world-plate]")).toHaveAttribute("src", /-compact\.webp$/);
@@ -109,7 +384,7 @@ test("Save-Data keeps the poster fallback and never requests the Three controlle
 test("mobile layout has no horizontal overflow and keeps primary controls reachable", async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
-  await page.goto("/");
+  await page.goto(homeUrl);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
@@ -144,7 +419,7 @@ for (const viewport of [
   test(`observatory reflows without horizontal scroll at ${viewport.label}`, async ({ browser }) => {
     const context = await browser.newContext({ viewport: { width: viewport.width, height: viewport.height } });
     const page = await context.newPage();
-    await page.goto("/");
+    await page.goto(homeUrl);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(1);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -153,7 +428,7 @@ for (const viewport of [
 }
 
 test("theme choice is explicit, persistent, and reflected by the document", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(homeUrl);
   const toggle = page.locator("[data-observatory-theme-toggle]");
   await toggle.click();
 
@@ -164,7 +439,7 @@ test("theme choice is explicit, persistent, and reflected by the document", asyn
 });
 
 test("homepage has no WCAG A/AA automated violations", async ({ page }) => {
-  await page.goto("/");
+  await page.goto(homeUrl);
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
   expect(results.violations).toEqual([]);
 });
