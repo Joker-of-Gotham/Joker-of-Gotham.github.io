@@ -3,6 +3,9 @@ node_modules/
 dist/
 .astro/
 coverage/
+.playwright-results/
+playwright-report/
+test-results/
 .dist/
 .codemap/
 
