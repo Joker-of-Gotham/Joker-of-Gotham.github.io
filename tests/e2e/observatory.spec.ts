@@ -367,7 +367,7 @@ test("reduced motion selects the static poster tier", async ({ browser }) => {
   const reducedStageImage = await page.locator("[data-pose='present'] .observatory-mobile-actor-figure").evaluate(
     (element) => getComputedStyle(element).backgroundImage
   );
-  expect(reducedStageImage).toMatch(/signal-guide-(?:dark|light)-poster\.webp/);
+  expect(reducedStageImage).toMatch(/guide-pose-(?:dark|light)-present\.webp/);
   await context.close();
 });
 

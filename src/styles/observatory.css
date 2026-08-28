@@ -176,6 +176,72 @@
   filter: blur(var(--motion-distance-sm));
 }
 
+.observatory-character-layer {
+  position: absolute;
+  inset-block-end: -6vh;
+  inset-inline-end: clamp(-4rem, -1vw, 1rem);
+  z-index: 2;
+  width: min(42vw, 46svh, 30rem);
+  aspect-ratio: 1 / 2;
+  opacity: 0;
+  transform: translate3d(0, 1.5rem, 0);
+  transition:
+    opacity var(--motion-duration-cinematic) var(--motion-ease-out),
+    transform var(--motion-duration-cinematic) var(--motion-ease-out);
+}
+
+.observatory[data-avatar-state="ready"] .observatory-character-layer {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.observatory-character-pose {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  object-position: center bottom;
+  opacity: 0;
+  filter: blur(0.22rem) drop-shadow(0 2rem 4rem color-mix(in oklch, var(--scene-signal-color) 22%, transparent));
+  transform: translate3d(0, 0.8rem, 0) scale(0.82);
+  transform-origin: center bottom;
+  transition:
+    opacity 360ms var(--motion-ease-out),
+    filter 360ms var(--motion-ease-out),
+    transform 360ms var(--motion-ease-out);
+  will-change: opacity, filter, transform;
+}
+
+.observatory-character-pose.is-active,
+.observatory-character-pose[data-pose-state="settled"],
+.observatory-character-pose[data-pose-state="arriving"] {
+  opacity: 1;
+  filter: blur(0) drop-shadow(0 2rem 4rem color-mix(in oklch, var(--scene-signal-color) 28%, transparent));
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.observatory-character-pose[data-pose-state="leaving"] {
+  opacity: 0;
+  filter: blur(0.38rem) drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 14%, transparent));
+  transform: translate3d(0, 1.2rem, 0) scale(0.78);
+  transition-duration: 220ms;
+}
+
+.observatory-character-pose[data-pose-state="entering"] {
+  opacity: 0;
+  filter: blur(0.22rem) drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 18%, transparent));
+  transform: translate3d(0, 0.8rem, 0) scale(0.82);
+  transition: none;
+}
+
+:root[data-motion="reduced"] .observatory-character-layer,
+:root[data-motion="reduced"] .observatory-character-pose {
+  transition: none;
+}
+
 .observatory-poster-moon {
   position: absolute;
   inset-block-start: 9vh;
@@ -1664,9 +1730,18 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   .observatory :where(*, *::before, *::after) {
     scroll-behavior: auto !important;
   }
+
+  .observatory-character-layer,
+  .observatory-character-pose {
+    transition: none !important;
+  }
 }
 
 @media (max-width: 820px) and (orientation: portrait) {
+  .observatory-character-layer {
+    display: none;
+  }
+
   .observatory-poster-avatar {
     display: none;
   }
@@ -1726,66 +1801,66 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   }
 
   .observatory-mobile-actor-figure {
-    --mobile-pose-x: 0%;
-    --mobile-pose-y: 0%;
     position: absolute;
     inset-inline-end: clamp(0.75rem, 7vw, 2rem);
     inset-block-end: -0.6rem;
-    width: min(42vw, 10rem);
-    aspect-ratio: 3 / 4;
-    background-image: url("/assets/img/observatory/signal-guide-dark-poses-runtime.webp");
+    width: min(30vw, 7.5rem);
+    aspect-ratio: 1 / 2;
+    background-image: url("/assets/img/observatory/guide-pose-dark-present.webp");
     background-repeat: no-repeat;
-    background-position: var(--mobile-pose-x) var(--mobile-pose-y);
-    background-size: 400% 200%;
+    background-position: center bottom;
+    background-size: contain;
     filter: drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 28%, transparent));
     transform-origin: center bottom;
     animation: observatory-mobile-guide-breathe 5.4s ease-in-out infinite;
   }
 
   .observatory[data-resolved-theme="light"] .observatory-mobile-actor-figure {
-    background-image: url("/assets/img/observatory/signal-guide-light-poses-runtime.webp");
+    background-image: url("/assets/img/observatory/guide-pose-light-present.webp");
   }
 
   .observatory[data-quality-tier="poster"] .observatory-mobile-actor-figure {
-    background-image: url("/assets/img/observatory/signal-guide-dark-poster.webp");
-    background-position: center bottom;
-    background-size: contain;
     animation: none;
   }
 
-  .observatory[data-quality-tier="poster"][data-resolved-theme="light"] .observatory-mobile-actor-figure {
-    background-image: url("/assets/img/observatory/signal-guide-light-poster.webp");
-  }
-
-  .observatory-mobile-actor-stage[data-pose="quarter-turn"] .observatory-mobile-actor-figure {
-    --mobile-pose-x: 33.333%;
+  .observatory-mobile-actor-stage[data-pose="point-up"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/guide-pose-dark-point-up.webp");
   }
 
   .observatory-mobile-actor-stage[data-pose="walk-profile"] .observatory-mobile-actor-figure {
-    --mobile-pose-x: 66.667%;
-  }
-
-  .observatory-mobile-actor-stage[data-pose="back-look"] .observatory-mobile-actor-figure {
-    --mobile-pose-x: 100%;
-  }
-
-  .observatory-mobile-actor-stage[data-pose="point-up"] .observatory-mobile-actor-figure {
-    --mobile-pose-y: 100%;
-  }
-
-  .observatory-mobile-actor-stage[data-pose="present"] .observatory-mobile-actor-figure {
-    --mobile-pose-x: 33.333%;
-    --mobile-pose-y: 100%;
+    background-image: url("/assets/img/observatory/guide-pose-dark-walk-profile.webp");
   }
 
   .observatory-mobile-actor-stage[data-pose="quick-turn"] .observatory-mobile-actor-figure {
-    --mobile-pose-x: 66.667%;
-    --mobile-pose-y: 100%;
+    background-image: url("/assets/img/observatory/guide-pose-dark-quick-turn.webp");
+  }
+
+  .observatory-mobile-actor-stage[data-pose="back-look"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/guide-pose-dark-back-look.webp");
   }
 
   .observatory-mobile-actor-stage[data-pose="settle"] .observatory-mobile-actor-figure {
-    --mobile-pose-x: 100%;
-    --mobile-pose-y: 100%;
+    background-image: url("/assets/img/observatory/guide-pose-dark-settle.webp");
+  }
+
+  .observatory[data-resolved-theme="light"] .observatory-mobile-actor-stage[data-pose="point-up"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/guide-pose-light-point-up.webp");
+  }
+
+  .observatory[data-resolved-theme="light"] .observatory-mobile-actor-stage[data-pose="walk-profile"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/guide-pose-light-walk-profile.webp");
+  }
+
+  .observatory[data-resolved-theme="light"] .observatory-mobile-actor-stage[data-pose="quick-turn"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/guide-pose-light-quick-turn.webp");
+  }
+
+  .observatory[data-resolved-theme="light"] .observatory-mobile-actor-stage[data-pose="back-look"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/guide-pose-light-back-look.webp");
+  }
+
+  .observatory[data-resolved-theme="light"] .observatory-mobile-actor-stage[data-pose="settle"] .observatory-mobile-actor-figure {
+    background-image: url("/assets/img/observatory/guide-pose-light-settle.webp");
   }
 }
 

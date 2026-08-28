@@ -639,7 +639,13 @@ export function createObservatoryKit(
 
   const group = new THREE.Group();
   group.name = "RecognizableObservatoryKit";
-  group.userData = { worldVersion: 4, proceduralAsset: true, livePlateDependency: false };
+  group.userData = {
+    worldVersion: 5,
+    proceduralAsset: true,
+    livePlateDependency: false,
+    fixedWorldCoordinates: true,
+    architecturalSystem: "recognizable-observatory-landmarks",
+  };
 
   const gate = createSignalGate(terrain, darkMetalMaterial, signalMaterial);
   const heroDish = createHeroDish(metalMaterial, signalMaterial);

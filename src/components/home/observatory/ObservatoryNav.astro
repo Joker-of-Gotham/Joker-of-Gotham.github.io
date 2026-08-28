@@ -1,5 +1,6 @@
 ---
 import AmbientAudioControl from "./AmbientAudioControl.astro";
+import Icon from "@/components/ui/Icon.astro";
 
 const chapters = [
   { id: "signal-gate", label: "Gate", coordinate: "00" },
@@ -38,6 +39,17 @@ const chapters = [
   </nav>
 
   <div class="observatory-nav-actions">
+    <button
+      class="observatory-control"
+      id="drawer-toggle"
+      type="button"
+      aria-label="打开主导航"
+      aria-controls="site-sidebar"
+      aria-expanded="false"
+    >
+      <span class="observatory-control-symbol" aria-hidden="true"><Icon name="menu" size={16} /></span>
+      <span class="observatory-control-label">导航</span>
+    </button>
     <a class="observatory-control" href="/search/" aria-label="搜索研究档案">
       <span class="observatory-control-symbol" aria-hidden="true">⌕</span>
       <span class="observatory-control-label">Search</span>

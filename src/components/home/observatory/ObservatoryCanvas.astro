@@ -1,4 +1,6 @@
 ---
+import { OBSERVATORY_DEFAULT_GUIDE_POSE } from "@/lib/observatory/chapter-guide-poses";
+
 interface Props {
   posterDark?: string;
   posterLight?: string;
@@ -34,6 +36,31 @@ const {
     decoding="async"
     fetchpriority="high"
   />
+  <div class="observatory-character-layer" data-observatory-character-layer>
+    <img
+      class="observatory-character-pose is-active"
+      data-character-slot="active"
+      data-pose-state="settled"
+      data-guide-pose={OBSERVATORY_DEFAULT_GUIDE_POSE.pose}
+      src={OBSERVATORY_DEFAULT_GUIDE_POSE.dark}
+      alt=""
+      width={OBSERVATORY_DEFAULT_GUIDE_POSE.width}
+      height={OBSERVATORY_DEFAULT_GUIDE_POSE.height}
+      decoding="async"
+      fetchpriority="high"
+    />
+    <img
+      class="observatory-character-pose"
+      data-character-slot="standby"
+      data-pose-state="idle"
+      data-guide-pose={OBSERVATORY_DEFAULT_GUIDE_POSE.pose}
+      src={OBSERVATORY_DEFAULT_GUIDE_POSE.dark}
+      alt=""
+      width={OBSERVATORY_DEFAULT_GUIDE_POSE.width}
+      height={OBSERVATORY_DEFAULT_GUIDE_POSE.height}
+      decoding="async"
+    />
+  </div>
   <div class="observatory-poster-field">
     <span class="observatory-poster-orbit observatory-poster-orbit--outer"></span>
     <span class="observatory-poster-orbit observatory-poster-orbit--inner"></span>

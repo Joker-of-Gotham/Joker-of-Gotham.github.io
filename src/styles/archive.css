@@ -578,12 +578,22 @@
 .archive-document-cover-scrim {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    color-mix(in oklch, var(--color-background-deep) 28%, transparent),
-    color-mix(in oklch, var(--color-background-deep) 72%, transparent)
-  );
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in oklch, var(--primitive-color-void-950) 72%, transparent) 0%,
+      color-mix(in oklch, var(--primitive-color-void-950) 44%, transparent) 40%,
+      color-mix(in oklch, var(--primitive-color-void-950) 10%, transparent) 72%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklch, var(--primitive-color-void-950) 18%, transparent) 0%,
+      transparent 30%,
+      transparent 46%,
+      color-mix(in oklch, var(--primitive-color-void-950) 34%, transparent) 68%,
+      color-mix(in oklch, var(--primitive-color-void-950) 82%, transparent) 100%
+    );
 }
 
 .archive-document-cover-copy {
@@ -594,15 +604,30 @@
   inline-size: min(calc(100% - var(--layout-page-inline) - var(--layout-page-inline)), var(--layout-content-width));
   margin-inline: auto;
   margin-block-end: var(--space-8);
-  padding: var(--space-6);
+  padding: var(--space-6) 0;
   border: 0;
-  border-block-start: var(--line-hairline) solid var(--component-card-border);
-  border-inline-start: var(--line-hairline) solid var(--component-card-border);
   border-radius: 0;
   color: var(--color-foreground-soft);
-  background: color-mix(in oklch, var(--color-background) 88%, transparent);
-  backdrop-filter: var(--glass-blur-regular);
+  background: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   box-shadow: none;
+  text-shadow: 0 0.18rem 1.2rem color-mix(in oklch, var(--primitive-color-void-950) 72%, transparent);
+}
+
+.archive-document-cover--image .archive-document-cover-copy,
+.archive-document-cover--image .archive-document-cover-copy h1,
+.archive-document-cover--image .archive-signal-meta dd {
+  color: var(--primitive-color-paper-50);
+}
+
+.archive-document-cover--image .archive-kicker,
+.archive-document-cover--image .archive-signal-meta dt {
+  color: color-mix(in oklch, var(--primitive-color-paper-50) 74%, transparent);
+}
+
+.archive-document-cover--image .archive-kicker > span {
+  color: color-mix(in oklch, var(--primitive-color-paper-50) 78%, var(--color-primary));
 }
 
 .archive-document-cover-copy h1 {
@@ -1725,8 +1750,25 @@
 
   .archive-document-cover-copy {
     margin-block-end: var(--space-4);
-    padding: var(--space-5);
-    border-radius: var(--radius-md);
+    padding: var(--space-5) 0;
+    border-radius: 0;
+  }
+
+  .archive-document-cover-scrim {
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in oklch, var(--primitive-color-void-950) 66%, transparent) 0%,
+        color-mix(in oklch, var(--primitive-color-void-950) 24%, transparent) 74%,
+        transparent 100%
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklch, var(--primitive-color-void-950) 12%, transparent) 0%,
+        transparent 24%,
+        color-mix(in oklch, var(--primitive-color-void-950) 28%, transparent) 48%,
+        color-mix(in oklch, var(--primitive-color-void-950) 88%, transparent) 100%
+      );
   }
 
   .archive-document-cover-copy h1 {

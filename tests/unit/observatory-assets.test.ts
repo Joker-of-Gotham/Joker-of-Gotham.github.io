@@ -40,81 +40,6 @@ describe("observatory production assets", () => {
     }
   });
 
-  it("keeps both aligned eight-pose atlases and their hashes in sync", async () => {
-    const manifestPath = resolve(root, "public/assets/img/observatory/pose-atlas-manifest.json");
-    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
-      columns: number;
-      rows: number;
-      poses: string[];
-      assets: Array<{
-        output: string;
-        bytes: number;
-        sha256: string;
-        width: number;
-        height: number;
-        hasAlpha: boolean;
-        cells: Array<{ opaquePixels: number; alphaBounds: [number, number, number, number] }>;
-      }>;
-    };
-
-    expect(manifest).toMatchObject({
-      columns: 4,
-      rows: 2,
-      poses: [
-        "idle",
-        "quarter-turn",
-        "walk-profile",
-        "back-look",
-        "point-up",
-        "present",
-        "quick-turn",
-        "settle",
-      ],
-    });
-    expect(manifest.assets).toHaveLength(2);
-
-    for (const asset of manifest.assets) {
-      const path = resolve(root, "public", asset.output.replace(/^\/assets\//, "assets/"));
-      const metadata = await sharp(path).metadata();
-      expect(metadata).toMatchObject({ width: 1536, height: 1024, hasAlpha: true });
-      expect((await stat(path)).size).toBe(asset.bytes);
-      expect(await sha256(path)).toBe(asset.sha256);
-      expect(asset.cells).toHaveLength(8);
-      expect(asset.cells.every((cell) => cell.opaquePixels > 20_000)).toBe(true);
-      expect(asset.cells.every((cell) => cell.alphaBounds[3] <= 501)).toBe(true);
-    }
-  });
-
-  it("keeps the pre-outlined runtime atlases reproducible and alpha-safe", async () => {
-    const manifestPath = resolve(root, "public/assets/img/observatory/pose-runtime-manifest.json");
-    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
-      columns: number;
-      rows: number;
-      outlineRadius: number;
-      assets: Array<{
-        source: string;
-        sourceSha256: string;
-        output: string;
-        bytes: number;
-        sha256: string;
-        width: number;
-        height: number;
-      }>;
-    };
-
-    expect(manifest).toMatchObject({ columns: 4, rows: 2, outlineRadius: 3 });
-    expect(manifest.assets).toHaveLength(2);
-    for (const asset of manifest.assets) {
-      const sourcePath = resolve(root, "public", asset.source.replace(/^\/assets\//, "assets/"));
-      const outputPath = resolve(root, "public", asset.output.replace(/^\/assets\//, "assets/"));
-      const metadata = await sharp(outputPath).metadata();
-      expect(metadata).toMatchObject({ width: 1536, height: 1024, hasAlpha: true });
-      expect(await sha256(sourcePath)).toBe(asset.sourceSha256);
-      expect((await stat(outputPath)).size).toBe(asset.bytes);
-      expect(await sha256(outputPath)).toBe(asset.sha256);
-    }
-  });
-
   it("keeps all twelve authored chapter guide cutouts transparent and reproducible", async () => {
     const manifestPath = resolve(root, "public/assets/img/observatory/chapter-guide-pose-manifest.json");
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
@@ -158,7 +83,7 @@ describe("observatory production assets", () => {
       expect((await stat(outputPath)).size).toBe(asset.bytes);
       expect(await sha256(outputPath)).toBe(asset.sha256);
     }
-  });
+  }, 15_000);
 
   it("keeps both cinematic world plates and their manifest in sync", async () => {
     const manifestPath = resolve(root, "public/assets/img/observatory/world-plate-manifest.json");

@@ -1,5 +1,6 @@
 import { installAmbientAudio } from "./ambient-audio";
 import type { AmbientAudioController } from "./ambient-audio";
+import { installObservatoryChapterGuide } from "./chapter-guide";
 import { decideObservatoryQuality } from "./quality-tier";
 import { getResolvedObservatoryTheme } from "./theme";
 import type { ObservatoryController } from "./controller";
@@ -187,6 +188,7 @@ function installChapterBridge(root: HTMLElement, signal: AbortSignal) {
       if (link.hash === `#${activeSection.id}`) link.setAttribute("aria-current", "location");
       else link.removeAttribute("aria-current");
     });
+    root.dispatchEvent(new CustomEvent("observatory:chapterchange", { detail: { chapter: activeId, index: activeIndex } }));
   };
   const scheduleSync = () => {
     if (frameId) return;
@@ -261,6 +263,7 @@ export async function mountObservatory() {
   const audio = installAmbientAudio(root);
   const themeObserver = installThemeBridge(root, abortController.signal);
   installChapterBridge(root, abortController.signal);
+  installObservatoryChapterGuide(root, abortController.signal);
   const mounted: MountedObservatory = { root, abortController, audio, controller: null, themeObserver };
   state.mount = mounted;
 
@@ -293,16 +296,7 @@ export async function mountObservatory() {
       root,
       canvas,
       context: decision.context,
-      quality: decision.profile,
-      avatarDarkAtlasSource: "/assets/img/observatory/signal-guide-dark-poses-runtime.webp",
-      avatarLightAtlasSource: "/assets/img/observatory/signal-guide-light-poses-runtime.webp",
-      avatarDarkFallbackSource:
-        root.dataset.avatarDarkSource?.replace(/-sample\.webp$/u, "-poster.webp") ??
-        "/assets/img/observatory/signal-guide-dark-poster.webp",
-      avatarLightFallbackSource:
-        root.dataset.avatarLightSource?.replace(/-sample\.webp$/u, "-poster.webp") ??
-        "/assets/img/observatory/signal-guide-light-poster.webp",
-      enableRealtimeAvatar: !window.matchMedia("(max-width: 820px) and (orientation: portrait)").matches
+      quality: decision.profile
     });
     mounted.controller = controller;
     await controller.initialize();

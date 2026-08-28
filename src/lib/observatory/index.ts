@@ -6,11 +6,20 @@ export {
   getObservatoryCameraRouteLength,
   sampleObservatoryCameraRoute
 } from "./camera-director";
-export { getObservatoryPoseAtlasFrame, resolveObservatoryAvatarPose } from "./pose-director";
 export { createObservatoryTerrainField } from "./terrain-field";
-export { OBSERVATORY_AVATAR_POSES, OBSERVATORY_CHAPTERS } from "./types";
+export { OBSERVATORY_CHAPTERS } from "./types";
+export {
+  listObservatoryGuidePoseSources,
+  OBSERVATORY_CHAPTER_GUIDE_POSES,
+  OBSERVATORY_DEFAULT_GUIDE_POSE,
+  OBSERVATORY_GUIDE_POSE_IDS,
+  resolveObservatoryChapterGuidePose,
+} from "./chapter-guide-poses";
 export type {
-  ObservatoryAvatarPose,
+  ObservatoryChapterGuidePose,
+  ObservatoryGuidePoseId,
+} from "./chapter-guide-poses";
+export type {
   ObservatoryChapterId,
   ObservatoryEntry,
   ObservatoryHeroCopy,

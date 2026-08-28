@@ -1,0 +1,568 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/prepare-chapter-guide-poses.mjs",
+  "processing": {
+    "output": {
+      "width": 900,
+      "height": 1800,
+      "format": "webp",
+      "quality": 92,
+      "alphaQuality": 100
+    },
+    "chromaKey": "Perimeter-sampled RGB distance + green-dominance soft matte with edge despill"
+  },
+  "assets": [
+    {
+      "theme": "dark",
+      "pose": "present",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-dark-present.png",
+      "sourceSha256": "797b9b17b2d0946b53f7103c3ea2ed9e3557a25c34a9b6dd716f5e62ef0ea06d",
+      "output": "/assets/img/observatory/guide-pose-dark-present.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 142170,
+      "sha256": "bdbebb29533225c0822483f888a3786d7e687eb26e4a2d9ea184b35b1e7fa7cf",
+      "sourceMetadata": {
+        "width": 887,
+        "height": 1774,
+        "bytes": 1442921
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-dark-present.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1231240,
+          "translucentPixels": 13518,
+          "opaquePixels": 375242,
+          "transparentRatio": 0.760025,
+          "translucentRatio": 0.008344,
+          "opaqueRatio": 0.231631
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 11,
+          "green": 246,
+          "blue": 19,
+          "samples": 10524
+        },
+        "preservation": {
+          "bluePurplePixels": 29319,
+          "retainedBluePurplePixels": 29319,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "dark",
+      "pose": "point-up",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-dark-point-up.png",
+      "sourceSha256": "000d0a5be3ff85627f336c7879146025a000bde305367bbe889862d2631cc033",
+      "output": "/assets/img/observatory/guide-pose-dark-point-up.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 163138,
+      "sha256": "dd53587b530adbf6869380a13384bea6509f68563a1667f4915fb107dc5e4fff",
+      "sourceMetadata": {
+        "width": 864,
+        "height": 1821,
+        "bytes": 1428142
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-dark-point-up.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1246953,
+          "translucentPixels": 26713,
+          "opaquePixels": 346334,
+          "transparentRatio": 0.769724,
+          "translucentRatio": 0.01649,
+          "opaqueRatio": 0.213786
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 5,
+          "green": 249,
+          "blue": 10,
+          "samples": 10620
+        },
+        "preservation": {
+          "bluePurplePixels": 31062,
+          "retainedBluePurplePixels": 31062,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "dark",
+      "pose": "walk-profile",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-dark-walk-profile.png",
+      "sourceSha256": "c76b6d2e66a8548f89d3c37f0f8f3a8feaf535e353949a15965f81035b850479",
+      "output": "/assets/img/observatory/guide-pose-dark-walk-profile.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 197374,
+      "sha256": "6a72830af7bdb073161dca0f20f76eb6eec7197500dc500cabf5b90179114b5b",
+      "sourceMetadata": {
+        "width": 864,
+        "height": 1821,
+        "bytes": 1556581
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-dark-walk-profile.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1187289,
+          "translucentPixels": 32221,
+          "opaquePixels": 400490,
+          "transparentRatio": 0.732894,
+          "translucentRatio": 0.01989,
+          "opaqueRatio": 0.247216
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 6,
+          "green": 246,
+          "blue": 4,
+          "samples": 10620
+        },
+        "preservation": {
+          "bluePurplePixels": 55885,
+          "retainedBluePurplePixels": 55885,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "dark",
+      "pose": "quick-turn",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-dark-quick-turn.png",
+      "sourceSha256": "9bfb4393acff2e3fd5ecf6eb8a2ed6ecb53c5dc48d8523058ada419aba5dc2f6",
+      "output": "/assets/img/observatory/guide-pose-dark-quick-turn.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 182962,
+      "sha256": "23fc41ff5a5e535d9a54dfbd439239e357587fa3ad2b6edc1f72f27a26885702",
+      "sourceMetadata": {
+        "width": 887,
+        "height": 1774,
+        "bytes": 1579940
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-dark-quick-turn.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1190159,
+          "translucentPixels": 18760,
+          "opaquePixels": 411081,
+          "transparentRatio": 0.734666,
+          "translucentRatio": 0.01158,
+          "opaqueRatio": 0.253754
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 6,
+          "green": 247,
+          "blue": 18,
+          "samples": 10524
+        },
+        "preservation": {
+          "bluePurplePixels": 62643,
+          "retainedBluePurplePixels": 62643,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "dark",
+      "pose": "back-look",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-dark-back-look.png",
+      "sourceSha256": "c86f6721c8ec48d94ec6c5373e8308e1097e5dd5b40b104ae09454455217ab55",
+      "output": "/assets/img/observatory/guide-pose-dark-back-look.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 130916,
+      "sha256": "7cc4ccf3682c929d3f2b8b8f7ccf76daef940ead9bd36f95260d40ef024aefa7",
+      "sourceMetadata": {
+        "width": 887,
+        "height": 1774,
+        "bytes": 1420667
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-dark-back-look.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1238582,
+          "translucentPixels": 13301,
+          "opaquePixels": 368117,
+          "transparentRatio": 0.764557,
+          "translucentRatio": 0.00821,
+          "opaqueRatio": 0.227233
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 9,
+          "green": 248,
+          "blue": 14,
+          "samples": 10524
+        },
+        "preservation": {
+          "bluePurplePixels": 23114,
+          "retainedBluePurplePixels": 23114,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "dark",
+      "pose": "settle",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-dark-settle.png",
+      "sourceSha256": "82e924ae35b7870ae4f62110d143ede4bbfb0f2c833a86cd307349e46399a47a",
+      "output": "/assets/img/observatory/guide-pose-dark-settle.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 129868,
+      "sha256": "a0ed34b1718140830e9be0f4b62fbe3953bf372d4a96d698d702e164b5dedbdb",
+      "sourceMetadata": {
+        "width": 901,
+        "height": 1746,
+        "bytes": 1369296
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-dark-settle.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1277227,
+          "translucentPixels": 18159,
+          "opaquePixels": 324614,
+          "transparentRatio": 0.788412,
+          "translucentRatio": 0.011209,
+          "opaqueRatio": 0.200379
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 12,
+          "green": 242,
+          "blue": 17,
+          "samples": 10464
+        },
+        "preservation": {
+          "bluePurplePixels": 26457,
+          "retainedBluePurplePixels": 26457,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "light",
+      "pose": "present",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-light-present.png",
+      "sourceSha256": "dd92952618c4c1765935f64cafba857b037c8908ac730ee1005108ff2e2c0a47",
+      "output": "/assets/img/observatory/guide-pose-light-present.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 137648,
+      "sha256": "8ab8a4d1c45b6f987a4c39774576d5c81c2e0f86befd6429b8c54e47bbd47783",
+      "sourceMetadata": {
+        "width": 887,
+        "height": 1774,
+        "bytes": 1388673
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-light-present.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1234574,
+          "translucentPixels": 13328,
+          "opaquePixels": 372098,
+          "transparentRatio": 0.762083,
+          "translucentRatio": 0.008227,
+          "opaqueRatio": 0.22969
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 19,
+          "green": 236,
+          "blue": 27,
+          "samples": 10524
+        },
+        "preservation": {
+          "bluePurplePixels": 37361,
+          "retainedBluePurplePixels": 37361,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "light",
+      "pose": "point-up",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-light-point-up.png",
+      "sourceSha256": "390212ac5033905247780d7514b9573db64a0142d87958c6b6c8136de603fb3c",
+      "output": "/assets/img/observatory/guide-pose-light-point-up.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 157006,
+      "sha256": "38357a688231c3614be065f8e50068a1b43b2b1ac1bfbd74af464622886df829",
+      "sourceMetadata": {
+        "width": 864,
+        "height": 1821,
+        "bytes": 1391233
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-light-point-up.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1255206,
+          "translucentPixels": 25811,
+          "opaquePixels": 338983,
+          "transparentRatio": 0.774819,
+          "translucentRatio": 0.015933,
+          "opaqueRatio": 0.209249
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 12,
+          "green": 232,
+          "blue": 31,
+          "samples": 10620
+        },
+        "preservation": {
+          "bluePurplePixels": 26419,
+          "retainedBluePurplePixels": 26419,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "light",
+      "pose": "walk-profile",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-light-walk-profile.png",
+      "sourceSha256": "90eedbcc334a7026ce31123120907befab06bf33712cebb6037b288954668064",
+      "output": "/assets/img/observatory/guide-pose-light-walk-profile.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 196404,
+      "sha256": "26145b81990c5dc75a7f9b40fab7e75f9135ef61e453f2ccd7864fb94a9d63fe",
+      "sourceMetadata": {
+        "width": 864,
+        "height": 1821,
+        "bytes": 1499041
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-light-walk-profile.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1180753,
+          "translucentPixels": 31532,
+          "opaquePixels": 407715,
+          "transparentRatio": 0.72886,
+          "translucentRatio": 0.019464,
+          "opaqueRatio": 0.251676
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 14,
+          "green": 238,
+          "blue": 22,
+          "samples": 10620
+        },
+        "preservation": {
+          "bluePurplePixels": 86566,
+          "retainedBluePurplePixels": 86566,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "light",
+      "pose": "quick-turn",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-light-quick-turn.png",
+      "sourceSha256": "adc7eeec983d707d64c2b57f753ba8cff6048d28e1bf8bd7153139e8c80fd134",
+      "output": "/assets/img/observatory/guide-pose-light-quick-turn.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 184898,
+      "sha256": "f0a4ee0a22b87747bc412423d040b93eb74a85849d7422d2f2b6dd5425ba0624",
+      "sourceMetadata": {
+        "width": 887,
+        "height": 1774,
+        "bytes": 1556493
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-light-quick-turn.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1192707,
+          "translucentPixels": 18778,
+          "opaquePixels": 408515,
+          "transparentRatio": 0.736239,
+          "translucentRatio": 0.011591,
+          "opaqueRatio": 0.25217
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 12,
+          "green": 234,
+          "blue": 38,
+          "samples": 10524
+        },
+        "preservation": {
+          "bluePurplePixels": 76482,
+          "retainedBluePurplePixels": 76482,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "light",
+      "pose": "back-look",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-light-back-look.png",
+      "sourceSha256": "9329896281eda2d026d9240dd372ee79ea21be280c4d14d97a7717c19f13e568",
+      "output": "/assets/img/observatory/guide-pose-light-back-look.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 130270,
+      "sha256": "f918a295f427ee109fce0f7a0439d54758148909eb5fd179220dfc0f83f90e4b",
+      "sourceMetadata": {
+        "width": 887,
+        "height": 1774,
+        "bytes": 1384092
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-light-back-look.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1242200,
+          "translucentPixels": 13491,
+          "opaquePixels": 364309,
+          "transparentRatio": 0.76679,
+          "translucentRatio": 0.008328,
+          "opaqueRatio": 0.224882
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 15,
+          "green": 236,
+          "blue": 33,
+          "samples": 10524
+        },
+        "preservation": {
+          "bluePurplePixels": 24617,
+          "retainedBluePurplePixels": 24617,
+          "bluePurpleRetention": 1
+        }
+      }
+    },
+    {
+      "theme": "light",
+      "pose": "settle",
+      "source": "assets-src/observatory/chapter-guide-poses/guide-pose-light-settle.png",
+      "sourceSha256": "b7d8230999c5a05872b5350dbc8536b7ed7d66eefeac387a6f57418c69b7088d",
+      "output": "/assets/img/observatory/guide-pose-light-settle.webp",
+      "width": 900,
+      "height": 1800,
+      "hasAlpha": true,
+      "bytes": 128854,
+      "sha256": "38d95da7248b45226a6e590d356e1e37dc4c01924780b4875d12308a1c7193fb",
+      "sourceMetadata": {
+        "width": 903,
+        "height": 1742,
+        "bytes": 1347730
+      },
+      "outputMetadata": {
+        "file": "public/assets/img/observatory/guide-pose-light-settle.webp",
+        "format": "webp",
+        "colourSpace": "srgb",
+        "channels": 4,
+        "alpha": {
+          "minimum": 0,
+          "maximum": 255,
+          "transparentPixels": 1282625,
+          "translucentPixels": 16327,
+          "opaquePixels": 321048,
+          "transparentRatio": 0.791744,
+          "translucentRatio": 0.010078,
+          "opaqueRatio": 0.198178
+        }
+      },
+      "processing": {
+        "sampledScreen": {
+          "red": 18,
+          "green": 228,
+          "blue": 30,
+          "samples": 10464
+        },
+        "preservation": {
+          "bluePurplePixels": 32027,
+          "retainedBluePurplePixels": 32027,
+          "bluePurpleRetention": 1
+        }
+      }
+    }
+  ]
+}

@@ -13,19 +13,6 @@ export type ObservatoryTheme = "dark" | "light";
 export type ObservatoryQualityTier = "poster" | "low" | "standard" | "enhanced";
 export type ObservatoryRenderState = "static" | "loading" | "ready" | "degraded" | "failed" | "suspended";
 
-export const OBSERVATORY_AVATAR_POSES = [
-  "idle",
-  "quarter-turn",
-  "walk-profile",
-  "back-look",
-  "point-up",
-  "present",
-  "quick-turn",
-  "settle"
-] as const;
-
-export type ObservatoryAvatarPose = (typeof OBSERVATORY_AVATAR_POSES)[number];
-
 export type Vec3Tuple = readonly [number, number, number];
 
 export interface ObservatoryQualityProfile {
@@ -99,11 +86,6 @@ export interface ObservatoryControllerOptions {
   canvas: HTMLCanvasElement;
   context: WebGL2RenderingContext;
   quality: ObservatoryQualityProfile;
-  avatarDarkAtlasSource: string;
-  avatarLightAtlasSource: string;
-  avatarDarkFallbackSource: string;
-  avatarLightFallbackSource: string;
-  enableRealtimeAvatar: boolean;
 }
 
 export interface ObservatoryMetric {

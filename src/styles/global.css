@@ -119,6 +119,15 @@ body[data-command-open] { overflow: hidden; }
 
 .main-area { min-width: 0; }
 
+.site-shell--observatory {
+  display: block;
+}
+
+.main-area--observatory {
+  position: relative;
+  min-width: 0;
+}
+
 .observatory-main {
   position: relative;
   min-block-size: 100svh;

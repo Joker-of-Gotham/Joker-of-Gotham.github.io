@@ -72,11 +72,17 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
 
     {
       variant === "observatory" ? (
-        <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body>
-          <PagefindFilters filters={pagefindFilters} />
-          <slot name="full-bleed" />
-          <slot />
-        </main>
+        <div class="site-shell site-shell--observatory" data-variant="observatory">
+          <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
+
+          <div class="main-area main-area--observatory">
+            <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body>
+              <PagefindFilters filters={pagefindFilters} />
+              <slot name="full-bleed" />
+              <slot />
+            </main>
+          </div>
+        </div>
       ) : (
         <div class="site-shell" data-variant="standard">
           <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />

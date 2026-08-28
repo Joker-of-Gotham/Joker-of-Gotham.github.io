@@ -23,8 +23,6 @@ interface Props {
   artifacts?: ObservatoryEntry[];
   posts?: ObservatoryEntry[];
   signals?: ObservatorySignalWindow[];
-  avatarDarkSource?: string;
-  avatarLightSource?: string;
   posterDark?: string;
   posterLight?: string;
 }
@@ -49,8 +47,6 @@ const {
     { src: "/assets/img/observatory/signal-komari.webp", alt: "教室窗边的黑发少女", eyebrow: "Daily signal", caption: "Chika Komari" },
     { src: "/assets/img/observatory/signal-kaguya.webp", alt: "暖色光线中的两位少女", eyebrow: "Afterlight", caption: "Lunar memory" }
   ],
-  avatarDarkSource = "/assets/img/observatory/signal-guide-dark-sample.webp",
-  avatarLightSource = "/assets/img/observatory/signal-guide-light-sample.webp",
   posterDark = "/assets/img/observatory/signal-guide-dark-poster.webp",
   posterLight = "/assets/img/observatory/signal-guide-light-poster.webp"
 } = Astro.props;
@@ -62,8 +58,8 @@ const {
   data-render-state="static"
   data-quality-tier="poster"
   data-avatar-state="poster"
-  data-avatar-dark-source={avatarDarkSource}
-  data-avatar-light-source={avatarLightSource}
+  data-avatar-representation="chapter-pose-raster"
+  data-world-version="5"
 >
   <a class="observatory-skip-link" href="#signal-gate-title">跳到首页主要内容</a>
   <ObservatoryCanvas posterDark={posterDark} posterLight={posterLight} />

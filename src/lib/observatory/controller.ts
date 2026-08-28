@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import type { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import type { UnrealBloomPass } from "three/addons/postprocessing/UnrealBloomPass.js";
-import { createObservatoryAvatarRig } from "./avatar-rig";
-import type { ObservatoryAvatarRig } from "./avatar-rig";
 import { calculateObservatoryAspectFraming, sampleObservatoryCameraRoute } from "./camera-director";
 import { createThreeObservatoryPalette, readObservatoryPalette } from "./palette";
 import type { ThreeObservatoryPalette } from "./palette";
@@ -19,7 +17,6 @@ import {
   shouldResizeRenderer
 } from "./render-scheduler";
 import type { LayoutMeasureState, PointerSample, RendererResizeState } from "./render-scheduler";
-import { getResolvedObservatoryTheme } from "./theme";
 import { calculateAbsoluteScrollProgress, interpolateObservatoryTimeline } from "./timeline";
 import type {
   ObservatoryControllerOptions,
@@ -27,7 +24,6 @@ import type {
   ObservatoryRenderState,
   ObservatoryTimelineState
 } from "./types";
-import type { ObservatoryScrollDirection } from "./pose-director";
 
 const PERFORMANCE_WARMUP_MS = 900;
 const PERFORMANCE_SAMPLE_WINDOW_MS = 2_200;
@@ -94,18 +90,11 @@ export class ObservatoryController {
   readonly canvas: HTMLCanvasElement;
 
   private readonly context: WebGL2RenderingContext;
-  private readonly avatarDarkAtlasSource: string;
-  private readonly avatarLightAtlasSource: string;
-  private readonly avatarDarkFallbackSource: string;
-  private readonly avatarLightFallbackSource: string;
-  private readonly enableRealtimeAvatar: boolean;
   private readonly abortController = new AbortController();
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(42, 1, 0.2, 900);
   private readonly cameraLookAt = new THREE.Vector3();
   private readonly cameraTarget = new THREE.Vector3();
-  private readonly avatarTarget = new THREE.Vector3();
-  private readonly avatarOffset = new THREE.Vector3();
   private readonly pointer = new THREE.Vector2();
   private readonly canvasBounds = { left: 0, top: 0, width: 1, height: 1 };
   private readonly frameSamples: number[] = [];
@@ -116,7 +105,6 @@ export class ObservatoryController {
   private composer: EffectComposer | null = null;
   private bloomPass: UnrealBloomPass | null = null;
   private world: ProceduralObservatoryWorld | null = null;
-  private avatar: ObservatoryAvatarRig | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private themeObserver: MutationObserver | null = null;
   private themeMedia: MediaQueryList | null = null;
@@ -143,8 +131,6 @@ export class ObservatoryController {
   private scrollDirty = true;
   private canvasBoundsDirty = true;
   private firstFramePresented = false;
-  private previousScrollProgress = 0;
-  private scrollDirection: ObservatoryScrollDirection = 0;
   private pendingPointerSample: PointerSample | null = null;
 
   constructor(options: ObservatoryControllerOptions) {
@@ -152,11 +138,6 @@ export class ObservatoryController {
     this.canvas = options.canvas;
     this.context = options.context;
     this.quality = { ...options.quality };
-    this.avatarDarkAtlasSource = options.avatarDarkAtlasSource;
-    this.avatarLightAtlasSource = options.avatarLightAtlasSource;
-    this.avatarDarkFallbackSource = options.avatarDarkFallbackSource;
-    this.avatarLightFallbackSource = options.avatarLightFallbackSource;
-    this.enableRealtimeAvatar = options.enableRealtimeAvatar;
   }
 
   async initialize(): Promise<void> {
@@ -203,7 +184,8 @@ export class ObservatoryController {
       this.applyTimelineState(1);
       this.initialized = true;
       this.startLoop();
-      if (this.enableRealtimeAvatar) void this.initializeAvatar();
+      this.root.dataset.avatarRepresentation = "chapter-pose-raster";
+      this.root.dataset.avatarState = "ready";
     } catch (error) {
       this.releaseGpuResources(false);
       this.fail(error);
@@ -211,39 +193,9 @@ export class ObservatoryController {
     }
   }
 
-  private async initializeAvatar() {
-    this.root.dataset.avatarState = "loading";
-    try {
-      if (!this.currentPalette) return;
-      const avatar = await createObservatoryAvatarRig(
-        this.avatarDarkAtlasSource,
-        this.avatarLightAtlasSource,
-        this.avatarDarkFallbackSource,
-        this.avatarLightFallbackSource,
-        this.quality,
-        getResolvedObservatoryTheme(),
-        this.currentPalette
-      );
-      if (this.disposed || !this.initialized) {
-        avatar.dispose();
-        return;
-      }
-      this.avatar = avatar;
-      this.scene.add(avatar.group);
-      this.root.dataset.avatarRepresentation = String(avatar.group.userData.representation ?? "unknown");
-      this.applyTimelineState(1);
-      this.root.dataset.avatarState = "ready";
-    } catch (error) {
-      this.root.dataset.avatarState = "unavailable";
-      console.warn("[Lunar Observatory] Realtime guide unavailable; world scene retained.", error);
-    }
-  }
-
   private releaseGpuResources(forceContextLoss: boolean) {
     this.postProcessingGeneration += 1;
-    this.avatar?.dispose();
     this.world?.dispose();
-    this.avatar = null;
     this.world = null;
     this.scene.clear();
     this.composer?.dispose();
@@ -274,7 +226,6 @@ export class ObservatoryController {
       this.root.addEventListener("pointerleave", () => {
         this.pointer.set(0, 0);
         this.pendingPointerSample = null;
-        this.avatar?.setPointer(0, 0, 0);
       }, { signal });
     }
 
@@ -298,10 +249,8 @@ export class ObservatoryController {
       if (immediate) {
         this.currentPalette = clonePalette(nextPalette);
         this.world?.setPalette(this.currentPalette);
-        this.avatar?.setPalette(this.currentPalette);
         if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.currentPalette.fog);
       }
-      this.avatar?.setTheme(getResolvedObservatoryTheme(), immediate);
     } catch {
       // Existing live colors remain valid if a transient theme token cannot be resolved.
     }
@@ -357,10 +306,6 @@ export class ObservatoryController {
   private updateScrollState() {
     const viewportCenter = window.scrollY + window.innerHeight * 0.5;
     const progress = calculateAbsoluteScrollProgress(this.sectionCenters, viewportCenter);
-    const delta = progress - this.previousScrollProgress;
-    if (Math.abs(delta) > 0.002) this.scrollDirection = delta > 0 ? 1 : -1;
-    else this.scrollDirection = 0;
-    this.previousScrollProgress = progress;
     this.timelineState = interpolateObservatoryTimeline(progress);
     // Navigation follows a stable reading line rather than a section midpoint.
     // This makes an anchored, content-heavy chapter active as soon as its title
@@ -396,7 +341,7 @@ export class ObservatoryController {
   }
 
   private handlePointerMove(event: PointerEvent) {
-    if (!this.avatar || event.pointerType === "touch") return;
+    if (event.pointerType === "touch") return;
     if (this.canvasBoundsDirty) this.updateCanvasBounds();
     const normalizedX = ((event.clientX - this.canvasBounds.left) / this.canvasBounds.width) * 2 - 1;
     const normalizedY = 1 - ((event.clientY - this.canvasBounds.top) / this.canvasBounds.height) * 2;
@@ -499,29 +444,6 @@ export class ObservatoryController {
       this.scene.fog.density = damp(this.scene.fog.density, state.fogDensity, 3.5, deltaSeconds);
     }
 
-    if (this.avatar) {
-      const portraitDock = this.camera.aspect < 0.8;
-      this.avatar.group.visible = !portraitDock;
-      this.avatarOffset.set(
-        portraitDock ? framing.lateralScale * 2.6 : state.avatarOffset[0] * framing.lateralScale,
-        portraitDock ? -2.04 + framing.verticalOffset : state.avatarOffset[1] + framing.verticalOffset,
-        state.avatarOffset[2]
-      );
-      this.avatarTarget.copy(this.avatarOffset).applyQuaternion(this.camera.quaternion).add(this.camera.position);
-      dampThreeVector(this.avatar.group.position, this.avatarTarget, 5.4, deltaSeconds);
-      this.avatar.group.quaternion.copy(this.camera.quaternion);
-      const targetScale = state.avatarScale * framing.avatarScale;
-      const scale = damp(this.avatar.group.scale.x, targetScale, 4.2, deltaSeconds);
-      this.avatar.group.scale.setScalar(scale);
-      this.avatar.setPose({
-        presence: state.avatarPresence,
-        yaw: state.avatarYaw,
-        lean: state.avatarLean,
-        energy: state.avatarEnergy,
-        absoluteProgress: state.absoluteProgress,
-        scrollDirection: this.scrollDirection
-      });
-    }
   }
 
   private updatePalette(deltaSeconds: number) {
@@ -529,7 +451,6 @@ export class ObservatoryController {
     const factor = 1 - Math.exp(-3.2 * deltaSeconds);
     interpolatePalette(this.currentPalette, this.targetPalette, factor);
     this.world?.setPalette(this.currentPalette);
-    this.avatar?.setPalette(this.currentPalette);
     if (this.scene.fog instanceof THREE.FogExp2) this.scene.fog.color.copy(this.currentPalette.fog);
     this.renderer?.setClearColor(this.currentPalette.fog, 0);
   }
@@ -550,7 +471,6 @@ export class ObservatoryController {
     this.pendingPointerSample = null;
     if (pointerSample && this.quality.pointerInteraction) {
       this.pointer.set(pointerSample.x * 0.5, pointerSample.y * 0.5);
-      this.avatar?.setPointer(pointerSample.x, pointerSample.y, pointerSample.strength);
     }
     if (this.scrollDirty) this.updateScrollState();
     this.applyTimelineState(deltaSeconds);
@@ -558,7 +478,6 @@ export class ObservatoryController {
 
     const elapsedSeconds = timestamp / 1_000;
     this.world.update(this.timelineState, elapsedSeconds, deltaSeconds);
-    this.avatar?.update(elapsedSeconds, deltaSeconds);
     if (this.composer) this.composer.render();
     else this.renderer.render(this.scene, this.camera);
 
@@ -595,7 +514,6 @@ export class ObservatoryController {
     if (lowerProfile.tier === this.quality.tier) return;
     this.quality = lowerProfile;
     this.root.dataset.qualityTier = lowerProfile.tier;
-    this.avatar?.setQuality(lowerProfile);
     this.world?.setQuality(lowerProfile);
     void this.configurePostProcessing();
     // Do not reallocate the full-screen drawing buffer during an adaptive

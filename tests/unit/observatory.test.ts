@@ -15,10 +15,6 @@ import {
   getObservatoryCameraRouteLength,
   sampleObservatoryCameraRoute,
 } from "../../src/lib/observatory/camera-director";
-import {
-  getObservatoryPoseAtlasFrame,
-  resolveObservatoryAvatarPose,
-} from "../../src/lib/observatory/pose-director";
 import { createObservatoryTerrainField } from "../../src/lib/observatory/terrain-field";
 import { createProceduralObservatoryWorld } from "../../src/lib/observatory/procedural-world";
 
@@ -244,20 +240,6 @@ describe("observatory terrain field", () => {
     expect(platform.regions.platform).toBeGreaterThan(0.95);
     expect(platform.buildable).toBeGreaterThan(0.8);
     expect(platform.height).not.toBe(ridge.height);
-  });
-});
-
-describe("observatory multi-pose atlas director", () => {
-  it("maps the eight authored poses into a 4x2 atlas", () => {
-    expect(getObservatoryPoseAtlasFrame("idle")).toMatchObject({ index: 0, offsetX: 0, offsetY: 0.5 });
-    expect(getObservatoryPoseAtlasFrame("settle")).toMatchObject({ index: 7, offsetX: 0.75, offsetY: 0 });
-  });
-
-  it("uses forward and reverse hysteresis around quick turns", () => {
-    expect(resolveObservatoryAvatarPose(3.95, "present", 1)).toBe("quick-turn");
-    expect(resolveObservatoryAvatarPose(4.21, "back-look", -1)).toBe("back-look");
-    expect(resolveObservatoryAvatarPose(4.12, "back-look", -1)).toBe("quick-turn");
-    expect(resolveObservatoryAvatarPose(3.95, "present", 1, "low")).toBe("back-look");
   });
 });
 
