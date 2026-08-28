@@ -4,6 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkLegacyCallout from "./src/lib/markdown/remarkLegacyCallout.ts";
+import remarkNormalizeDocumentHeadings from "./src/lib/markdown/remarkNormalizeDocumentHeadings.ts";
 
 export default defineConfig({
   site: "https://joker-of-gotham.github.io",
@@ -21,7 +22,7 @@ export default defineConfig({
   },
   markdown: {
     syntaxHighlight: "shiki",
-    remarkPlugins: [remarkLegacyCallout, remarkMath],
+    remarkPlugins: [remarkNormalizeDocumentHeadings, remarkLegacyCallout, remarkMath],
     rehypePlugins: [
       [
         rehypeKatex,

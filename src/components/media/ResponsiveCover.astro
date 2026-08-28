@@ -1,0 +1,42 @@
+---
+import { getResponsiveCover } from "@/lib/media/covers";
+
+interface Props {
+  src: string;
+  alt: string;
+  class?: string;
+  sizes?: string;
+  loading?: "eager" | "lazy";
+  fetchpriority?: "high" | "low" | "auto";
+  decoding?: "async" | "sync" | "auto";
+  ariaHidden?: boolean;
+}
+
+const {
+  src,
+  alt,
+  class: className,
+  sizes = "(max-width: 720px) 100vw, (max-width: 1200px) 66vw, 800px",
+  loading = "lazy",
+  fetchpriority = loading === "eager" ? "high" : "auto",
+  decoding = "async",
+  ariaHidden = false
+} = Astro.props;
+
+const cover = getResponsiveCover(src);
+---
+
+<img
+  class={className}
+  src={cover?.fallbackSrc ?? src}
+  srcset={cover?.srcset || undefined}
+  sizes={cover?.srcset ? sizes : undefined}
+  width={cover?.width}
+  height={cover?.height}
+  alt={alt}
+  loading={loading}
+  fetchpriority={fetchpriority}
+  decoding={decoding}
+  aria-hidden={ariaHidden ? "true" : undefined}
+  data-responsive-cover={cover ? "optimized" : "source"}
+/>

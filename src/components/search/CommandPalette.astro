@@ -1,96 +1,295 @@
-﻿<div class="command-root" id="command-root" hidden>
-  <button class="command-mask" id="command-mask" aria-label="Close quick find"></button>
-  <section class="command-panel" role="dialog" aria-modal="true" aria-label="Quick Find">
+<div class="command-root" id="command-root" hidden>
+  <button class="command-mask" id="command-mask" type="button" aria-label="关闭快速搜索"></button>
+  <section class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
     <header class="command-header">
-      <input id="command-input" class="input command-input" placeholder="Quick Find..." autocomplete="off" />
-      <span class="meta-row">Esc</span>
+      <div class="command-heading">
+        <p class="sidebar-brand-kicker">Nocturne Research Archive</p>
+        <h2 id="command-title">快速搜索</h2>
+      </div>
+      <div class="command-header-actions">
+        <kbd class="command-shortcut">Esc</kbd>
+        <button class="button command-close" type="button" data-command-close>关闭</button>
+      </div>
     </header>
+
+    <div class="command-search-row">
+      <label class="sr-only" for="command-input">搜索文章、成果与路线图</label>
+      <input
+        id="command-input"
+        class="input command-input"
+        type="search"
+        placeholder="搜索文章、成果与路线图……"
+        autocomplete="off"
+        aria-controls="command-results"
+        aria-describedby="command-status"
+      />
+    </div>
+
+    <p class="command-status meta-row" id="command-status" aria-live="polite">输入关键词，或浏览最近条目。</p>
     <ul class="command-results list-clean" id="command-results"></ul>
   </section>
 </div>
 
 <script is:inline>
-  const root = document.getElementById("command-root");
-  const mask = document.getElementById("command-mask");
-  const input = document.getElementById("command-input");
-  const results = document.getElementById("command-results");
+  (() => {
+    const commandWindow = window;
+    commandWindow.__lunarCommandPalette?.abort?.();
 
-  let loaded = false;
-  let items = [];
-  let query = "";
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const root = document.getElementById("command-root");
+    const mask = document.getElementById("command-mask");
+    const input = document.getElementById("command-input");
+    const results = document.getElementById("command-results");
+    const status = document.getElementById("command-status");
+    const panel = root?.querySelector(".command-panel");
 
-  const render = () => {
-    if (!results) return;
-    const q = query.trim().toLowerCase();
-    const filtered = q
-      ? items.filter((item) => item.title.toLowerCase().includes(q) || item.kind.toLowerCase().includes(q)).slice(0, 18)
-      : items.slice(0, 12);
+    if (!root || !mask || !(input instanceof HTMLInputElement) || !results || !status || !panel) return;
 
-    results.innerHTML = filtered
-      .map(
-        (item) =>
-          `<li><a class="command-item" href="${item.url}"><span>${item.title}</span><span class="tag-chip">${item.kind}</span></a></li>`
-      )
-      .join("");
+    let items = [];
+    let loaded = false;
+    let loading = false;
+    let loadError = false;
+    let query = "";
+    let restoreTarget = null;
+    let inertedElements = [];
 
-    if (filtered.length === 0) {
-      results.innerHTML = '<li class="meta-row">No results found</li>';
-    }
-  };
+    const setStatus = (message) => {
+      status.textContent = message;
+    };
 
-  const loadItems = async () => {
-    if (loaded) return;
-    loaded = true;
-    try {
-      const response = await fetch("/command-items.json");
-      const payload = await response.json();
-      if (Array.isArray(payload)) {
-        items = payload;
+    const updateTriggers = (expanded) => {
+      document.querySelectorAll("[data-command-palette-trigger]").forEach((trigger) => {
+        trigger.setAttribute("aria-expanded", String(expanded));
+      });
+    };
+
+    const normalizedItems = () => items.filter((item) => {
+      if (!item || typeof item.title !== "string" || typeof item.kind !== "string" || typeof item.url !== "string") return false;
+      if (!item.url.startsWith("/") || item.url.startsWith("//")) return false;
+      try {
+        return new URL(item.url, window.location.origin).origin === window.location.origin;
+      } catch {
+        return false;
       }
-    } catch {
-      items = [];
-    }
-    render();
-  };
+    });
 
-  const open = async () => {
-    if (!root) return;
-    root.hidden = false;
-    await loadItems();
-    if (input instanceof HTMLInputElement) {
-      input.focus();
-      input.select();
-    }
-  };
+    const render = () => {
+      const keyword = query.trim().toLocaleLowerCase("zh-CN");
+      const filtered = normalizedItems()
+        .filter((item) => {
+          if (!keyword) return true;
+          const tags = Array.isArray(item.tags) ? item.tags.join(" ") : "";
+          const summary = typeof item.summary === "string" ? item.summary : "";
+          const haystack = `${item.title} ${item.kind} ${summary} ${tags}`.toLocaleLowerCase("zh-CN");
+          return haystack.includes(keyword);
+        })
+        .slice(0, keyword ? 18 : 12);
 
-  const close = () => {
-    if (!root) return;
-    root.hidden = true;
-  };
+      const fragment = document.createDocumentFragment();
+      filtered.forEach((item) => {
+        const listItem = document.createElement("li");
+        const link = document.createElement("a");
+        const title = document.createElement("span");
+        const kind = document.createElement("span");
 
-  document.addEventListener("keydown", (event) => {
-    const trigger = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
-    if (trigger) {
-      event.preventDefault();
-      if (root?.hidden) {
-        void open();
+        link.className = "command-item";
+        link.href = item.url;
+        title.className = "command-item-title";
+        title.textContent = item.title;
+        kind.className = "tag-chip";
+        kind.textContent = item.kind;
+
+        link.append(title, kind);
+        listItem.append(link);
+        fragment.append(listItem);
+      });
+
+      results.replaceChildren(fragment);
+
+      if (loading) {
+        setStatus("正在载入档案索引……");
+      } else if (loadError) {
+        setStatus("快速搜索暂时不可用；可前往完整搜索页继续。");
+      } else if (filtered.length === 0) {
+        setStatus(keyword ? "没有找到匹配条目。按 Enter 打开完整搜索。" : "档案索引当前为空。");
       } else {
-        close();
+        setStatus(`显示 ${filtered.length} 个${keyword ? "匹配" : "最近"}条目。`);
       }
-      return;
-    }
+    };
 
-    if (event.key === "Escape") {
-      close();
-    }
-  });
+    const loadItems = async () => {
+      if (loaded || loading) return;
+      loading = true;
+      results.setAttribute("aria-busy", "true");
+      render();
 
-  mask?.addEventListener("click", close);
+      try {
+        const response = await fetch("/command-items.json", { signal, cache: "no-store" });
+        if (!response.ok) throw new Error("Command index request failed");
+        const payload = await response.json();
+        items = Array.isArray(payload) ? payload : [];
+        loaded = true;
+        loadError = false;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+        items = [];
+        loadError = true;
+      } finally {
+        loading = false;
+        results.removeAttribute("aria-busy");
+        if (!signal.aborted) render();
+      }
+    };
 
-  input?.addEventListener("input", (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement)) return;
-    query = target.value;
-    render();
-  });
+    const close = (restoreFocus = true) => {
+      if (root.hidden) return;
+      root.hidden = true;
+      document.body.removeAttribute("data-command-open");
+      updateTriggers(false);
+      inertedElements.forEach((element) => {
+        if (element.isConnected) element.inert = false;
+      });
+      inertedElements = [];
+
+      if (restoreFocus && restoreTarget instanceof HTMLElement && restoreTarget.isConnected) {
+        restoreTarget.focus({ preventScroll: true });
+      }
+      restoreTarget = null;
+    };
+
+    const open = async (initialQuery = "") => {
+      const wasHidden = root.hidden;
+      if (wasHidden) {
+        restoreTarget = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      }
+
+      root.hidden = false;
+      document.body.dataset.commandOpen = "";
+      updateTriggers(true);
+      if (wasHidden) {
+        inertedElements = Array.from(document.body.children).filter((element) => {
+          if (!(element instanceof HTMLElement) || element === root || element.inert) return false;
+          element.inert = true;
+          return true;
+        });
+      }
+      query = typeof initialQuery === "string" ? initialQuery : "";
+      input.value = query;
+      render();
+      input.focus({ preventScroll: true });
+      input.select();
+      await loadItems();
+    };
+
+    const resultLinks = () => Array.from(results.querySelectorAll("a.command-item"));
+
+    const moveResultFocus = (direction) => {
+      const links = resultLinks();
+      if (links.length === 0) return;
+      const activeIndex = links.indexOf(document.activeElement);
+      const nextIndex = activeIndex < 0
+        ? direction > 0 ? 0 : links.length - 1
+        : (activeIndex + direction + links.length) % links.length;
+      links[nextIndex]?.focus();
+    };
+
+    document.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const trigger = target.closest("[data-command-palette-trigger]");
+      if (trigger) {
+        event.preventDefault();
+        void open();
+        return;
+      }
+
+      if (target.closest("#command-results a")) close(false);
+    }, { signal });
+
+    document.addEventListener("keydown", (event) => {
+      const shortcut = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+      if (shortcut) {
+        event.preventDefault();
+        root.hidden ? void open() : close();
+        return;
+      }
+
+      if (root.hidden) return;
+
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        moveResultFocus(1);
+        return;
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        moveResultFocus(-1);
+        return;
+      }
+
+      if (event.key === "Enter" && document.activeElement === input && resultLinks().length === 0) {
+        event.preventDefault();
+        const destination = query.trim() ? `/search/?q=${encodeURIComponent(query.trim())}` : "/search/";
+        close(false);
+        window.location.href = destination;
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(panel.querySelectorAll("a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex='-1'])"));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }, { signal });
+
+    input.addEventListener("input", () => {
+      query = input.value;
+      render();
+    }, { signal });
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && resultLinks().length > 0) {
+        event.preventDefault();
+        resultLinks()[0]?.click();
+      }
+    }, { signal });
+
+    mask.addEventListener("click", () => close(), { signal });
+    panel.querySelector("[data-command-close]")?.addEventListener("click", () => close(), { signal });
+
+    document.addEventListener("command-palette:open", (event) => {
+      const initialQuery = event.detail?.query;
+      void open(typeof initialQuery === "string" ? initialQuery : "");
+    }, { signal });
+    document.addEventListener("command-palette:close", () => close(), { signal });
+    document.addEventListener("astro:before-swap", () => {
+      close(false);
+      controller.abort();
+    }, { once: true, signal });
+
+    commandWindow.__lunarCommandPalette = {
+      abort: () => {
+        close(false);
+        controller.abort();
+      },
+      open,
+      close
+    };
+  })();
 </script>

@@ -36,6 +36,7 @@ const { node } = Astro.props;
 const queryText = `${node.title} ${node.summary} ${node.tags.join(" ")} ${node.highlights.join(" ")}`.toLowerCase();
 const tagsText = node.tags.map((tag) => tag.toLowerCase()).join("|");
 const defaultOpen = node.status === "now";
+const contentId = `roadmap-node-${node.slug}-content`;
 
 const statusLabel: Record<RoadmapStatus, string> = {
   done: "Completed",
@@ -66,7 +67,10 @@ const statusLabel: Record<RoadmapStatus, string> = {
         class={`tree-toggle ${defaultOpen ? "is-open" : ""}`}
         data-roadmap-toggle
         data-slug={node.slug}
+        data-title={node.title}
         aria-expanded={defaultOpen ? "true" : "false"}
+        aria-controls={contentId}
+        aria-label={`${defaultOpen ? "收起" : "展开"} ${node.title}`}
       >
         <Icon name="chevron-right" size={14} />
       </button>
@@ -77,7 +81,7 @@ const statusLabel: Record<RoadmapStatus, string> = {
       <span class="meta-row tree-progress">{(node.progress ?? 0).toFixed(1)}%</span>
     </header>
 
-    <div class="tree-node-content" data-roadmap-content hidden={!defaultOpen} data-default-open={defaultOpen ? "1" : "0"}>
+    <div id={contentId} class="tree-node-content" data-roadmap-content hidden={!defaultOpen} data-default-open={defaultOpen ? "1" : "0"}>
       <p>{node.summary}</p>
 
       {node.highlights.length > 0 && (

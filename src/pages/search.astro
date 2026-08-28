@@ -1,6 +1,7 @@
 ﻿---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Icon from "@/components/ui/Icon.astro";
+import "@/styles/archive.css";
 
 const quickKindTabs = [
   { label: "All", kind: "all" },
@@ -12,42 +13,58 @@ const quickKindTabs = [
 ];
 ---
 
-<BaseLayout title="Search" crumbs={[{ label: "Home", href: "/" }, { label: "Search" }]}> 
-  <section class="section-stack" id="search-page">
-    <div class="section-heading-row">
-      <h1>Search</h1>
-      <span class="meta-row">Live search across roadmap, blog, and artifacts</span>
-    </div>
+<BaseLayout
+  title="Search"
+  description="Search the Nocturne Research Archive across roadmap nodes, blog records, projects, papers, and artifacts."
+  crumbs={[{ label: "Home", href: "/" }, { label: "Search" }]}
+>
+  <section class="archive-page archive-search-page" id="search-page" aria-labelledby="search-page-title">
+    <header class="archive-masthead archive-masthead--search">
+      <div class="archive-masthead-copy">
+        <p class="archive-kicker"><span aria-hidden="true">A—04</span> Signal retrieval</p>
+        <h1 id="search-page-title">Search</h1>
+        <p class="archive-lead">Across every roadmap node, research note, project, paper, and materialized artifact.</p>
+        <p class="archive-note">Filters are reflected in the URL, so every result set remains bookmarkable and shareable.</p>
+      </div>
+      <div class="archive-search-orbit" aria-hidden="true">
+        <span>QUERY</span>
+        <span>INDEX</span>
+        <span>TRACE</span>
+      </div>
+    </header>
 
-    <div class="card search-shell">
-      <div class="card-body section-stack" style="gap:var(--space-4)">
+    <form class="archive-search-console" id="archive-search-form" role="search" aria-describedby="search-help search-result-status">
+      <div class="archive-search-primary">
         <label class="sr-only" for="search-query-input">Search query</label>
         <div class="input icon-input-wrap search-input-wrap">
           <Icon name="search" size={16} />
-          <input id="search-query-input" class="unstyled-input" placeholder="Type keywords and press Enter..." autocomplete="off" />
+          <input id="search-query-input" class="unstyled-input" type="search" placeholder="Search a title, topic, track, or signal…" autocomplete="off" aria-controls="search-result-list" />
         </div>
+        <p class="archive-search-help" id="search-help">Results update as you type. Combine a record type with year, track, and execution status.</p>
+      </div>
 
-        <div class="filter-bar" id="search-kind-tabs">
+      <div class="archive-search-filters">
+        <div class="filter-bar archive-kind-tabs" id="search-kind-tabs" aria-label="Record type">
           {
             quickKindTabs.map((tab) => (
-              <button class="tag-chip" type="button" data-kind={tab.kind}>{tab.label}</button>
+              <button class={`tag-chip ${tab.kind === "all" ? "active" : ""}`} type="button" data-kind={tab.kind} aria-pressed={tab.kind === "all" ? "true" : "false"}>{tab.label}</button>
             ))
           }
         </div>
 
-        <div class="filter-bar">
-          <label class="sr-only" for="search-year">Year</label>
-          <select id="search-year">
+        <div class="filter-bar archive-select-filters">
+          <label for="search-year">Year</label>
+          <select id="search-year" aria-label="Filter by year">
             <option value="all">All year</option>
           </select>
 
-          <label class="sr-only" for="search-track">Track</label>
-          <select id="search-track">
+          <label for="search-track">Track</label>
+          <select id="search-track" aria-label="Filter by track">
             <option value="all">All track</option>
           </select>
 
-          <label class="sr-only" for="search-status">Status</label>
-          <select id="search-status">
+          <label for="search-status">Status</label>
+          <select id="search-status" aria-label="Filter by status">
             <option value="all">All status</option>
             <option value="done">Completed</option>
             <option value="now">Ongoing</option>
@@ -55,12 +72,26 @@ const quickKindTabs = [
             <option value="next">Planned</option>
             <option value="later">Pending</option>
           </select>
+          <button class="button archive-search-reset" type="button" id="search-reset">Reset</button>
         </div>
       </div>
-    </div>
+    </form>
 
-    <div class="search-result-list" id="search-result-list"></div>
-    <p class="meta-row" id="search-empty" hidden>No matching results. Try different keywords or filters.</p>
+    <section class="archive-search-results" aria-labelledby="search-results-title">
+      <div class="archive-section-heading archive-section-heading--compact">
+        <div>
+          <p class="archive-kicker">Resolved signals</p>
+          <h2 id="search-results-title">Results</h2>
+        </div>
+        <p class="archive-search-status" id="search-result-status" role="status" aria-live="polite">Loading archive index…</p>
+      </div>
+      <div class="search-result-list" id="search-result-list" role="list" aria-busy="true"></div>
+      <div class="archive-empty-state" id="search-empty" hidden>
+        <span aria-hidden="true">∅</span>
+        <p>No matching signals.</p>
+        <p>Try a broader keyword or reset one of the filters.</p>
+      </div>
+    </section>
   </section>
 
   <script is:inline>
@@ -68,12 +99,15 @@ const quickKindTabs = [
 
     if (root) {
       const queryInput = document.getElementById("search-query-input");
+      const form = document.getElementById("archive-search-form");
       const tabs = document.getElementById("search-kind-tabs");
       const yearSelect = document.getElementById("search-year");
       const trackSelect = document.getElementById("search-track");
       const statusSelect = document.getElementById("search-status");
+      const resetButton = document.getElementById("search-reset");
       const list = document.getElementById("search-result-list");
       const empty = document.getElementById("search-empty");
+      const resultStatus = document.getElementById("search-result-status");
 
       const STATUS_LABEL = {
         done: "Completed",
@@ -170,14 +204,16 @@ const quickKindTabs = [
           .slice(0, 120);
 
         list.innerHTML = filtered
-          .map((item) => {
-            const status = item.status ? STATUS_LABEL[item.status] || item.status : "";
-            const meta = [item.kind, item.track, item.type, item.year, status].filter(Boolean).join(" · ");
+          .map((item, index) => {
+            const statusLabel = item.status ? STATUS_LABEL[item.status] || item.status : "";
+            const meta = [item.kind, item.track, item.type, item.year, statusLabel].filter(Boolean).join(" · ");
             const tags = (item.tags || []).slice(0, 4);
 
             return `
-              <article class="card">
-                <a class="card-body search-result-item" href="${item.url}">
+              <article class="archive-search-result" role="listitem">
+                <a class="search-result-item" href="${escapeHtml(item.url)}">
+                  <span class="archive-search-result-index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+                  <div class="archive-search-result-copy">
                   <div class="search-result-head">
                     <h3>${escapeHtml(item.title)}</h3>
                     <span class="tag-chip">${escapeHtml(item.kind)}</span>
@@ -185,6 +221,8 @@ const quickKindTabs = [
                   ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
                   ${meta ? `<p class="meta-row">${escapeHtml(meta)}</p>` : ""}
                   ${tags.length > 0 ? `<div class="meta-row">${tags.map((tag) => `<span class=\"tag-chip\">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+                  </div>
+                  <span class="archive-search-result-action" aria-hidden="true">↗</span>
                 </a>
               </article>
             `;
@@ -194,6 +232,10 @@ const quickKindTabs = [
         if (empty) {
           empty.hidden = filtered.length > 0;
         }
+        if (resultStatus) {
+          resultStatus.textContent = `${filtered.length} of ${items.length} signals`;
+        }
+        list.setAttribute("aria-busy", "false");
       };
 
       const bindEvents = () => {
@@ -235,7 +277,25 @@ const quickKindTabs = [
           state.kind = target.dataset.kind || "all";
           updateUrl();
           render();
-          tabs.querySelectorAll("[data-kind]").forEach((tab) => tab.classList.toggle("active", tab === target));
+          tabs.querySelectorAll("[data-kind]").forEach((tab) => {
+            const isActive = tab === target;
+            tab.classList.toggle("active", isActive);
+            tab.setAttribute("aria-pressed", isActive ? "true" : "false");
+          });
+        });
+
+        form?.addEventListener("submit", (event) => event.preventDefault());
+
+        resetButton?.addEventListener("click", () => {
+          state.q = "";
+          state.kind = "all";
+          state.year = "all";
+          state.track = "all";
+          state.status = "all";
+          applyControls();
+          updateUrl();
+          render();
+          if (queryInput instanceof HTMLInputElement) queryInput.focus();
         });
       };
 
@@ -245,7 +305,9 @@ const quickKindTabs = [
         if (trackSelect instanceof HTMLSelectElement) trackSelect.value = state.track;
         if (statusSelect instanceof HTMLSelectElement) statusSelect.value = state.status;
         tabs?.querySelectorAll("[data-kind]").forEach((tab) => {
-          tab.classList.toggle("active", tab.getAttribute("data-kind") === state.kind);
+          const isActive = tab.getAttribute("data-kind") === state.kind;
+          tab.classList.toggle("active", isActive);
+          tab.setAttribute("aria-pressed", isActive ? "true" : "false");
         });
       };
 
@@ -262,7 +324,11 @@ const quickKindTabs = [
 
       boot().catch(() => {
         if (list) {
-          list.innerHTML = '<article class="card"><div class="card-body"><p>Failed to load the search index. Please refresh and try again.</p></div></article>';
+          list.setAttribute("aria-busy", "false");
+          list.innerHTML = '<article class="archive-search-error" role="alert"><p>Failed to load the search index. Please refresh and try again.</p></article>';
+        }
+        if (resultStatus) {
+          resultStatus.textContent = "Archive index unavailable";
         }
       });
     }

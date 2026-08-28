@@ -1,6 +1,6 @@
 ﻿---
 import "@/styles/main.css";
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import Sidebar from "@/components/layout/Sidebar.astro";
 import Topbar from "@/components/layout/Topbar.astro";
 import CommandPalette from "@/components/search/CommandPalette.astro";
@@ -17,9 +17,16 @@ interface Props {
   description?: string;
   crumbs?: Crumb[];
   pagefindFilters?: Record<string, string | number | Array<string | number> | null | undefined>;
+  variant?: "standard" | "observatory";
 }
 
-const { title, description = "Chika Komari's research and engineering website", crumbs = [], pagefindFilters = {} } = Astro.props;
+const {
+  title,
+  description = "Chika Komari's research and engineering website",
+  crumbs = [],
+  pagefindFilters = {},
+  variant = "standard"
+} = Astro.props;
 const { home, taxonomy } = await getSiteConfig();
 
 const quickLinks = home?.quick_links?.length
@@ -36,33 +43,61 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (() => {
+        try {
+          const preference = localStorage.getItem("lunar-observatory-theme");
+          if (preference === "dark" || preference === "light") {
+            document.documentElement.dataset.theme = preference;
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+          }
+        } catch {
+          document.documentElement.removeAttribute("data-theme");
+        }
+      })();
+    </script>
     <title>{title} | Chika Komari</title>
     <meta name="description" content={description} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" /></noscript>
-    <ViewTransitions />
+    <ClientRouter />
     <slot name="head" />
   </head>
-  <body>
-    <div class="site-shell">
-      <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
+  <body data-shell-variant={variant}>
+    <a class="skip-link" href="#main-content">跳转至主要内容</a>
 
-      <div class="main-area">
-        <Topbar title={title} crumbs={crumbs} />
-        <slot name="full-bleed" />
-        <main class="main-container" data-pagefind-body>
+    {
+      variant === "observatory" ? (
+        <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body>
           <PagefindFilters filters={pagefindFilters} />
+          <slot name="full-bleed" />
           <slot />
         </main>
-      </div>
-    </div>
+      ) : (
+        <div class="site-shell" data-variant="standard">
+          <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
+
+          <div class="main-area">
+            <Topbar title={title} crumbs={crumbs} />
+            <slot name="full-bleed" />
+            <main id="main-content" class="main-container page-main" tabindex="-1" data-pagefind-body>
+              <PagefindFilters filters={pagefindFilters} />
+              <slot />
+            </main>
+          </div>
+        </div>
+      )
+    }
 
     <CommandPalette />
 
     <script>
       let _sidebarAC: AbortController | null = null;
+
       function initSidebar() {
         _sidebarAC?.abort();
         _sidebarAC = new AbortController();
@@ -71,20 +106,63 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
         const sidebar = document.getElementById("site-sidebar");
         const toggle = document.getElementById("drawer-toggle");
         if (!sidebar || !toggle) return;
+        const mainArea = document.querySelector<HTMLElement>(".main-area");
 
-        function closeSidebar() {
-          sidebar!.classList.remove("open");
-          document.querySelector(".mobile-mask")?.remove();
+        let restoreTarget: HTMLElement | null = null;
+
+        const focusableSelector = [
+          "a[href]",
+          "button:not([disabled])",
+          "input:not([disabled])",
+          "select:not([disabled])",
+          "textarea:not([disabled])",
+          "[tabindex]:not([tabindex='-1'])"
+        ].join(",");
+
+        function setExpanded(expanded: boolean) {
+          toggle!.setAttribute("aria-expanded", String(expanded));
+          sidebar!.setAttribute("aria-hidden", String(!expanded));
+          if (expanded) {
+            sidebar!.removeAttribute("inert");
+            if (mainArea) mainArea.inert = true;
+            document.body.dataset.drawerOpen = "";
+          } else {
+            sidebar!.setAttribute("inert", "");
+            if (mainArea) mainArea.inert = false;
+            document.body.removeAttribute("data-drawer-open");
+          }
         }
+
+        function closeSidebar(restoreFocus = true) {
+          const wasOpen = sidebar!.classList.contains("open");
+          sidebar!.classList.remove("open");
+          setExpanded(false);
+          document.querySelector(".mobile-mask")?.remove();
+
+          if (wasOpen && restoreFocus) {
+            const target = restoreTarget?.isConnected ? restoreTarget : toggle;
+            target?.focus({ preventScroll: true });
+          }
+
+          restoreTarget = null;
+        }
+
         function openSidebar() {
+          restoreTarget = document.activeElement instanceof HTMLElement ? document.activeElement : toggle;
           sidebar!.classList.add("open");
+          setExpanded(true);
+
           if (!document.querySelector(".mobile-mask")) {
             const mask = document.createElement("button");
+            mask.type = "button";
             mask.className = "mobile-mask";
-            mask.setAttribute("aria-label", "Close sidebar");
-            mask.addEventListener("click", closeSidebar);
+            mask.setAttribute("aria-label", "关闭导航栏");
+            mask.addEventListener("click", () => closeSidebar(), { signal: sig });
             document.body.appendChild(mask);
           }
+
+          const firstControl = sidebar!.querySelector<HTMLElement>("[data-sidebar-close], a[href], button:not([disabled])");
+          firstControl?.focus({ preventScroll: true });
         }
 
         toggle.addEventListener("click", (e) => {
@@ -92,15 +170,219 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
         }, { signal: sig });
 
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape" && sidebar.classList.contains("open")) closeSidebar();
+        sidebar.querySelector("[data-sidebar-close]")?.addEventListener("click", () => closeSidebar(), { signal: sig });
+
+        sidebar.addEventListener("click", (event) => {
+          const target = event.target;
+          if (target instanceof Element && target.closest("a[href]")) {
+            closeSidebar(false);
+          }
         }, { signal: sig });
+
+        document.addEventListener("keydown", (e) => {
+          if (!sidebar.classList.contains("open")) return;
+
+          if (e.key === "Escape") {
+            e.preventDefault();
+            closeSidebar();
+            return;
+          }
+
+          if (e.key !== "Tab") return;
+          const focusable = Array.from(sidebar.querySelectorAll<HTMLElement>(focusableSelector)).filter(
+            (element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true"
+          );
+          if (focusable.length === 0) return;
+
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }, { signal: sig });
+
+        document.addEventListener("astro:before-swap", () => closeSidebar(false), { once: true, signal: sig });
+        closeSidebar(false);
       }
+
       document.addEventListener("astro:page-load", initSidebar);
+      initSidebar();
     </script>
 
     <script>
+      // @ts-nocheck
+      const shellWindow = window;
+      const THEME_STORAGE_KEY = "lunar-observatory-theme";
+      const THEME_CHANGE_EVENT = "observatory:theme-change";
+
+      if (!shellWindow.__lunarShellController) {
+        const colorScheme = window.matchMedia("(prefers-color-scheme: light)");
+        const controller = {
+          routePending: false,
+          lastTheme: null,
+          lastPreference: null,
+          volatilePreference: null,
+          syncTheme: null
+        };
+
+        const readPreference = () => {
+          try {
+            const value = localStorage.getItem(THEME_STORAGE_KEY);
+            return value === "dark" || value === "light" ? value : controller.volatilePreference;
+          } catch {
+            return controller.volatilePreference;
+          }
+        };
+
+        const effectiveTheme = (preference = readPreference()) => preference ?? (colorScheme.matches ? "light" : "dark");
+
+        const updateThemeControls = (theme, preference) => {
+          const nextTheme = theme === "dark" ? "light" : "dark";
+          const currentLabel = theme === "dark" ? "深空" : "月纸";
+          const nextLabel = nextTheme === "dark" ? "深色" : "浅色";
+
+          document.querySelectorAll("[data-theme-toggle]").forEach((control) => {
+            if (!(control instanceof HTMLElement)) return;
+            control.dataset.themeState = theme;
+            control.dataset.themePreference = preference ?? "system";
+            control.setAttribute("aria-label", `当前为${currentLabel}主题，切换至${nextLabel}主题`);
+            control.setAttribute("title", `切换至${nextLabel}主题`);
+            const label = control.querySelector("[data-theme-label]");
+            if (label) label.textContent = currentLabel;
+          });
+        };
+
+        const syncTheme = ({ forceEvent = false } = {}) => {
+          const preference = readPreference();
+          if (preference) {
+            document.documentElement.dataset.theme = preference;
+          } else {
+            document.documentElement.removeAttribute("data-theme");
+          }
+
+          const theme = effectiveTheme(preference);
+          updateThemeControls(theme, preference);
+
+          if (forceEvent || controller.lastTheme !== theme || controller.lastPreference !== preference) {
+            controller.lastTheme = theme;
+            controller.lastPreference = preference;
+            window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, {
+              detail: { theme, preference: preference ?? "system" }
+            }));
+          }
+        };
+
+        const observeThemeAttribute = () => {
+          const attributeTheme = document.documentElement.dataset.theme;
+          let preference = readPreference();
+          if (!preference && (attributeTheme === "dark" || attributeTheme === "light")) {
+            controller.volatilePreference = attributeTheme;
+            preference = attributeTheme;
+          }
+          const theme = attributeTheme === "dark" || attributeTheme === "light"
+            ? attributeTheme
+            : effectiveTheme(preference);
+          updateThemeControls(theme, preference);
+
+          if (controller.lastTheme !== theme || controller.lastPreference !== preference) {
+            controller.lastTheme = theme;
+            controller.lastPreference = preference;
+            window.dispatchEvent(new CustomEvent(THEME_CHANGE_EVENT, {
+              detail: { theme, preference: preference ?? "system" }
+            }));
+          }
+        };
+
+        const setExplicitTheme = (theme) => {
+          try {
+            localStorage.setItem(THEME_STORAGE_KEY, theme);
+            controller.volatilePreference = null;
+          } catch {
+            controller.volatilePreference = theme;
+          }
+          document.documentElement.dataset.theme = theme;
+          syncTheme({ forceEvent: true });
+        };
+
+        document.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+          const toggle = target.closest("[data-theme-toggle]");
+          if (!toggle) return;
+          event.preventDefault();
+          setExplicitTheme(effectiveTheme() === "dark" ? "light" : "dark");
+        });
+
+        document.addEventListener("astro:before-preparation", () => {
+          controller.routePending = true;
+        });
+
+        document.addEventListener("astro:before-swap", (event) => {
+          const preference = readPreference();
+          const nextRoot = event.newDocument?.documentElement;
+          if (!nextRoot) return;
+          if (preference) nextRoot.dataset.theme = preference;
+          else nextRoot.removeAttribute("data-theme");
+        });
+
+        document.addEventListener("astro:page-load", () => {
+          syncTheme({ forceEvent: true });
+
+          if (!controller.routePending) return;
+          controller.routePending = false;
+
+          window.requestAnimationFrame(() => {
+            const active = document.activeElement;
+            if (active instanceof HTMLElement && active !== document.body && active.isConnected) return;
+
+            let focusTarget = document.getElementById("main-content");
+            if (window.location.hash.length > 1) {
+              try {
+                focusTarget = document.getElementById(decodeURIComponent(window.location.hash.slice(1))) ?? focusTarget;
+              } catch {
+                // Keep the main landmark as the safe target for malformed fragments.
+              }
+            }
+
+            if (!(focusTarget instanceof HTMLElement)) return;
+            const hadTabindex = focusTarget.hasAttribute("tabindex");
+            if (!hadTabindex) focusTarget.setAttribute("tabindex", "-1");
+            focusTarget.focus({ preventScroll: true });
+            if (!hadTabindex) {
+              focusTarget.addEventListener("blur", () => focusTarget?.removeAttribute("tabindex"), { once: true });
+            }
+          });
+        });
+
+        colorScheme.addEventListener("change", () => {
+          if (!readPreference()) syncTheme({ forceEvent: true });
+        });
+        new MutationObserver(observeThemeAttribute).observe(document.documentElement, {
+          attributes: true,
+          attributeFilter: ["data-theme"]
+        });
+        window.addEventListener("storage", (event) => {
+          if (event.key === THEME_STORAGE_KEY) syncTheme({ forceEvent: true });
+        });
+
+        shellWindow.__lunarShellController = controller;
+        controller.syncTheme = syncTheme;
+        syncTheme({ forceEvent: true });
+      } else {
+        shellWindow.__lunarShellController.syncTheme?.({ forceEvent: true });
+      }
+    </script>
+
+    <script>
+      let _animationObserver: IntersectionObserver | null = null;
+
       function initAnimations() {
+        _animationObserver?.disconnect();
+        _animationObserver = null;
         const els = document.querySelectorAll("[data-animate]:not(.in-view)");
         if (!els.length) return;
 
@@ -110,55 +392,22 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           return;
         }
 
-        const observer = new IntersectionObserver(
+        _animationObserver = new IntersectionObserver(
           (entries) => {
             entries.forEach((e) => {
               if (e.isIntersecting) {
                 (e.target as HTMLElement).classList.add("in-view");
-                observer.unobserve(e.target);
+                _animationObserver?.unobserve(e.target);
               }
             });
           },
           { threshold: 0.05, rootMargin: "0px 0px -20px 0px" }
         );
-        els.forEach((el) => observer.observe(el));
+        els.forEach((el) => _animationObserver?.observe(el));
       }
       document.addEventListener("astro:page-load", initAnimations);
-    </script>
-
-    <script>
-      let _carouselAC: AbortController | null = null;
-      function initHeroCarousel() {
-        _carouselAC?.abort();
-        _carouselAC = new AbortController();
-        const sig = _carouselAC.signal;
-
-        const slides = document.querySelectorAll("#hero-carousel .hero-carousel-slide");
-        const dots = document.querySelectorAll("#hero-carousel-dots .hero-carousel-dot");
-        if (slides.length <= 1) return;
-
-        let current = 0;
-        let timer: ReturnType<typeof setInterval>;
-
-        function goTo(idx: number) {
-          if (idx === current) return;
-          slides[current].classList.remove("is-active");
-          dots[current]?.classList.remove("is-active");
-          current = idx;
-          slides[current].classList.add("is-active");
-          dots[current]?.classList.add("is-active");
-          clearInterval(timer);
-          timer = setInterval(() => goTo((current + 1) % slides.length), 6000);
-        }
-
-        dots.forEach((dot) => {
-          dot.addEventListener("click", () => goTo(parseInt((dot as HTMLElement).dataset.idx || "0", 10)), { signal: sig });
-        });
-
-        sig.addEventListener("abort", () => clearInterval(timer));
-        timer = setInterval(() => goTo((current + 1) % slides.length), 6000);
-      }
-      document.addEventListener("astro:page-load", initHeroCarousel);
+      document.addEventListener("astro:before-swap", () => _animationObserver?.disconnect());
+      initAnimations();
     </script>
 
     <script>
@@ -188,6 +437,72 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           const language = extractLanguage(code) || pre.dataset.language || "text";
           pre.dataset.lang = String(language).toUpperCase();
           pre.dataset.codeDecorated = "1";
+          pre.tabIndex = 0;
+          pre.setAttribute("aria-label", `${String(language).toUpperCase()} 代码，可横向滚动`);
+
+          if (String(language).toLowerCase() !== "mermaid") {
+            const copyButton = document.createElement("button");
+            copyButton.className = "code-copy-button";
+            copyButton.type = "button";
+            copyButton.textContent = "Copy";
+            copyButton.setAttribute("aria-label", `复制 ${String(language).toUpperCase()} 代码`);
+            copyButton.addEventListener("click", async () => {
+              try {
+                await navigator.clipboard.writeText(code.textContent ?? "");
+                copyButton.textContent = "Copied";
+                copyButton.dataset.copyState = "copied";
+                copyButton.setAttribute("aria-label", "代码已复制");
+                window.setTimeout(() => {
+                  copyButton.textContent = "Copy";
+                  delete copyButton.dataset.copyState;
+                  copyButton.setAttribute("aria-label", `复制 ${String(language).toUpperCase()} 代码`);
+                }, 1_600);
+              } catch {
+                copyButton.textContent = "Unavailable";
+                copyButton.dataset.copyState = "error";
+                copyButton.setAttribute("aria-label", "当前环境无法复制代码");
+              }
+            });
+            pre.appendChild(copyButton);
+          }
+        });
+      };
+
+      const prepareResponsiveContent = (scope = document) => {
+        scope.querySelectorAll(".content table").forEach((table, index) => {
+          if (!(table instanceof HTMLTableElement) || table.closest(".table-wrap")) return;
+          const wrapper = document.createElement("div");
+          wrapper.className = "table-wrap";
+          wrapper.tabIndex = 0;
+          wrapper.setAttribute("role", "region");
+          const caption = table.querySelector("caption")?.textContent?.trim();
+          wrapper.setAttribute("aria-label", caption ? `${caption}，可横向滚动` : `数据表 ${index + 1}，可横向滚动`);
+          table.before(wrapper);
+          wrapper.appendChild(table);
+        });
+
+        scope.querySelectorAll(".content img").forEach((image) => {
+          if (!(image instanceof HTMLImageElement)) return;
+          if (!image.hasAttribute("loading")) image.loading = "lazy";
+          if (!image.hasAttribute("decoding")) image.decoding = "async";
+        });
+
+        scope.querySelectorAll(".katex-display").forEach((formula) => {
+          if (!(formula instanceof HTMLElement) || formula.dataset.scrollRegion === "1") return;
+          formula.dataset.scrollRegion = "1";
+          formula.tabIndex = 0;
+          formula.setAttribute("role", "region");
+          formula.setAttribute("aria-label", "数学公式，可横向滚动");
+        });
+
+        scope.querySelectorAll(".content input[type='checkbox']").forEach((checkbox) => {
+          if (!(checkbox instanceof HTMLInputElement) || checkbox.dataset.taskLabelled === "1") return;
+          const task = checkbox.closest("li");
+          const text = task?.textContent?.replace(/\s+/g, " ").trim();
+          if (!text) return;
+
+          checkbox.dataset.taskLabelled = "1";
+          checkbox.setAttribute("aria-label", `${checkbox.checked ? "已完成" : "未完成"}任务：${text}`);
         });
       };
 
@@ -246,8 +561,29 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
               const mermaid = module.default ?? module;
               mermaid.initialize({
                 startOnLoad: false,
-                securityLevel: "loose",
-                theme: "dark"
+                securityLevel: "strict",
+                theme: "base",
+                themeVariables: {
+                  darkMode: true,
+                  background: "#0a0f18",
+                  primaryColor: "#172033",
+                  primaryTextColor: "#ffffff",
+                  primaryBorderColor: "#9bb8d8",
+                  secondaryColor: "#211c35",
+                  secondaryTextColor: "#ffffff",
+                  tertiaryColor: "#102c2a",
+                  tertiaryTextColor: "#ffffff",
+                  lineColor: "#c7d6e8",
+                  textColor: "#ffffff",
+                  edgeLabelBackground: "#0a0f18",
+                  clusterBkg: "#111827",
+                  clusterBorder: "#9bb8d8",
+                  titleColor: "#ffffff"
+                },
+                flowchart: {
+                  htmlLabels: false,
+                  useMaxWidth: true
+                }
               });
               return mermaid;
             })
@@ -310,6 +646,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
       const applyEnhancements = () => {
         schedule(() => {
           decorateCodeBlocks(document);
+          prepareResponsiveContent(document);
           cleanupLegacyMarkers(document);
         });
         schedule(() => void renderMermaidBlocks(document));

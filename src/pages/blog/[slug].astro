@@ -2,9 +2,11 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/ui/Card.astro";
 import Comments from "@/components/ui/Comments.astro";
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
 import type { CollectionEntry } from "astro:content";
 import { getPublishedBlogPosts, getRoadmapNodes, getArtifacts, normalizeSlug, formatDate, readingTimeFromBody } from "@/lib/content/queries";
 import { computeSimilarPosts } from "@/lib/content/similarity";
+import "@/styles/archive.css";
 
 export async function getStaticPaths() {
   const posts = await getPublishedBlogPosts();
@@ -18,7 +20,7 @@ const tocHeadings = headings.filter((heading: RenderHeading) => heading.depth <=
 const [posts, nodes, artifacts] = await Promise.all([getPublishedBlogPosts(), getRoadmapNodes(), getArtifacts()]);
 
 const currentSlug = normalizeSlug(entry);
-const currentNodeSlugSet = new Set(entry.data.related_nodes);
+const currentNodeSlugSet = new Set<string>(entry.data.related_nodes as string[]);
 
 for (const node of nodes) {
   if (node.data.related_posts.includes(currentSlug)) {
@@ -40,10 +42,10 @@ const relatedArtifacts = artifacts.filter((artifact) => {
 // specified, no auto-computation. Final list is sorted by date descending.
 const TARGET_RELATED = 4;
 const postBySlug = new Map(posts.map((post) => [normalizeSlug(post), post] as const));
-const manualSlugs = (entry.data.related_posts ?? [])
-  .map((slug: string) => (postBySlug.has(slug) ? slug : null))
-  .filter((slug): slug is string => slug !== null);
-const manualSet = new Set(manualSlugs);
+const manualSlugs: string[] = ((entry.data.related_posts ?? []) as string[]).filter(
+  (slug: string) => postBySlug.has(slug)
+);
+const manualSet = new Set<string>(manualSlugs);
 
 let relatedPosts: typeof posts;
 if (manualSlugs.length >= TARGET_RELATED) {
@@ -66,7 +68,6 @@ const newerPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
 const olderPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
 
 const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
-const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 ---
 
 <BaseLayout
@@ -79,40 +80,48 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
     tags: entry.data.tags
   }}
 >
-  <article class="section-stack">
-    <header class="blog-article-header">
+  <article class="archive-page archive-document archive-document--blog">
+    <header class="archive-document-header">
       {entry.data.cover ? (
-        <div class="blog-article-cover-wrap full-bleed">
-          <img class="blog-article-cover" src={entry.data.cover} alt={entry.data.title} loading="eager" fetchpriority="high" decoding="async" />
-          <div class="blog-article-cover-overlay" />
-          <div class="blog-article-cover-text">
+        <div class="archive-document-cover archive-document-cover--image full-bleed">
+          <ResponsiveCover
+            src={entry.data.cover}
+            alt={entry.data.title}
+            loading="eager"
+            fetchpriority="high"
+            sizes="(max-width: 960px) 100vw, 1440px"
+          />
+          <div class="archive-document-cover-scrim" aria-hidden="true" />
+          <div class="archive-document-cover-copy">
+            <p class="archive-kicker"><span aria-hidden="true">A / BLOG</span> Indexed transmission</p>
             <h1>{entry.data.title}</h1>
-            <div class="meta-row">
-              <span>{formatDate(entry.data.date)}</span>
-              <span>{entry.data.collection}</span>
-              <span>{readMinutes} 分钟阅读</span>
-            </div>
+            <dl class="archive-signal-meta" aria-label="Article metadata">
+              <div><dt>Received</dt><dd><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></dd></div>
+              <div><dt>Collection</dt><dd>{entry.data.collection}</dd></div>
+              <div><dt>Read</dt><dd>{readMinutes} 分钟</dd></div>
+            </dl>
           </div>
         </div>
       ) : (
-        <div class="blog-article-placeholder-cover full-bleed" />
-      )}
-
-      {entry.data.emoji && (
-        <div class="blog-article-emoji">{entry.data.emoji}</div>
-      )}
-
-      {!entry.data.cover && (
-        <div class="blog-article-header-content">
-          <h1>{entry.data.title}</h1>
-          <div class="meta-row">
-            <span>{formatDate(entry.data.date)}</span>
-            <span>{entry.data.collection}</span>
-            <span>{readMinutes} 分钟阅读</span>
+        <div class="archive-document-cover archive-document-cover--placeholder full-bleed">
+          <div class="archive-document-cover-copy">
+            <p class="archive-kicker"><span aria-hidden="true">A / BLOG</span> Indexed transmission</p>
+            <h1>{entry.data.title}</h1>
+            <dl class="archive-signal-meta" aria-label="Article metadata">
+              <div><dt>Received</dt><dd><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></dd></div>
+              <div><dt>Collection</dt><dd>{entry.data.collection}</dd></div>
+              <div><dt>Read</dt><dd>{readMinutes} 分钟</dd></div>
+            </dl>
           </div>
         </div>
       )}
-      <div class="meta-row">
+
+      {entry.data.emoji && (
+        <div class="archive-document-emoji" aria-hidden="true">{entry.data.emoji}</div>
+      )}
+
+      <div class="archive-document-tags" aria-label="Article tags">
+        <span class="archive-document-tags-label">Signal taxonomy</span>
         {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
       </div>
     </header>
@@ -124,7 +133,7 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
           <span class="toc-dock-progress"><strong data-toc-progress>0%</strong></span>
         </div>
         <ul class="toc-outline">
-          {tocHeadings.some((h: (typeof tocHeadings)[number]) => h.depth === 1) && <span class="toc-spine" aria-hidden="true"></span>}
+          {tocHeadings.some((h: (typeof tocHeadings)[number]) => h.depth === 1) && <li class="toc-spine" aria-hidden="true"></li>}
           {
             tocHeadings.map((heading: (typeof tocHeadings)[number], index: number) => {
               const depth = heading.depth;
@@ -163,51 +172,72 @@ const tocPanelId = `toc-panel-${currentSlug.replace(/[^a-zA-Z0-9_-]/g, "-")}`;
       </aside>
     )}
 
-    <div class="article-content content">
-      <Content />
+    <div class="archive-reading-shell">
+      <div class="archive-reading-marker" aria-hidden="true">
+        <span>NOCTURNE</span>
+        <span>{currentSlug}</span>
+      </div>
+      <div class="article-content content archive-prose">
+        <Content />
+      </div>
     </div>
 
-    <section class="section-stack" data-animate>
-      <h2>关联路线图节点</h2>
-      {relatedNodes.length > 0 ? (
-        <div class="card-grid">
-          {relatedNodes.map((node) => <Card href={`/roadmap/${normalizeSlug(node)}/`} title={node.data.title} subtitle={node.data.status.toUpperCase()} />)}
+    <footer class="archive-document-footer">
+      <section class="archive-related-section" aria-labelledby="related-roadmap-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Linked trajectory</p><h2 id="related-roadmap-title">关联路线图节点</h2></div>
+          <span class="archive-coordinate">{relatedNodes.length.toString().padStart(2, "0")}</span>
         </div>
-      ) : (
-        <Card title="暂无关联路线图节点" />
-      )}
-    </section>
+        {relatedNodes.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedNodes.map((node) => <Card href={`/roadmap/${normalizeSlug(node)}/`} title={node.data.title} subtitle={node.data.status.toUpperCase()} />)}
+          </div>
+        ) : (
+          <Card title="暂无关联路线图节点" />
+        )}
+      </section>
 
-    <section class="section-stack" data-animate>
-      <h2>关联成果</h2>
-      {relatedArtifacts.length > 0 ? (
-        <div class="card-grid">
-          {relatedArtifacts.map((artifact) => <Card href={`/artifacts/${normalizeSlug(artifact)}/`} title={artifact.data.title} subtitle={artifact.data.type.toUpperCase()} />)}
+      <section class="archive-related-section" aria-labelledby="related-artifacts-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Materialized signal</p><h2 id="related-artifacts-title">关联成果</h2></div>
+          <span class="archive-coordinate">{relatedArtifacts.length.toString().padStart(2, "0")}</span>
         </div>
-      ) : (
-        <Card title="暂无关联成果" />
-      )}
-    </section>
+        {relatedArtifacts.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedArtifacts.map((artifact) => <Card href={`/artifacts/${normalizeSlug(artifact)}/`} title={artifact.data.title} subtitle={artifact.data.type.toUpperCase()} />)}
+          </div>
+        ) : (
+          <Card title="暂无关联成果" />
+        )}
+      </section>
 
-    <section class="section-stack" data-animate>
-      <h2>相关文章</h2>
-      {relatedPosts.length > 0 ? (
-        <div class="card-grid">
-          {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+      <section class="archive-related-section" aria-labelledby="related-posts-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Adjacent records</p><h2 id="related-posts-title">相关文章</h2></div>
+          <span class="archive-coordinate">{relatedPosts.length.toString().padStart(2, "0")}</span>
         </div>
-      ) : (
-        <Card title="暂无相关文章" />
-      )}
-    </section>
+        {relatedPosts.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+          </div>
+        ) : (
+          <Card title="暂无相关文章" />
+        )}
+      </section>
 
-    <Card title="上一篇 / 下一篇">
-      <div class="filter-bar" style="justify-content:space-between;">
-        {olderPost ? <a href={`/blog/${normalizeSlug(olderPost)}/`}>← {olderPost.data.title}</a> : <span class="meta-row">没有更早文章</span>}
-        {newerPost ? <a href={`/blog/${normalizeSlug(newerPost)}/`}>{newerPost.data.title} →</a> : <span class="meta-row">没有更新文章</span>}
-      </div>
-    </Card>
+      <nav class="archive-pagination" aria-label="相邻文章">
+        <div>
+          <span class="archive-kicker">Previous signal</span>
+          {olderPost ? <a href={`/blog/${normalizeSlug(olderPost)}/`}>← {olderPost.data.title}</a> : <span class="archive-pagination-empty">没有更早文章</span>}
+        </div>
+        <div>
+          <span class="archive-kicker">Next signal</span>
+          {newerPost ? <a href={`/blog/${normalizeSlug(newerPost)}/`}>{newerPost.data.title} →</a> : <span class="archive-pagination-empty">没有更新文章</span>}
+        </div>
+      </nav>
 
-    <Comments term={entry.data.title} />
+      <Comments term={entry.data.title} />
+    </footer>
   </article>
 
   <script is:inline>

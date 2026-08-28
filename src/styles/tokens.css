@@ -1,208 +1,538 @@
+/*
+ * Lunar Signal Observatory — canonical runtime tokens
+ * Source of truth: /DESIGN.md
+ * Architecture: Layer 1 primitives -> Layer 2 semantics -> Layer 3 components.
+ * Components must not consume --primitive-* directly.
+ */
+
 :root {
   color-scheme: dark;
 
-  /* ── Background depth layers (近纯黑) ── */
-  --bg-void: #050608;
-  --bg-base: #08090c;
-  --bg-elevated: rgba(17, 19, 24, 0.74);
-  --bg-overlay: rgba(24, 27, 33, 0.58);
+  /* ================================================================
+     Layer 1 — immutable primitives
+     ================================================================ */
 
-  /* Legacy aliases (keep component compat) */
-  --bg-muted: #0d0f13;
-  --bg-surface: var(--bg-elevated);
-  --bg-surface-soft: rgba(20, 23, 29, 0.44);
+  /* Lunar neutral scale */
+  --primitive-color-void-950: oklch(0.1229 0.0108 271.39); /* #05060a */
+  --primitive-color-ink-900: oklch(0.1604 0.0152 272.2); /* #0b0d14 */
+  --primitive-color-ink-850: oklch(0.19 0.02 273);
+  --primitive-color-ink-800: oklch(0.2162 0.0241 273.38); /* #161925 */
+  --primitive-color-ink-750: oklch(0.2686 0.0323 273.83); /* #212536 */
+  --primitive-color-ink-700: oklch(0.3056 0.0369 273.23); /* #292e42 */
+  --primitive-color-ink-600: oklch(0.48 0.026 272);
+  --primitive-color-mist-500: oklch(0.7338 0.0186 264.45); /* #a3a9b5 */
+  --primitive-color-mist-300: oklch(0.8638 0.0187 269.07); /* #cdd2df */
+  --primitive-color-paper-100: oklch(0.9264 0.0092 78.28); /* #eae6e0 */
+  --primitive-color-paper-50: oklch(0.9618 0.0086 84.57); /* #f5f2ec */
+  --primitive-color-white: oklch(1 0 0);
 
-  /* ── Glass tiers (Apple Liquid Glass) ── */
-  --glass-blur-thin: blur(8px);
-  --glass-blur-regular: blur(16px);
-  --glass-blur-thick: blur(24px);
+  /* Approved brand anchors */
+  --primitive-color-violet-300: oklch(0.79 0.125 286);
+  --primitive-color-violet-500: oklch(0.6642 0.1875 286.04); /* #8d7cff */
+  --primitive-color-violet-700: oklch(0.4714 0.1734 280.97); /* #4f46b8 */
+  --primitive-color-blue-300: oklch(0.82 0.095 258.5);
+  --primitive-color-blue-500: oklch(0.724 0.1439 258.69); /* #6ca6ff */
+  --primitive-color-blue-700: oklch(0.49 0.145 259);
+  --primitive-color-rose-300: oklch(0.82 0.075 359);
+  --primitive-color-rose-500: oklch(0.7371 0.1159 359.13); /* #e58aa8 */
+  --primitive-color-rose-700: oklch(0.5116 0.128 358.13); /* #9e4266 */
+  --primitive-color-gold-300: oklch(0.84 0.06 85);
+  --primitive-color-gold-500: oklch(0.7494 0.0826 84.76); /* #c6aa70 */
+  --primitive-color-gold-700: oklch(0.59 0.095 88);
+
+  /* Status anchors */
+  --primitive-color-success-400: oklch(0.72 0.12 165);
+  --primitive-color-success-700: oklch(0.49 0.105 165);
+  --primitive-color-danger-400: oklch(0.7 0.16 25);
+  --primitive-color-danger-700: oklch(0.50 0.145 25);
+
+  /* Alpha primitives */
+  --primitive-alpha-white-4: oklch(1 0 0 / 0.04);
+  --primitive-alpha-white-7: oklch(1 0 0 / 0.07);
+  --primitive-alpha-white-12: oklch(1 0 0 / 0.12);
+  --primitive-alpha-black-8: oklch(0 0 0 / 0.08);
+  --primitive-alpha-black-18: oklch(0 0 0 / 0.18);
+  --primitive-alpha-black-36: oklch(0 0 0 / 0.36);
+  --primitive-alpha-black-52: oklch(0 0 0 / 0.52);
+
+  /* Typography primitives: one display stack, one body stack, one mono stack */
+  --primitive-font-display: "Space Grotesk", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", serif;
+  --primitive-font-body: "Inter", "Source Han Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --primitive-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --primitive-font-weight-regular: 400;
+  --primitive-font-weight-medium: 500;
+  --primitive-font-weight-semibold: 600;
+  --primitive-font-weight-bold: 700;
+
+  /* Fluid type primitives */
+  --primitive-type-xs: clamp(0.75rem, 0.72rem + 0.12vw, 0.8125rem);
+  --primitive-type-sm: clamp(0.8125rem, 0.78rem + 0.16vw, 0.9rem);
+  --primitive-type-base: clamp(0.975rem, 0.93rem + 0.2vw, 1.075rem);
+  --primitive-type-lg: clamp(1.0875rem, 1.01rem + 0.34vw, 1.25rem);
+  --primitive-type-xl: clamp(1.25rem, 1.12rem + 0.55vw, 1.5rem);
+  --primitive-type-2xl: clamp(1.5rem, 1.27rem + 0.95vw, 1.95rem);
+  --primitive-type-3xl: clamp(1.9rem, 1.55rem + 1.5vw, 2.65rem);
+  --primitive-type-4xl: clamp(2.5rem, 1.88rem + 2.65vw, 3.9rem);
+  --primitive-type-5xl: clamp(3.25rem, 2.15rem + 4.8vw, 6rem);
+  --primitive-leading-tight: 1.08;
+  --primitive-leading-heading: 1.2;
+  --primitive-leading-body: 1.75;
+  --primitive-leading-code: 1.65;
+
+  /* Four-point spacing primitives */
+  --primitive-space-1: 0.25rem;
+  --primitive-space-2: 0.5rem;
+  --primitive-space-3: 0.75rem;
+  --primitive-space-4: 1rem;
+  --primitive-space-5: 1.25rem;
+  --primitive-space-6: 1.5rem;
+  --primitive-space-8: 2rem;
+  --primitive-space-10: 2.5rem;
+  --primitive-space-12: 3rem;
+  --primitive-space-16: 4rem;
+  --primitive-space-20: 5rem;
+  --primitive-space-24: 6rem;
+  --primitive-space-32: 8rem;
+
+  /* Layout primitives */
+  --primitive-layout-reading-width: 44rem;
+  --primitive-layout-content-width: 75rem;
+  --primitive-layout-cinematic-width: 100rem;
+  --primitive-layout-sidebar-width: 17.5rem;
+  --primitive-layout-page-inline: clamp(1rem, 3.2vw, 3.5rem);
+  --primitive-layout-section-block: clamp(4rem, 9vw, 9rem);
+  --primitive-layout-grid-gap: clamp(1rem, 2vw, 2rem);
+
+  /* Shape primitives */
+  --primitive-radius-xs: 0.375rem;
+  --primitive-radius-sm: 0.625rem;
+  --primitive-radius-md: 1rem;
+  --primitive-radius-lg: 1.5rem;
+  --primitive-radius-xl: 2rem;
+  --primitive-radius-orbit: 999rem;
+  --primitive-stroke-hairline: 1px;
+  --primitive-stroke-emphasis: 2px;
+
+  /* Depth primitives */
+  --primitive-blur-thin: blur(8px);
+  --primitive-blur-regular: blur(16px);
+  --primitive-blur-thick: blur(24px);
+  --primitive-shadow-sm: 0 2px 10px var(--primitive-alpha-black-18);
+  --primitive-shadow-md: 0 12px 36px var(--primitive-alpha-black-36);
+  --primitive-shadow-lg: 0 28px 84px var(--primitive-alpha-black-52);
+
+  /* Motion primitives */
+  --primitive-duration-instant: 0ms;
+  --primitive-duration-fast: 120ms;
+  --primitive-duration-normal: 220ms;
+  --primitive-duration-slow: 420ms;
+  --primitive-duration-cinematic: 900ms;
+  --primitive-motion-distance-sm: 0.375rem;
+  --primitive-motion-distance-md: 1rem;
+  --primitive-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --primitive-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --primitive-ease-in: cubic-bezier(0.7, 0, 1, 1);
+  --primitive-ease-spring: cubic-bezier(0.22, 1.18, 0.32, 1);
+
+  /* ================================================================
+     Layer 2 — semantic roles (dark / Lunar Signal Observatory)
+     ================================================================ */
+
+  --color-background-deep: var(--primitive-color-void-950);
+  --color-background: var(--primitive-color-ink-900);
+  --color-background-raised: var(--primitive-color-ink-850);
+  --color-surface: var(--primitive-color-ink-800);
+  --color-surface-strong: var(--primitive-color-ink-750);
+  --color-overlay: oklch(0.1229 0.0108 271.39 / 0.78);
+
+  --color-foreground: var(--primitive-color-paper-50);
+  --color-foreground-soft: var(--primitive-color-mist-300);
+  --color-muted: var(--primitive-color-mist-500);
+  --color-inverse: var(--primitive-color-void-950);
+
+  --color-primary: var(--primitive-color-violet-500);
+  --color-primary-hover: var(--primitive-color-violet-300);
+  --color-primary-foreground: var(--primitive-color-void-950);
+  --color-secondary: var(--primitive-color-blue-500);
+  --color-secondary-hover: var(--primitive-color-blue-300);
+  --color-secondary-foreground: var(--primitive-color-void-950);
+  --color-accent: var(--primitive-color-rose-500);
+  --color-accent-foreground: var(--primitive-color-void-950);
+  --color-metal: var(--primitive-color-gold-500);
+  --color-metal-foreground: var(--primitive-color-void-950);
+  --color-link: var(--primitive-color-blue-300);
+
+  --color-border: color-mix(in oklch, var(--color-foreground) 16%, transparent);
+  --color-border-strong: color-mix(in oklch, var(--color-foreground) 30%, transparent);
+  --color-focus-ring: var(--primitive-color-blue-500);
+  --color-selection-background: color-mix(in oklch, var(--color-primary) 42%, transparent);
+  --color-selection-foreground: var(--color-foreground);
+  /* Syntax highlighting is generated with a dark Shiki palette, so this
+     semantic surface intentionally stays dark in both site themes. */
+  --color-code-surface: var(--primitive-color-ink-900);
+  --color-code-text: var(--primitive-color-paper-50);
+  --color-code-muted: var(--primitive-color-mist-300);
+
+  --color-success: var(--primitive-color-success-400);
+  --color-success-foreground: var(--primitive-color-void-950);
+  --color-warning: var(--primitive-color-gold-500);
+  --color-warning-foreground: var(--primitive-color-void-950);
+  --color-danger: var(--primitive-color-danger-400);
+  --color-danger-foreground: var(--primitive-color-void-950);
+  --color-info: var(--primitive-color-blue-500);
+  --color-info-foreground: var(--primitive-color-void-950);
+
+  --scene-fog-color: var(--color-background-deep);
+  --scene-signal-color: var(--color-primary);
+  --scene-orbit-color: var(--color-secondary);
+  --scene-afterlight-color: var(--color-accent);
+  --scene-metal-color: var(--color-metal);
+  --scene-particle-base: var(--color-foreground-soft);
+
+  --font-display: var(--primitive-font-display);
+  --font-sans: var(--primitive-font-body);
+  --font-mono: var(--primitive-font-mono);
+  --text-xs: var(--primitive-type-xs);
+  --text-sm: var(--primitive-type-sm);
+  --text-base: var(--primitive-type-base);
+  --text-lg: var(--primitive-type-lg);
+  --text-xl: var(--primitive-type-xl);
+  --text-2xl: var(--primitive-type-2xl);
+  --text-3xl: var(--primitive-type-3xl);
+  --text-4xl: var(--primitive-type-4xl);
+  --text-5xl: var(--primitive-type-5xl);
+  --leading-tight: var(--primitive-leading-tight);
+  --leading-heading: var(--primitive-leading-heading);
+  --leading-body: var(--primitive-leading-body);
+  --leading-code: var(--primitive-leading-code);
+
+  --layout-reading-width: var(--primitive-layout-reading-width);
+  --layout-content-width: var(--primitive-layout-content-width);
+  --layout-cinematic-width: var(--primitive-layout-cinematic-width);
+  --layout-page-inline: var(--primitive-layout-page-inline);
+  --layout-section-block: var(--primitive-layout-section-block);
+  --layout-grid-gap: var(--primitive-layout-grid-gap);
+  --line-hairline: var(--primitive-stroke-hairline);
+  --line-emphasis: var(--primitive-stroke-emphasis);
+
+  --motion-duration-instant: var(--primitive-duration-instant);
+  --motion-duration-fast: var(--primitive-duration-fast);
+  --motion-duration-normal: var(--primitive-duration-normal);
+  --motion-duration-slow: var(--primitive-duration-slow);
+  --motion-duration-cinematic: var(--primitive-duration-cinematic);
+  --motion-ease-standard: var(--primitive-ease-standard);
+  --motion-ease-out: var(--primitive-ease-out);
+  --motion-ease-in: var(--primitive-ease-in);
+  --motion-ease-spring: var(--primitive-ease-spring);
+  --motion-distance-sm: var(--primitive-motion-distance-sm);
+  --motion-distance-md: var(--primitive-motion-distance-md);
+  --motion-parallax-factor: 1;
+  --motion-particle-drift-factor: 1;
+  --motion-continuous-enabled: 1;
+
+  /* ================================================================
+     Layer 3 — component contracts
+     ================================================================ */
+
+  --component-button-primary-bg: var(--color-primary);
+  --component-button-primary-bg-hover: var(--color-primary-hover);
+  --component-button-primary-text: var(--color-primary-foreground);
+  --component-button-secondary-bg: color-mix(in oklch, var(--color-surface-strong) 78%, transparent);
+  --component-button-secondary-text: var(--color-foreground);
+  --component-button-border: var(--color-border-strong);
+  --component-button-focus-ring: var(--color-focus-ring);
+
+  --component-card-bg: color-mix(in oklch, var(--color-surface) 78%, transparent);
+  --component-card-bg-hover: color-mix(in oklch, var(--color-surface-strong) 84%, transparent);
+  --component-card-border: var(--color-border);
+  --component-card-border-hover: color-mix(in oklch, var(--color-primary) 42%, transparent);
+  --component-card-shadow: var(--primitive-shadow-sm);
+  --component-card-shadow-hover: var(--primitive-shadow-md);
+
+  --component-field-bg: linear-gradient(
+    108deg,
+    color-mix(in oklch, var(--color-surface) 58%, transparent),
+    color-mix(in oklch, var(--color-surface) 18%, transparent) 62%,
+    transparent
+  );
+  --component-field-bg-hover: linear-gradient(
+    108deg,
+    color-mix(in oklch, var(--color-surface-strong) 68%, transparent),
+    color-mix(in oklch, var(--color-surface) 20%, transparent) 68%,
+    transparent
+  );
+  --component-field-edge: linear-gradient(90deg, var(--color-border-strong), transparent 82%);
+  --component-field-edge-active: linear-gradient(90deg, var(--color-primary), var(--color-secondary), transparent 86%);
+
+  --component-nav-bg: color-mix(in oklch, var(--color-background) 70%, transparent);
+  --component-nav-border: var(--color-border);
+  --component-nav-active: var(--color-primary);
+
+  --component-form-bg: color-mix(in oklch, var(--color-surface) 72%, transparent);
+  --component-form-border: var(--color-border-strong);
+  --component-form-placeholder: var(--color-muted);
+
+  --component-article-bg: var(--color-background);
+  --component-article-text: var(--color-foreground-soft);
+  --component-article-heading: var(--color-foreground);
+  --component-article-link: var(--color-link);
+  --component-code-bg: var(--color-code-surface);
+  --component-code-text: var(--color-code-text);
+  --component-code-muted: var(--color-code-muted);
+  --component-code-border: color-mix(in oklch, var(--color-code-muted) 28%, transparent);
+
+  --component-canvas-bg: var(--scene-fog-color);
+  --component-canvas-poster-bg: linear-gradient(145deg, var(--color-background-deep), var(--color-surface));
+  --component-avatar-particle: var(--scene-particle-base);
+  --component-avatar-signal: var(--scene-signal-color);
+  --component-avatar-edge: var(--scene-orbit-color);
+  --component-audio-control-bg: color-mix(in oklch, var(--color-surface-strong) 82%, transparent);
+  --component-audio-control-text: var(--color-foreground);
+
+  /* ================================================================
+     Compatibility aliases — remove only after component migration
+     ================================================================ */
+
+  --bg-void: var(--color-background-deep);
+  --bg-base: var(--color-background);
+  --bg-elevated: var(--component-card-bg);
+  --bg-overlay: var(--color-overlay);
+  --bg-muted: var(--color-background-raised);
+  --bg-surface: var(--component-card-bg);
+  --bg-surface-soft: color-mix(in oklch, var(--color-surface) 52%, transparent);
+
+  --glass-blur-thin: var(--primitive-blur-thin);
+  --glass-blur-regular: var(--primitive-blur-regular);
+  --glass-blur-thick: var(--primitive-blur-thick);
   --glass-blur-elevated: var(--glass-blur-regular);
-  --glass-bg-thin: rgba(8, 9, 12, 0.48);
-  --glass-bg-regular: rgba(13, 15, 19, 0.54);
-  --glass-bg-thick: rgba(11, 13, 17, 0.76);
+  --glass-bg-thin: color-mix(in oklch, var(--color-surface) 58%, transparent);
+  --glass-bg-regular: color-mix(in oklch, var(--color-surface) 72%, transparent);
+  --glass-bg-thick: color-mix(in oklch, var(--color-surface) 88%, transparent);
   --glass-bg-elevated: var(--glass-bg-regular);
-  --glass-border: rgba(255, 255, 255, 0.07);
-  --glass-border-hover: rgba(255, 255, 255, 0.14);
-  --glass-highlight: rgba(255, 255, 255, 0.04);
+  --glass-border: var(--color-border);
+  --glass-border-hover: var(--color-border-strong);
+  --glass-highlight: color-mix(in oklch, var(--color-foreground) 5%, transparent);
 
-  /* ── Text (近纯白, 略降一档避免过亮刺眼) ── */
-  --text-strong: #f7f8fa;
-  --text-default: #e8eaef;
-  --text-muted: #a3a9b5;
+  --text-strong: var(--color-foreground);
+  --text-default: var(--color-foreground-soft);
+  --text-muted: var(--color-muted);
 
-  /* ── Accent palette (莫兰迪五色谱, 清透柔和: 明度饱和取中, 不灰不刺眼) ── */
-  --accent-cyan: #6fb3ad;    /* 柔透青 teal */
-  --accent-blue: #7a99cf;    /* 柔透蓝 */
-  --accent-violet: #9485cf;  /* 柔透紫 */
-  --accent-amber: #c2985a;   /* 柔透赭黄 */
-  --accent-rose: #cc8a9a;    /* 柔透玫红 */
-  --accent-green: #7fc093;   /* 柔亮绿 (加粗) */
-  --accent-yellow: #ddc06a;  /* 柔亮黄 (公式) */
+  /* Cyan is retained as a historical name and now resolves to Orbit Blue. */
+  --accent-cyan: var(--color-secondary);
+  --accent-blue: var(--color-secondary);
+  --accent-violet: var(--color-primary);
+  --accent-amber: var(--color-metal);
+  --accent-rose: var(--color-accent);
+  --accent-green: var(--color-success);
+  --accent-yellow: var(--color-warning);
+  --accent-primary: var(--color-primary);
+  --accent-secondary: var(--color-secondary);
+  --accent-warm: var(--color-metal);
+  --accent-1: var(--color-primary);
 
-  /* Legacy aliases */
-  --accent-primary: var(--accent-cyan);
-  --accent-secondary: var(--accent-blue);
-  --accent-warm: var(--accent-amber);
-  --accent-1: var(--accent-cyan);
+  --status-now: var(--color-primary);
+  --status-next: var(--color-secondary);
+  --status-later: var(--color-muted);
+  --status-done: var(--color-success);
+  --status-blocked: var(--color-warning);
 
-  /* ── Status (中性灰白语义色, 避免蓝绿) ── */
-  --status-now: var(--text-strong);
-  --status-next: var(--text-default);
-  --status-later: #8a909c;
-  --status-done: var(--text-strong);
-  --status-blocked: #c2985a; /* 柔透赭黄 */
+  --border-default: var(--color-border);
+  --border-subtle: color-mix(in oklch, var(--color-foreground) 8%, transparent);
 
-  /* ── Borders ── */
-  --border-default: rgba(154, 160, 172, 0.18);
-  --border-subtle: rgba(255, 255, 255, 0.05);
+  --shadow-sm: var(--primitive-shadow-sm);
+  --shadow-md: var(--primitive-shadow-md);
+  --shadow-lg: var(--primitive-shadow-lg);
+  --shadow-glow-sm: 0 4px 18px color-mix(in oklch, var(--color-primary) 16%, transparent);
+  --shadow-glow-md: 0 14px 44px color-mix(in oklch, var(--color-primary) 20%, transparent);
+  --shadow-glow-lg: 0 30px 86px color-mix(in oklch, var(--color-primary) 24%, transparent);
 
-  /* ── Shadows (中性深度, 去彩色光晕) ── */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.46);
-  --shadow-glow-sm: 0 4px 14px rgba(0, 0, 0, 0.36);
-  --shadow-glow-md: 0 10px 36px rgba(0, 0, 0, 0.42);
-  --shadow-glow-lg: 0 20px 56px rgba(0, 0, 0, 0.5);
+  --radius-xs: var(--primitive-radius-xs);
+  --radius-sm: var(--primitive-radius-sm);
+  --radius-md: var(--primitive-radius-md);
+  --radius-lg: var(--primitive-radius-lg);
+  --radius-xl: var(--primitive-radius-xl);
+  --radius-pill: var(--primitive-radius-orbit);
+  --radius-full: var(--primitive-radius-orbit);
 
-  /* ── Radius ── */
-  --radius-xs: 8px;
-  --radius-sm: 12px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
-  --radius-pill: 999px;
+  --space-1: var(--primitive-space-1);
+  --space-2: var(--primitive-space-2);
+  --space-3: var(--primitive-space-3);
+  --space-4: var(--primitive-space-4);
+  --space-5: var(--primitive-space-5);
+  --space-6: var(--primitive-space-6);
+  --space-8: var(--primitive-space-8);
+  --space-10: var(--primitive-space-10);
+  --space-12: var(--primitive-space-12);
+  --space-16: var(--primitive-space-16);
+  --space-20: var(--primitive-space-20);
+  --space-24: var(--primitive-space-24);
+  --space-32: var(--primitive-space-32);
 
-  /* ── Spacing (8pt base) ── */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --space-20: 80px;
-  --space-24: 96px;
-  --space-32: 128px;
+  --sidebar-width: var(--primitive-layout-sidebar-width);
+  --main-max-width: var(--layout-content-width);
+  --mobile-padding: var(--primitive-space-4);
+  --tablet-padding: var(--primitive-space-6);
+  --desktop-padding: var(--primitive-space-10);
 
-  /* ── Layout ── */
-  --sidebar-width: 280px;
-  --main-max-width: 1200px;
-  --mobile-padding: 16px;
-  --tablet-padding: 24px;
-  --desktop-padding: 40px;
+  --font-body: var(--font-sans);
+  --font-heading: var(--font-display);
 
-  /* ── Typography ── */
-  --font-body: "Inter", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
-  --font-heading: "Space Grotesk", "Inter", "PingFang SC", sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --ease-out: var(--motion-ease-out);
+  --ease-spring: var(--motion-ease-spring);
+  --ease-smooth: var(--motion-ease-standard);
+  --duration-fast: var(--motion-duration-fast);
+  --duration-normal: var(--motion-duration-normal);
+  --duration-slow: var(--motion-duration-slow);
 
-  /* ── Easing ── */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* ── Durations ── */
-  --duration-fast: 150ms;
-  --duration-normal: 300ms;
-  --duration-slow: 500ms;
-
-  /* ── Image system: banner background slots ── */
   --about-bg-image: none;
   --hero-bg-overlay: linear-gradient(
     180deg,
-    rgba(5, 6, 8, 0.66) 0%,
-    rgba(5, 6, 8, 0.16) 25%,
-    rgba(5, 6, 8, 0.16) 55%,
-    rgba(5, 6, 8, 0.72) 80%,
-    rgba(5, 6, 8, 0.96) 100%
+    color-mix(in oklch, var(--color-background-deep) 76%, transparent) 0%,
+    color-mix(in oklch, var(--color-background-deep) 18%, transparent) 28%,
+    color-mix(in oklch, var(--color-background-deep) 24%, transparent) 58%,
+    color-mix(in oklch, var(--color-background-deep) 82%, transparent) 84%,
+    var(--color-background-deep) 100%
   );
   --about-bg-overlay: linear-gradient(
     180deg,
-    rgba(5, 6, 8, 0.6) 0%,
-    rgba(5, 6, 8, 0.35) 50%,
-    rgba(5, 6, 8, 0.72) 100%
+    color-mix(in oklch, var(--color-background-deep) 66%, transparent),
+    color-mix(in oklch, var(--color-background-deep) 38%, transparent) 52%,
+    color-mix(in oklch, var(--color-background-deep) 82%, transparent)
   );
 
-  /* ── Placeholder cover gradients (6 variants, 莫兰迪灰调微差) ── */
-  --cover-grad-1: linear-gradient(135deg, #0a0b0e 0%, #14171c 40%, #1a1e24 100%);
-  --cover-grad-2: linear-gradient(135deg, #0a0c0f 0%, #15181d 40%, #1b1f26 100%);
-  --cover-grad-3: linear-gradient(135deg, #0b0d10 0%, #16191f 40%, #1d2128 100%);
-  --cover-grad-4: linear-gradient(135deg, #0a0b0e 0%, #14171c 40%, #1b1f26 100%);
-  --cover-grad-5: linear-gradient(135deg, #0a0c0f 0%, #16191e 40%, #1d2128 100%);
-  --cover-grad-6: linear-gradient(135deg, #0a0b0e 0%, #14171c 40%, #1a1e25 100%);
+  --cover-grad-1: linear-gradient(135deg, var(--color-background-deep), var(--color-surface));
+  --cover-grad-2: linear-gradient(135deg, var(--color-background), color-mix(in oklch, var(--color-secondary) 18%, var(--color-surface)));
+  --cover-grad-3: linear-gradient(135deg, var(--color-background-deep), color-mix(in oklch, var(--color-accent) 16%, var(--color-surface)));
+  --cover-grad-4: linear-gradient(135deg, var(--color-background), color-mix(in oklch, var(--color-primary) 17%, var(--color-surface)));
+  --cover-grad-5: linear-gradient(135deg, var(--color-background-deep), color-mix(in oklch, var(--color-metal) 14%, var(--color-surface)));
+  --cover-grad-6: linear-gradient(135deg, var(--color-background), color-mix(in oklch, var(--color-secondary) 11%, var(--color-surface-strong)));
 }
 
+/* Explicit light theme. Only Layer 2 semantic color roles are remapped. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-background-deep: var(--primitive-color-paper-100);
+  --color-background: var(--primitive-color-paper-50);
+  --color-background-raised: var(--primitive-color-white);
+  --color-surface: var(--primitive-color-white);
+  --color-surface-strong: var(--primitive-color-paper-100);
+  --color-overlay: oklch(0.1229 0.0108 271.39 / 0.42);
+
+  --color-foreground: var(--primitive-color-void-950);
+  --color-foreground-soft: var(--primitive-color-ink-750);
+  --color-muted: var(--primitive-color-ink-600);
+  --color-inverse: var(--primitive-color-paper-50);
+
+  --color-primary: var(--primitive-color-violet-700);
+  --color-primary-hover: var(--primitive-color-violet-500);
+  --color-primary-foreground: var(--primitive-color-paper-50);
+  --color-secondary: var(--primitive-color-blue-700);
+  --color-secondary-hover: var(--primitive-color-blue-500);
+  --color-secondary-foreground: var(--primitive-color-paper-50);
+  --color-accent: var(--primitive-color-rose-700);
+  --color-accent-foreground: var(--primitive-color-paper-50);
+  --color-metal: var(--primitive-color-gold-700);
+  --color-metal-foreground: var(--primitive-color-void-950);
+  --color-link: var(--primitive-color-violet-700);
+
+  --color-border: color-mix(in oklch, var(--primitive-color-ink-600) 34%, transparent);
+  --color-border-strong: color-mix(in oklch, var(--primitive-color-ink-600) 64%, transparent);
+  --color-focus-ring: var(--primitive-color-blue-700);
+  --color-selection-background: color-mix(in oklch, var(--color-primary) 24%, transparent);
+  --color-selection-foreground: var(--color-foreground);
+
+  --color-success: var(--primitive-color-success-700);
+  --color-success-foreground: var(--primitive-color-paper-50);
+  --color-warning: var(--primitive-color-gold-700);
+  --color-warning-foreground: var(--primitive-color-void-950);
+  --color-danger: var(--primitive-color-danger-700);
+  --color-danger-foreground: var(--primitive-color-paper-50);
+  --color-info: var(--primitive-color-blue-700);
+  --color-info-foreground: var(--primitive-color-paper-50);
+
+  --scene-fog-color: var(--color-background-deep);
+  --scene-signal-color: var(--color-primary);
+  --scene-orbit-color: var(--color-secondary);
+  --scene-afterlight-color: var(--color-accent);
+  --scene-metal-color: var(--color-metal);
+  --scene-particle-base: var(--color-foreground-soft);
+}
+
+/* OS preference is the fallback only; an explicit data-theme always wins. */
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme]) {
     color-scheme: light;
-    --bg-void: #eceef2;
-    --bg-base: #f2f3f6;
-    --bg-elevated: rgba(255, 255, 255, 0.78);
-    --bg-overlay: rgba(255, 255, 255, 0.62);
-    --bg-muted: #e9ebef;
-    --bg-surface: var(--bg-elevated);
-    --bg-surface-soft: rgba(255, 255, 255, 0.52);
-    --glass-bg-thin: rgba(255, 255, 255, 0.5);
-    --glass-bg-regular: rgba(255, 255, 255, 0.6);
-    --glass-bg-thick: rgba(255, 255, 255, 0.78);
-    --glass-bg-elevated: var(--glass-bg-regular);
-    --glass-border: rgba(0, 0, 0, 0.06);
-    --glass-border-hover: rgba(0, 0, 0, 0.1);
-    --glass-highlight: rgba(255, 255, 255, 0.5);
-    --text-strong: #1a1d23;
-    --text-default: #363b45;
-    --text-muted: #6c7280;
-    --border-default: rgba(108, 114, 128, 0.2);
-    --border-subtle: rgba(0, 0, 0, 0.04);
+    --color-background-deep: var(--primitive-color-paper-100);
+    --color-background: var(--primitive-color-paper-50);
+    --color-background-raised: var(--primitive-color-white);
+    --color-surface: var(--primitive-color-white);
+    --color-surface-strong: var(--primitive-color-paper-100);
+    --color-overlay: oklch(0.1229 0.0108 271.39 / 0.42);
 
-    /* ── 莫兰迪 accent (浅底压暗, 柔透保留色相) ── */
-    --accent-cyan: #2f8680;
-    --accent-blue: #3a64b0;
-    --accent-violet: #6450a8;
-    --accent-amber: #9a7520;
-    --accent-rose: #b04865;
-    --accent-green: #2f8a52;
-    --accent-yellow: #9a7820;
-    --accent-1: var(--accent-cyan);
+    --color-foreground: var(--primitive-color-void-950);
+    --color-foreground-soft: var(--primitive-color-ink-750);
+    --color-muted: var(--primitive-color-ink-600);
+    --color-inverse: var(--primitive-color-paper-50);
 
-    /* ── Status (浅底中性灰白语义色, 避免蓝绿) ── */
-    --status-now: #1a1d23;
-    --status-next: #363b45;
-    --status-later: #6e7480;
-    --status-done: #1a1d23;
-    --status-blocked: #9a7520;
+    --color-primary: var(--primitive-color-violet-700);
+    --color-primary-hover: var(--primitive-color-violet-500);
+    --color-primary-foreground: var(--primitive-color-paper-50);
+    --color-secondary: var(--primitive-color-blue-700);
+    --color-secondary-hover: var(--primitive-color-blue-500);
+    --color-secondary-foreground: var(--primitive-color-paper-50);
+    --color-accent: var(--primitive-color-rose-700);
+    --color-accent-foreground: var(--primitive-color-paper-50);
+    --color-metal: var(--primitive-color-gold-700);
+    --color-metal-foreground: var(--primitive-color-void-950);
+    --color-link: var(--primitive-color-violet-700);
 
-    /* ── Cover gradients (浅灰米白) ── */
-    --cover-grad-1: linear-gradient(135deg, #e6e8ec 0%, #dcdee3 40%, #d4d7dd 100%);
-    --cover-grad-2: linear-gradient(135deg, #e7e9ed 0%, #dddfe4 40%, #d5d8de 100%);
-    --cover-grad-3: linear-gradient(135deg, #e6e8eb 0%, #dcdee2 40%, #d3d6dc 100%);
-    --cover-grad-4: linear-gradient(135deg, #e7e9ec 0%, #dddfe3 40%, #d4d7dd 100%);
-    --cover-grad-5: linear-gradient(135deg, #e6e8eb 0%, #dcdee2 40%, #d4d7dc 100%);
-    --cover-grad-6: linear-gradient(135deg, #e7e9ed 0%, #dddfe4 40%, #d5d8de 100%);
+    --color-border: color-mix(in oklch, var(--primitive-color-ink-600) 34%, transparent);
+    --color-border-strong: color-mix(in oklch, var(--primitive-color-ink-600) 64%, transparent);
+    --color-focus-ring: var(--primitive-color-blue-700);
+    --color-selection-background: color-mix(in oklch, var(--color-primary) 24%, transparent);
+    --color-selection-foreground: var(--color-foreground);
 
-    --shadow-sm: 0 2px 8px rgba(26, 29, 35, 0.06);
-    --shadow-md: 0 8px 32px rgba(26, 29, 35, 0.1);
-    --shadow-lg: 0 20px 60px rgba(26, 29, 35, 0.14);
-    --shadow-glow-sm: 0 4px 16px rgba(26, 29, 35, 0.08);
-    --shadow-glow-md: 0 12px 40px rgba(26, 29, 35, 0.12);
-    --shadow-glow-lg: 0 24px 60px rgba(26, 29, 35, 0.16);
+    --color-success: var(--primitive-color-success-700);
+    --color-success-foreground: var(--primitive-color-paper-50);
+    --color-warning: var(--primitive-color-gold-700);
+    --color-warning-foreground: var(--primitive-color-void-950);
+    --color-danger: var(--primitive-color-danger-700);
+    --color-danger-foreground: var(--primitive-color-paper-50);
+    --color-info: var(--primitive-color-blue-700);
+    --color-info-foreground: var(--primitive-color-paper-50);
 
-    --hero-bg-overlay: linear-gradient(
-      180deg,
-      rgba(242, 243, 246, 0.65) 0%,
-      rgba(242, 243, 246, 0.15) 25%,
-      rgba(242, 243, 246, 0.15) 55%,
-      rgba(242, 243, 246, 0.7) 80%,
-      rgba(242, 243, 246, 0.95) 100%
-    );
-    --about-bg-overlay: linear-gradient(
-      180deg,
-      rgba(242, 243, 246, 0.6) 0%,
-      rgba(242, 243, 246, 0.35) 50%,
-      rgba(242, 243, 246, 0.7) 100%
-    );
+    --scene-fog-color: var(--color-background-deep);
+    --scene-signal-color: var(--color-primary);
+    --scene-orbit-color: var(--color-secondary);
+    --scene-afterlight-color: var(--color-accent);
+    --scene-metal-color: var(--color-metal);
+    --scene-particle-base: var(--color-foreground-soft);
+  }
+}
+
+/* Manual and OS-level reduced motion collapse distance and continuous effects. */
+:root[data-motion="reduced"] {
+  --motion-duration-fast: 1ms;
+  --motion-duration-normal: 1ms;
+  --motion-duration-slow: 1ms;
+  --motion-duration-cinematic: 1ms;
+  --motion-distance-sm: 0px;
+  --motion-distance-md: 0px;
+  --motion-parallax-factor: 0;
+  --motion-particle-drift-factor: 0;
+  --motion-continuous-enabled: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-fast: 1ms;
+    --motion-duration-normal: 1ms;
+    --motion-duration-slow: 1ms;
+    --motion-duration-cinematic: 1ms;
+    --motion-distance-sm: 0px;
+    --motion-distance-md: 0px;
+    --motion-parallax-factor: 0;
+    --motion-particle-drift-factor: 0;
+    --motion-continuous-enabled: 0;
   }
 }

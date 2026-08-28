@@ -1,5 +1,6 @@
 ﻿---
 import Icon from "@/components/ui/Icon.astro";
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
 
 interface BlogItem {
   title: string;
@@ -111,7 +112,16 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
         >
           {
             item.cover ? (
-              <img class="card-cover" src={item.cover} alt={item.title} loading={idx === 0 ? "eager" : "lazy"} />
+              <ResponsiveCover
+                class="card-cover"
+                src={item.cover}
+                alt={item.title}
+                loading={idx === 0 ? "eager" : "lazy"}
+                fetchpriority={idx === 0 ? "high" : "auto"}
+                sizes={idx === 0
+                  ? "(max-width: 720px) 100vw, (max-width: 1180px) 66vw, 760px"
+                  : "(max-width: 720px) 100vw, (max-width: 1180px) 50vw, 420px"}
+              />
             ) : (
               <div class="card-cover placeholder-cover" data-variant={((idx % 6) + 1).toString()}><Icon name="blog" size={idx === 0 ? 32 : 20} /></div>
             )

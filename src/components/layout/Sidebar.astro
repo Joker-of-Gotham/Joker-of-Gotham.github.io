@@ -25,6 +25,10 @@ const navItems = [
 
 const activePath = pathname.endsWith("/") ? pathname : `${pathname}/`;
 
+function isActive(href: string) {
+  return href === "/" ? activePath === href : activePath.startsWith(href);
+}
+
 function iconForQuickLink(label: string) {
   const key = label.toLowerCase();
   if (key.includes("github")) return "github" as const;
@@ -37,12 +41,19 @@ function iconForQuickLink(label: string) {
 }
 ---
 
-<aside class="sidebar" id="site-sidebar">
+<aside class="sidebar" id="site-sidebar" role="dialog" aria-modal="true" aria-label="主导航" aria-hidden="true">
+  <div class="sidebar-head">
+    <p class="sidebar-brand-kicker">Lunar Signal Observatory</p>
+    <button class="button sidebar-close" type="button" data-sidebar-close aria-label="关闭主导航">
+      <Icon name="chevron-right" size={16} />
+    </button>
+  </div>
+
   <a class="sidebar-profile" href="/">
-    <img src="/assets/img/profile.png" alt="Chika Komari avatar" width="64" height="64" class="sidebar-avatar" loading="eager" />
-    <div>
-      <h3 class="sidebar-name">Chika Komari</h3>
-      <p class="meta-row">Implicit Signal Mining</p>
+    <img src="/assets/img/observatory/profile-avatar.webp" alt="Chika Komari avatar" width="64" height="64" class="sidebar-avatar" loading="eager" decoding="async" />
+    <div class="sidebar-brand-copy">
+      <p class="sidebar-name">Chika Komari</p>
+      <p class="meta-row">Nocturne Research Archive</p>
     </div>
   </a>
 
@@ -51,7 +62,11 @@ function iconForQuickLink(label: string) {
     <nav class="sidebar-nav" aria-label="Primary navigation">
       {
         navItems.map((item) => (
-          <a class={`sidebar-link ${activePath === item.href ? "active" : ""}`} href={item.href}>
+          <a
+            class={`sidebar-link ${isActive(item.href) ? "active" : ""}`}
+            href={item.href}
+            aria-current={isActive(item.href) ? "page" : undefined}
+          >
             <Icon name={item.icon} size={16} />
             <span>{item.label}</span>
           </a>
@@ -101,7 +116,14 @@ function iconForQuickLink(label: string) {
 
   <section class="sidebar-section">
     <p class="sidebar-title">Search</p>
-    <a class="button sidebar-search-button" href="/search/">
+    <a
+      class="button sidebar-search-button"
+      href="/search/"
+      data-command-palette-trigger
+      aria-haspopup="dialog"
+      aria-controls="command-root"
+      aria-expanded="false"
+    >
       <Icon name="search" size={16} />
       <span class="sidebar-search-copy">
         <span>Open Search</span>

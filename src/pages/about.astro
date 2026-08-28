@@ -1,8 +1,13 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Icon from "@/components/ui/Icon.astro";
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
+import { getResponsiveCover } from "@/lib/media/covers";
+import "@/styles/archive.css";
 
 const email = "liuzhh268@mail2.sysu.edu.cn";
+const aboutPosterSource = "/assets/img/observatory/signal-bocchi.webp";
+const aboutPoster = getResponsiveCover(aboutPosterSource)?.largestSrc ?? aboutPosterSource;
 
 interface ResumeLink {
   label: string;
@@ -214,82 +219,115 @@ const sections: ResumeSection[] = [
 ];
 ---
 
-<BaseLayout title="About" crumbs={[{ label: "Home", href: "/" }, { label: "About" }]}> 
-  <section class="section-stack about-page">
-    <header class="about-hero-banner full-bleed" id="cv" data-animate>
-      <video class="about-hero-video" autoplay muted loop playsinline>
-        <source src="/assets/img/banners/孤独摇滚-波奇-动态.mp4" type="video/mp4" />
+<BaseLayout
+  title="About"
+  description="Chika Komari — research profile, experience, publications, projects, honors, and long-term trajectory."
+  crumbs={[{ label: "Home", href: "/" }, { label: "About" }]}
+>
+  <div class="archive-page archive-about-page" id="cv">
+    <header class="about-hero-banner archive-about-hero full-bleed" data-animate aria-labelledby="about-name">
+      <ResponsiveCover
+        class="about-hero-poster"
+        src={aboutPosterSource}
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        sizes="100vw"
+        ariaHidden
+      />
+      <video class="about-hero-video archive-about-video" muted loop playsinline preload="none" poster={aboutPoster} aria-hidden="true" data-about-signal-video>
+        <source src="/assets/img/observatory/about-signal-loop.mp4" type="video/mp4" />
       </video>
       <div class="about-hero-banner-inner">
-        <h1 class="about-hero-name text-gradient">Chika Komari</h1>
+        <p class="archive-kicker archive-kicker--afterlight"><span aria-hidden="true">C—05</span> Researcher / Builder / Signal observer</p>
+        <h1 class="about-hero-name" id="about-name">Chika Komari</h1>
         <p class="about-hero-tagline">Implicit Signal Mining for Personalized Decision Systems</p>
         <p class="about-hero-desc">A unified research path across structural, semantic, and psychological signal mining in complex information networks.</p>
-        <div class="filter-bar" style="justify-content: center; margin-top: var(--space-4);">
+        <div class="archive-about-actions">
           <button class="button primary" type="button" data-email-open>
             <Icon name="mail" size={16} />
             <span>Contact</span>
           </button>
+          <a class="button" href="#research-profile">Read profile <span aria-hidden="true">↓</span></a>
         </div>
+      </div>
+      <div class="archive-afterlight-caption" aria-hidden="true">
+        <span>AFTERLIGHT SIGNAL</span>
+        <span>Keep the precise things tender.</span>
       </div>
     </header>
 
-    {
-      sections.map((section, sectionIdx) => (
-        <section class="resume-section" data-animate>
-          <h2>{section.title === "Publications" ? "📄 " + section.title : section.title}</h2>
-          <div class={`resume-list ${section.title === "Publications" ? "resume-list--pub" : ""}`}>
-            {
-              section.items.map((item: ResumeItem) => (
-                <article class={`resume-item card ${section.title === "Publications" ? "card--pub" : ""}`} data-animate>
-                  <div class="card-body">
-                    <div class="resume-item-head">
-                      <strong>{item.name}</strong>
-                      <span class="meta-row">{item.period}</span>
-                    </div>
-                    <p>{item.summary}</p>
-                    <ul class="tree-highlight-list">
-                      {item.points.map((point: string) => <li>{point}</li>)}
-                    </ul>
-                    {item.link && (
-                      <p>
-                        <a class="text-link link-hover-line" href={item.link.url} target="_blank" rel="noreferrer">{item.link.label} ↗</a>
-                      </p>
-                    )}
-                  </div>
-                </article>
-              ))
-            }
-          </div>
-        </section>
-      ))
-    }
+    <div class="archive-about-body">
+      {
+        sections.map((section, sectionIdx) => {
+          const sectionId = sectionIdx === 0 ? "research-profile" : `profile-section-${sectionIdx + 1}`;
+          return (
+            <section class={`resume-section archive-profile-section ${section.title === "Publications" ? "archive-profile-section--featured" : ""}`} aria-labelledby={`${sectionId}-title`} id={sectionId} data-animate>
+              <div class="archive-section-heading archive-section-heading--compact">
+                <div>
+                  <p class="archive-kicker">Profile chapter {String(sectionIdx + 1).padStart(2, "0")}</p>
+                  <h2 id={`${sectionId}-title`}>{section.title}</h2>
+                </div>
+                <span class="archive-coordinate">{section.items.length.toString().padStart(2, "0")}</span>
+              </div>
+              <div class={`resume-list ${section.title === "Publications" ? "resume-list--pub" : ""}`}>
+                {
+                  section.items.map((item: ResumeItem) => (
+                    <article class={`resume-item ${section.title === "Publications" ? "card--pub" : ""}`} data-animate>
+                      <div class="archive-profile-item-body">
+                        <div class="resume-item-head">
+                          <h3>{item.name}</h3>
+                          <span>{item.period}</span>
+                        </div>
+                        <p class="archive-profile-summary">{item.summary}</p>
+                        <ul class="tree-highlight-list">
+                          {item.points.map((point: string) => <li>{point}</li>)}
+                        </ul>
+                        {item.link && (
+                          <p>
+                            <a class="text-link link-hover-line" href={item.link.url} target="_blank" rel="noreferrer">{item.link.label} ↗</a>
+                          </p>
+                        )}
+                      </div>
+                    </article>
+                  ))
+                }
+              </div>
+            </section>
+          );
+        })
+      }
 
-    <section class="resume-section" data-animate>
-      <h2>Selected Links</h2>
-      <div class="quick-link-grid">
-        {links.map((link) => (
-          <a class="quick-link-item" href={link.url} target="_blank" rel="noreferrer">
-            <Icon name={link.icon} size={16} />
-            <span>{link.label}</span>
+      <section class="resume-section archive-profile-section archive-profile-links" aria-labelledby="selected-links-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Open channels</p><h2 id="selected-links-title">Selected Links</h2></div>
+          <span class="archive-coordinate">{String(links.length + 1).padStart(2, "0")}</span>
+        </div>
+        <div class="quick-link-grid">
+          {links.map((link) => (
+            <a class="quick-link-item" href={link.url} target="_blank" rel="noreferrer">
+              <Icon name={link.icon} size={16} />
+              <span>{link.label}</span>
+              <Icon name="external" size={13} class="link-end" />
+            </a>
+          ))}
+          <button class="quick-link-item" type="button" data-email-open>
+            <Icon name="mail" size={16} />
+            <span>Email</span>
             <Icon name="external" size={13} class="link-end" />
-          </a>
-        ))}
-        <button class="quick-link-item" type="button" data-email-open>
-          <Icon name="mail" size={16} />
-          <span>Email</span>
-          <Icon name="external" size={13} class="link-end" />
-        </button>
-      </div>
-    </section>
-  </section>
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
 
-  <dialog class="email-dialog" id="email-dialog">
-    <form method="dialog" class="card-body section-stack" style="min-width:min(460px, 92vw);">
-      <div class="section-heading-row" style="border-bottom:0;padding-bottom:0;">
-        <h3>Choose Email Method</h3>
-        <button class="button" value="cancel">Close</button>
+  <dialog class="email-dialog archive-contact-dialog" id="email-dialog" aria-labelledby="contact-dialog-title">
+    <form method="dialog" class="archive-contact-dialog-body">
+      <div class="archive-section-heading archive-section-heading--compact">
+        <div><p class="archive-kicker">Direct channel</p><h2 id="contact-dialog-title">Choose Email Method</h2></div>
+        <button class="button" value="cancel" aria-label="Close contact dialog">Close</button>
       </div>
-      <p class="meta-row">Email: {email}</p>
+      <p class="archive-contact-address">Email: <span>{email}</span></p>
       <div class="quick-link-grid">
         <a class="quick-link-item" href={`mailto:${email}`}>
           <Icon name="mail" size={16} />
@@ -305,16 +343,36 @@ const sections: ResumeSection[] = [
         </a>
         <button class="quick-link-item" type="button" id="copy-email-btn">
           <Icon name="mail" size={16} />
-          <span>Copy Email Address</span>
+          <span id="copy-email-label">Copy Email Address</span>
         </button>
       </div>
+      <p class="archive-copy-status" id="copy-email-status" role="status" aria-live="polite" hidden></p>
     </form>
   </dialog>
 
   <script is:inline>
+    const signalVideo = document.querySelector("[data-about-signal-video]");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const shouldUsePoster = reduceMotion.matches || Boolean(connection?.saveData);
+
+    if (signalVideo instanceof HTMLVideoElement) {
+      if (shouldUsePoster) {
+        signalVideo.hidden = true;
+        signalVideo.pause();
+      } else {
+        signalVideo.preload = "metadata";
+        void signalVideo.play().catch(() => {
+          signalVideo.hidden = true;
+        });
+      }
+    }
+
     const modal = document.getElementById("email-dialog");
     const triggers = document.querySelectorAll("[data-email-open]");
     const copyButton = document.getElementById("copy-email-btn");
+    const copyLabel = document.getElementById("copy-email-label");
+    const copyStatus = document.getElementById("copy-email-status");
 
     triggers.forEach((button) => {
       button.addEventListener("click", () => {
@@ -327,9 +385,17 @@ const sections: ResumeSection[] = [
     copyButton?.addEventListener("click", async () => {
       try {
         await navigator.clipboard.writeText("liuzhh268@mail2.sysu.edu.cn");
-        copyButton.textContent = "Copied";
+        if (copyLabel) copyLabel.textContent = "Copied";
+        if (copyStatus) {
+          copyStatus.textContent = "Email address copied to clipboard.";
+          copyStatus.hidden = false;
+        }
       } catch (_error) {
-        copyButton.textContent = "Copy failed";
+        if (copyLabel) copyLabel.textContent = "Copy failed";
+        if (copyStatus) {
+          copyStatus.textContent = "Copy failed. Select the address above instead.";
+          copyStatus.hidden = false;
+        }
       }
     });
   </script>

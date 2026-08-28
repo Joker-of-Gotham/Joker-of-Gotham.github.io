@@ -3,9 +3,11 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import Badge from "@/components/ui/Badge.astro";
 import Card from "@/components/ui/Card.astro";
 import Comments from "@/components/ui/Comments.astro";
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
 import type { CollectionEntry } from "astro:content";
 import { getRoadmapNodes, getPublishedBlogPosts, getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
 import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
+import "@/styles/archive.css";
 
 export async function getStaticPaths() {
   const nodes = await getRoadmapNodes();
@@ -157,101 +159,137 @@ const crumbs = [
     tags: entry.data.tags
   }}
 >
-  <section class="section-stack">
-    <header class="card">
-      <div class="card-body section-stack" style="gap:var(--space-4)">
-        <div class="filter-bar" style="justify-content:space-between;align-items:flex-start;">
-          <div class="section-stack" style="gap:var(--space-2)">
-            <h1>{entry.data.title}</h1>
-            <div class="meta-row">
+  <section class="archive-page archive-node-detail">
+    <header class="archive-node-console" aria-labelledby="roadmap-node-title">
+      {entry.data.cover && (
+        <div class="archive-node-cover">
+          <ResponsiveCover
+            src={entry.data.cover}
+            alt={entry.data.title}
+            loading="eager"
+            fetchpriority="high"
+            sizes="(max-width: 960px) 100vw, 1200px"
+          />
+        </div>
+      )}
+      <div class="archive-node-heading">
+        <div class="archive-node-copy">
+          <p class="archive-kicker"><span aria-hidden="true">B / TRAJECTORY</span> Execution node</p>
+          <div>
+            <h1 id="roadmap-node-title">{entry.data.title}</h1>
+            <div class="archive-node-meta">
               <Badge status={entry.data.status} />
               <span class="tag-chip">{entry.data.node_level}</span>
               <span>{entry.data.track}</span>
-              <span>Updated on {formatDate(entry.data.last_updated)}</span>
+              <span>Updated <time datetime={entry.data.last_updated.toISOString()}>{formatDate(entry.data.last_updated)}</time></span>
             </div>
           </div>
-          <a class="button" href="/roadmap/">Back to Roadmap</a>
+          <p class="archive-node-summary">{entry.data.summary}</p>
         </div>
+        <a class="button archive-back-link" href="/roadmap/"><span aria-hidden="true">←</span> Back to Roadmap</a>
+      </div>
 
-        <div class="progress-line" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress}>
+      <div class="archive-node-progress">
+        <div class="archive-node-progress-head">
+          <span>Execution progress</span>
+          <strong>{progress}%</strong>
+        </div>
+        <div class="progress-line" role="progressbar" aria-label="Execution progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow={progress}>
           <span style={`width:${progress}%`} />
         </div>
-        <p class="meta-row">Progress {progress}% · Milestones {orderedMilestones.length} · Related {relatedPosts.length + relatedArtifacts.length}</p>
       </div>
+
+      <dl class="archive-node-metrics" aria-label="Node metrics">
+        <div><dt>Milestones</dt><dd>{orderedMilestones.length}</dd></div>
+        <div><dt>Descendants</dt><dd>{descendantRows.length}</dd></div>
+        <div><dt>Blog links</dt><dd>{relatedPosts.length}</dd></div>
+        <div><dt>Artifacts</dt><dd>{relatedArtifacts.length}</dd></div>
+      </dl>
     </header>
 
-    <article class="card">
-      <div class="card-body section-stack">
-        <h2>Execution Table</h2>
-        <p class="meta-row">
+    <section class="archive-execution-panel" aria-labelledby="execution-table-title">
+      <div class="archive-section-heading archive-section-heading--compact">
+        <div>
+          <p class="archive-kicker">Subtree telemetry</p>
+          <h2 id="execution-table-title">Execution Table</h2>
+        </div>
+        <p class="archive-parent-bearing">
           <span>Parent</span>
           {parentChain.length > 0 ? <a href={`/roadmap/${normalizeSlug(parentChain[parentChain.length - 1])}/`}>{parentChain[parentChain.length - 1].data.title}</a> : <span>Root Node</span>}
         </p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Node</th>
-                <th>Level</th>
-                <th>Status</th>
-                <th>Progress</th>
-                <th>Children</th>
-                <th>Related Blog</th>
-                <th>Related Artifacts</th>
-                <th>Milestones</th>
-                <th>Next Target</th>
-                <th>Last Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {executionRows.length > 0 ? (
-                executionRows.map((row) => (
-                  <tr>
-                    <td>
-                      <a href={`/roadmap/${row.nodeSlug}/`} style={`padding-left:${row.depth * 12}px;display:inline-block;`}>
-                        {row.nodeTitle}
-                      </a>
-                    </td>
-                    <td>{row.level}</td>
-                    <td><span class={`badge ${row.status}`}>{statusLabel[row.status]}</span></td>
-                    <td>{row.progress.toFixed(1)}%</td>
-                    <td>{row.childrenCount}</td>
-                    <td>{row.relatedPostCount}</td>
-                    <td>{row.relatedArtifactCount}</td>
-                    <td>{row.completedMilestoneCount}/{row.milestoneCount}</td>
-                    <td>
-                      <div class="meta-row" style="gap:6px;">
-                        <span>{row.nextMilestoneDate}</span>
-                        {row.nextMilestoneStatus ? <span class={`badge ${row.nextMilestoneStatus}`}>{statusLabel[row.nextMilestoneStatus]}</span> : <span>-</span>}
-                        <span>{row.nextMilestoneNote}</span>
-                      </div>
-                    </td>
-                    <td>{row.latestMilestoneDate !== "-" ? row.latestMilestoneDate : row.lastUpdatedLabel}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colspan={10}>
-                    <span class="meta-row">No execution milestones</span>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
       </div>
-    </article>
+      <div class="table-wrap archive-data-table">
+        <table>
+          <caption class="sr-only">Execution metrics for {entry.data.title} and descendant roadmap nodes</caption>
+          <thead>
+            <tr>
+              <th scope="col">Node</th>
+              <th scope="col">Level</th>
+              <th scope="col">Status</th>
+              <th scope="col">Progress</th>
+              <th scope="col">Children</th>
+              <th scope="col">Related Blog</th>
+              <th scope="col">Related Artifacts</th>
+              <th scope="col">Milestones</th>
+              <th scope="col">Next Target</th>
+              <th scope="col">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {executionRows.length > 0 ? (
+              executionRows.map((row) => (
+                <tr>
+                  <td>
+                    <a class="archive-depth-link" href={`/roadmap/${row.nodeSlug}/`} style={`--archive-depth:${row.depth}`}>
+                      {row.nodeTitle}
+                    </a>
+                  </td>
+                  <td>{row.level}</td>
+                  <td><span class={`badge ${row.status}`}>{statusLabel[row.status]}</span></td>
+                  <td>{row.progress.toFixed(1)}%</td>
+                  <td>{row.childrenCount}</td>
+                  <td>{row.relatedPostCount}</td>
+                  <td>{row.relatedArtifactCount}</td>
+                  <td>{row.completedMilestoneCount}/{row.milestoneCount}</td>
+                  <td>
+                    <div class="archive-target-meta">
+                      <span>{row.nextMilestoneDate}</span>
+                      {row.nextMilestoneStatus ? <span class={`badge ${row.nextMilestoneStatus}`}>{statusLabel[row.nextMilestoneStatus]}</span> : <span>-</span>}
+                      <span>{row.nextMilestoneNote}</span>
+                    </div>
+                  </td>
+                  <td>{row.latestMilestoneDate !== "-" ? row.latestMilestoneDate : row.lastUpdatedLabel}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colspan={10}>
+                  <span class="meta-row">No execution milestones</span>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
 
-    <article class="card">
-      <div class="card-body content roadmap-detail-content">
+    <article class="archive-reading-shell archive-roadmap-reading" aria-label="Roadmap node notes">
+      <div class="archive-reading-marker" aria-hidden="true">
+        <span>TRAJECTORY NOTE</span>
+        <span>{currentSlug}</span>
+      </div>
+      <div class="article-content content archive-prose roadmap-detail-content">
         <Content />
       </div>
     </article>
 
-    <section class="section-stack">
-      <h2>Related Blog Posts</h2>
+    <section class="archive-related-section" aria-labelledby="roadmap-related-blog-title">
+      <div class="archive-section-heading archive-section-heading--compact">
+        <div><p class="archive-kicker">Research log</p><h2 id="roadmap-related-blog-title">Related Blog Posts</h2></div>
+        <span class="archive-coordinate">{relatedPosts.length.toString().padStart(2, "0")}</span>
+      </div>
       {relatedPosts.length > 0 ? (
-        <div class="card-grid">
+        <div class="card-grid archive-related-grid">
           {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
         </div>
       ) : (
@@ -259,10 +297,13 @@ const crumbs = [
       )}
     </section>
 
-    <section class="section-stack">
-      <h2>Related Artifacts</h2>
+    <section class="archive-related-section" aria-labelledby="roadmap-related-artifact-title">
+      <div class="archive-section-heading archive-section-heading--compact">
+        <div><p class="archive-kicker">Materialized signal</p><h2 id="roadmap-related-artifact-title">Related Artifacts</h2></div>
+        <span class="archive-coordinate">{relatedArtifacts.length.toString().padStart(2, "0")}</span>
+      </div>
       {relatedArtifacts.length > 0 ? (
-        <div class="card-grid">
+        <div class="card-grid archive-related-grid">
           {relatedArtifacts.map((artifact) => <Card href={`/artifacts/${normalizeSlug(artifact)}/`} title={artifact.data.title} subtitle={artifact.data.type.toUpperCase()} />)}
         </div>
       ) : (

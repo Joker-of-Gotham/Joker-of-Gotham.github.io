@@ -192,7 +192,7 @@ const ganttRows: GanttRow[] = visibleGanttItems.map((item) => {
               <span>Planned {row.statusCount.next}</span>
               <span>Pending {row.statusCount.later}</span>
             </div>
-            <div class="progress-line" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={row.progress}>
+            <div class="progress-line" role="progressbar" aria-label={`${row.track} progress`} aria-valuemin={0} aria-valuemax={100} aria-valuenow={row.progress}>
               <span style={`width:${row.progress}%`} />
             </div>
             <ul class="tree-node-list">
@@ -367,6 +367,7 @@ const ganttRows: GanttRow[] = visibleGanttItems.map((item) => {
         const open = state.expanded.has(slug);
 
         button.setAttribute("aria-expanded", open ? "true" : "false");
+        button.setAttribute("aria-label", `${open ? "收起" : "展开"} ${button.dataset.title || "路线节点"}`);
         button.classList.toggle("is-open", open);
 
         if (content) {

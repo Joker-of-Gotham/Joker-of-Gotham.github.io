@@ -2,8 +2,10 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/ui/Card.astro";
 import Comments from "@/components/ui/Comments.astro";
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
 import type { CollectionEntry } from "astro:content";
 import { getArtifacts, getRoadmapNodes, getPublishedBlogPosts, normalizeSlug, formatDate } from "@/lib/content/queries";
+import "@/styles/archive.css";
 
 export async function getStaticPaths() {
   const artifacts = await getArtifacts();
@@ -85,84 +87,112 @@ const normalizedLinks: Array<{ label: string; url: string; isInternal: boolean }
     tags: entry.data.tags
   }}
 >
-  <article class="section-stack">
-    <header class="blog-article-header">
+  <article class="archive-page archive-document archive-document--artifact">
+    <header class="archive-document-header">
       {entry.data.cover ? (
-        <div class="blog-article-cover-wrap full-bleed">
-          <img class="blog-article-cover" src={entry.data.cover} alt={entry.data.title} loading="eager" fetchpriority="high" decoding="async" />
-          <div class="blog-article-cover-overlay" />
-          <div class="blog-article-cover-text">
+        <div class="archive-document-cover archive-document-cover--image full-bleed">
+          <ResponsiveCover
+            src={entry.data.cover}
+            alt={entry.data.title}
+            loading="eager"
+            fetchpriority="high"
+            sizes="(max-width: 960px) 100vw, 1440px"
+          />
+          <div class="archive-document-cover-scrim" aria-hidden="true" />
+          <div class="archive-document-cover-copy">
+            <p class="archive-kicker"><span aria-hidden="true">B / ARTIFACT</span> Materialized signal</p>
             <h1>{entry.data.title}</h1>
-            <div class="meta-row">
-              <span>{entry.data.type.toUpperCase()}</span>
-              <span>{formatDate(entry.data.date)}</span>
-              {entry.data.venue && <span>{entry.data.venue}</span>}
-            </div>
+            <dl class="archive-signal-meta" aria-label="Artifact metadata">
+              <div><dt>Format</dt><dd>{entry.data.type.toUpperCase()}</dd></div>
+              <div><dt>Released</dt><dd><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></dd></div>
+              {entry.data.venue && <div><dt>Venue</dt><dd>{entry.data.venue}</dd></div>}
+            </dl>
           </div>
         </div>
       ) : (
-        <div class="blog-article-placeholder-cover full-bleed" />
-      )}
-
-      {!entry.data.cover && (
-        <div class="blog-article-header-content">
-          <h1>{entry.data.title}</h1>
-          <div class="meta-row">
-            <span>{entry.data.type.toUpperCase()}</span>
-            <span>{formatDate(entry.data.date)}</span>
-            {entry.data.venue && <span>{entry.data.venue}</span>}
+        <div class="archive-document-cover archive-document-cover--placeholder archive-document-cover--artifact full-bleed">
+          <div class="archive-document-cover-copy">
+            <p class="archive-kicker"><span aria-hidden="true">B / ARTIFACT</span> Materialized signal</p>
+            <h1>{entry.data.title}</h1>
+            <dl class="archive-signal-meta" aria-label="Artifact metadata">
+              <div><dt>Format</dt><dd>{entry.data.type.toUpperCase()}</dd></div>
+              <div><dt>Released</dt><dd><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></dd></div>
+              {entry.data.venue && <div><dt>Venue</dt><dd>{entry.data.venue}</dd></div>}
+            </dl>
           </div>
         </div>
       )}
 
-      <p>{entry.data.summary}</p>
-      <div class="meta-row">
-        {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
+      <div class="archive-document-deck">
+        <p>{entry.data.summary}</p>
+        <div class="archive-document-tags" aria-label="Artifact tags">
+          <span class="archive-document-tags-label">Signal taxonomy</span>
+          {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
+        </div>
       </div>
     </header>
 
     {normalizedLinks.length > 0 && (
-      <Card title="Links">
-        <ul class="list-clean">
+      <nav class="archive-link-console" aria-labelledby="artifact-links-title">
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">External bearings</p><h2 id="artifact-links-title">Links</h2></div>
+          <span class="archive-coordinate">{normalizedLinks.length.toString().padStart(2, "0")}</span>
+        </div>
+        <ul>
           {
             normalizedLinks.map((link: (typeof normalizedLinks)[number]) => (
               <li>
                 <a href={link.url} target={link.isInternal ? undefined : "_blank"} rel={link.isInternal ? undefined : "noreferrer"}>
-                  {link.label}
+                  <span>{link.label}</span>
+                  <span aria-hidden="true">{link.isInternal ? "→" : "↗"}</span>
                 </a>
               </li>
             ))
           }
         </ul>
-      </Card>
+      </nav>
     )}
 
-    <div class="article-content content">
-      <Content />
+    <div class="archive-reading-shell">
+      <div class="archive-reading-marker" aria-hidden="true">
+        <span>OBSERVATION OBJECT</span>
+        <span>{currentSlug}</span>
+      </div>
+      <div class="article-content content archive-prose">
+        <Content />
+      </div>
     </div>
 
-    <section class="section-stack" data-animate>
-      <h2>关联路线图节点</h2>
-      {relatedNodes.length > 0 ? (
-        <div class="card-grid">
-          {relatedNodes.map((node) => <Card href={`/roadmap/${normalizeSlug(node)}/`} title={node.data.title} subtitle={node.data.track} />)}
+    <footer class="archive-document-footer">
+      <section class="archive-related-section" aria-labelledby="artifact-related-roadmap-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Linked trajectory</p><h2 id="artifact-related-roadmap-title">关联路线图节点</h2></div>
+          <span class="archive-coordinate">{relatedNodes.length.toString().padStart(2, "0")}</span>
         </div>
-      ) : (
-        <Card title="暂无关联路线图节点" />
-      )}
-    </section>
+        {relatedNodes.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedNodes.map((node) => <Card href={`/roadmap/${normalizeSlug(node)}/`} title={node.data.title} subtitle={node.data.track} />)}
+          </div>
+        ) : (
+          <Card title="暂无关联路线图节点" />
+        )}
+      </section>
 
-    <section class="section-stack" data-animate>
-      <h2>关联博客</h2>
-      {relatedPosts.length > 0 ? (
-        <div class="card-grid">
-          {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+      <section class="archive-related-section" aria-labelledby="artifact-related-blog-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Research log</p><h2 id="artifact-related-blog-title">关联博客</h2></div>
+          <span class="archive-coordinate">{relatedPosts.length.toString().padStart(2, "0")}</span>
         </div>
-      ) : (
-        <Card title="暂无关联博客" />
-      )}
-    </section>
+        {relatedPosts.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+          </div>
+        ) : (
+          <Card title="暂无关联博客" />
+        )}
+      </section>
 
-    <Comments term={entry.data.title} />
+      <Comments term={entry.data.title} />
+    </footer>
   </article>
 </BaseLayout>

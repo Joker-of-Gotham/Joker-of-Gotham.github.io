@@ -1,0 +1,1131 @@
+{
+  "version": 1,
+  "generator": "scripts/prepare-cover-assets.mjs",
+  "settings": {
+    "format": "webp",
+    "effort": 6,
+    "targets": [
+      {
+        "width": 640,
+        "quality": 78
+      },
+      {
+        "width": 1280,
+        "quality": 82
+      }
+    ]
+  },
+  "summary": {
+    "sourceCount": 38,
+    "derivativeCount": 76,
+    "sourceBytes": 95437210,
+    "derivativeBytes": 3801820,
+    "coverDirectorySourceCount": 34,
+    "coverDirectorySourceBytes": 94877706,
+    "coverDirectoryDerivativeBytes": 3578566
+  },
+  "entries": {
+    "/assets/images/技术杂谈/前端开发1_工程化/组件化示意图.png": {
+      "group": "frontmatter-cover",
+      "source": {
+        "path": "/assets/images/技术杂谈/前端开发1_工程化/组件化示意图.png",
+        "format": "png",
+        "width": 746,
+        "height": 320,
+        "bytes": 16860,
+        "sha256": "8faf68ec1f53d55861b9611b7f614fa68bad991807bb95153a9c336cf524b04c"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 275,
+          "bytes": 5002,
+          "sha256": "d185fda5cc41b601a1bead37d96d737e1bc4600aea987d13b76433b4c02f9f44",
+          "path": "/assets/img/covers/generated/组件化示意图-8faf68ec1f-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 746,
+          "height": 320,
+          "bytes": 7004,
+          "sha256": "0cd3833c5c8d2d94115f39683f617bb47182c6fd811c49119e71d97bfc4a4665",
+          "path": "/assets/img/covers/generated/组件化示意图-8faf68ec1f-1280w.webp"
+        }
+      ]
+    },
+    "/assets/images/图论/introduction_to_graph_theory/定义与案例/图的矩阵表示.png": {
+      "group": "frontmatter-cover",
+      "source": {
+        "path": "/assets/images/图论/introduction_to_graph_theory/定义与案例/图的矩阵表示.png",
+        "format": "png",
+        "width": 923,
+        "height": 258,
+        "bytes": 66370,
+        "sha256": "b72453cb46a4beeb2658dfdd0b105f3d72be8f8fa1c83fa046ee852db3fa526a"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 179,
+          "bytes": 5474,
+          "sha256": "c7403c680822235438d7601552af40e925e2261443cf40d2fc7f0b34af8098d8",
+          "path": "/assets/img/covers/generated/图的矩阵表示-b72453cb46-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 923,
+          "height": 258,
+          "bytes": 8672,
+          "sha256": "606475e961b427593d07bf625f9917e657cc8f49d0404360b4b1f46ec4f1518f",
+          "path": "/assets/img/covers/generated/图的矩阵表示-b72453cb46-1280w.webp"
+        }
+      ]
+    },
+    "/assets/images/LLM学习/deepseek-r1/DeepSeek-R1训练范式.png": {
+      "group": "frontmatter-cover",
+      "source": {
+        "path": "/assets/images/LLM学习/deepseek-r1/DeepSeek-R1训练范式.png",
+        "format": "png",
+        "width": 1787,
+        "height": 847,
+        "bytes": 367956,
+        "sha256": "1117b21b59cfd01035f0123752e7ba3532b3efdfaf67daf797b1b2ef2ce380d8"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 303,
+          "bytes": 12308,
+          "sha256": "4c7180355abe3ba1cf548b43b7e64b1d41ea275b132e6a5812fc3791addf37e4",
+          "path": "/assets/img/covers/generated/DeepSeek-R1训练范式-1117b21b59-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 607,
+          "bytes": 34038,
+          "sha256": "aa77531c24cae56f2d5240aef8276c51e9b3477e9d9a9732dfdc94c5dc180b58",
+          "path": "/assets/img/covers/generated/DeepSeek-R1训练范式-1117b21b59-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/败犬女主-八奈见1.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/败犬女主-八奈见1.webp",
+        "format": "png",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 717339,
+        "sha256": "020f85ee0cec362fcb688598037b23c341b3f6ce3b4bac61937cd8e457c06bce"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 19658,
+          "sha256": "770c7f52e3b472ef8be0bf3b1aa86c75098254095b66327e5ac3ffb39ecb2709",
+          "path": "/assets/img/covers/generated/败犬女主-八奈见1-020f85ee0c-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 50318,
+          "sha256": "83c9a084eea4f6784622f3f9b737fd036312f368eb8f43dd17349425abe9de22",
+          "path": "/assets/img/covers/generated/败犬女主-八奈见1-020f85ee0c-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/败犬女主-八奈见2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/败犬女主-八奈见2.webp",
+        "format": "png",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 10536026,
+        "sha256": "23c7407af9db3770423f94aa34ae9a3bfe59b20f204e5faa286c2f57985ea092"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 16002,
+          "sha256": "6e247ed28ec0e4e2836e741a7fad724679a5d54e2f4338af29b087d54e95e5a1",
+          "path": "/assets/img/covers/generated/败犬女主-八奈见2-23c7407af9-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 52732,
+          "sha256": "ec532b32ef350c940843cd1b176bce9a1304ea14a552716c18d8ae69ebe73b07",
+          "path": "/assets/img/covers/generated/败犬女主-八奈见2-23c7407af9-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/败犬女主-八奈见3.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/败犬女主-八奈见3.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 196413,
+        "sha256": "1e109df8b75b7eb4489dcc44beb8401f798c12a0a6aff689cd9c1eb64ae020d7"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 20926,
+          "sha256": "dd161090241cc488cbcb1265d81a21644733354d0d629c790f2e1de53e96a037",
+          "path": "/assets/img/covers/generated/败犬女主-八奈见3-1e109df8b7-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 66970,
+          "sha256": "69ee5ea4da102f135c417efb001fa3c6de57ba22a301cae09fa534f22b8e8889",
+          "path": "/assets/img/covers/generated/败犬女主-八奈见3-1e109df8b7-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/败犬女主-小鞠知花.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/败犬女主-小鞠知花.webp",
+        "format": "png",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 4308478,
+        "sha256": "9d6c17fa894b626428fc98200a1badc198f5c345031b7db000f73efe9a8d529f"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 6910,
+          "sha256": "0e6a81e97131f9d3a45a8ebb7b3974ee2d8c9b8a550042442b1273612d658870",
+          "path": "/assets/img/covers/generated/败犬女主-小鞠知花-9d6c17fa89-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 22456,
+          "sha256": "76cf5bc26cf17fcb097df2255803b9fecd7eee526a9e9cdb5614f76576eb34c0",
+          "path": "/assets/img/covers/generated/败犬女主-小鞠知花-9d6c17fa89-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/超时空辉夜姬壁纸-二人合照2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/超时空辉夜姬壁纸-二人合照2.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 271703,
+        "sha256": "e489b951ac23d5015825ee1640344d838f2458c5f2bbd429d380ca3967f2a8a7"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 30742,
+          "sha256": "fcd281d51f3b65c8a058f8c8c25476a0c5fa55b4e4d561319fabdf655c4c5409",
+          "path": "/assets/img/covers/generated/超时空辉夜姬壁纸-二人合照2-e489b951ac-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 85672,
+          "sha256": "aeae219c2b667b084bfdc760082606ffb7ecff94ed892be453414b73fcebef56",
+          "path": "/assets/img/covers/generated/超时空辉夜姬壁纸-二人合照2-e489b951ac-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/超时空辉夜姬壁纸-辉夜3.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/超时空辉夜姬壁纸-辉夜3.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 165894,
+        "sha256": "c5da9cde8a275ff8a868457f5ab042ff18502a32c44f3e564990d2b74388f6e3"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 23272,
+          "sha256": "3576974c6e97ed071c6e2b8aebc1157fd735348811cb20a2ecb73ceff391c77f",
+          "path": "/assets/img/covers/generated/超时空辉夜姬壁纸-辉夜3-c5da9cde8a-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 61992,
+          "sha256": "389e2bf5dd9076e698619b736c480a9944151be3b3a6bcebf00003aff3e10756",
+          "path": "/assets/img/covers/generated/超时空辉夜姬壁纸-辉夜3-c5da9cde8a-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/超时空辉夜姬壁纸-三人合照2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/超时空辉夜姬壁纸-三人合照2.webp",
+        "format": "png",
+        "width": 3834,
+        "height": 2158,
+        "bytes": 8494163,
+        "sha256": "03bf0371dc2cb2a93fac9a825bf0efb17e27d8b9ee23fcdc4e7642c6d49e20b9"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 29602,
+          "sha256": "a856dd5593ca0715c46293e72d94d0469650b1b77322e03200c647ea8ee1fd9a",
+          "path": "/assets/img/covers/generated/超时空辉夜姬壁纸-三人合照2-03bf0371dc-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 91326,
+          "sha256": "4eaaed6307d9d13ae3a9e5dfe757afed3b0b338aeb4474dad2d89fc7f5e10cb1",
+          "path": "/assets/img/covers/generated/超时空辉夜姬壁纸-三人合照2-03bf0371dc-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-波奇2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-波奇2.webp",
+        "format": "webp",
+        "width": 7609,
+        "height": 3760,
+        "bytes": 324586,
+        "sha256": "c67da7d01f8bbebb48934cd760e6d9f94220724cba16672f2dd9e8e0ba40935b"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 316,
+          "bytes": 9352,
+          "sha256": "c9df6084a43961c52bf14566e5ac47867cdae7cfb9aee9c2fe9daf0a284bccc3",
+          "path": "/assets/img/covers/generated/孤独摇滚-波奇2-c67da7d01f-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 633,
+          "bytes": 27470,
+          "sha256": "b65e766bf2f7c3bf590544b94659b6c8f3d33f647f1de9dd3bf29aa932c470c1",
+          "path": "/assets/img/covers/generated/孤独摇滚-波奇2-c67da7d01f-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-虹夏.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-虹夏.webp",
+        "format": "png",
+        "width": 5198,
+        "height": 2924,
+        "bytes": 21434694,
+        "sha256": "2780583d0aa6e0c9430704422d5a959947bf1beb8a5c7c91b0649212c0d41306"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 24490,
+          "sha256": "a5d5477682602bcae2b99cd8bca1cb5d174e3fa61591a2759c3598d1dbfcd179",
+          "path": "/assets/img/covers/generated/孤独摇滚-虹夏-2780583d0a-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 76408,
+          "sha256": "2d0e2cfb596207ece9c06eaa17579750eb98d24000702bfdee190473a0ab6d43",
+          "path": "/assets/img/covers/generated/孤独摇滚-虹夏-2780583d0a-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-虹夏2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-虹夏2.webp",
+        "format": "jpeg",
+        "width": 2400,
+        "height": 1600,
+        "bytes": 369144,
+        "sha256": "58a95203647842475985c631300f550f3b06b09101699eae37eb3d942b44e3d2"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 427,
+          "bytes": 30028,
+          "sha256": "ee51b258184e9c70b7d5d49c5c622d3f0b8f1156e1a0c1a7178253e6f564afc3",
+          "path": "/assets/img/covers/generated/孤独摇滚-虹夏2-58a9520364-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 853,
+          "bytes": 90884,
+          "sha256": "cfee4506063e9a0c0d4b179c485bd675a3f1a05a59b604a62bc76bffdd0636a9",
+          "path": "/assets/img/covers/generated/孤独摇滚-虹夏2-58a9520364-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-虹夏与凉.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-虹夏与凉.webp",
+        "format": "jpeg",
+        "width": 2583,
+        "height": 1827,
+        "bytes": 847420,
+        "sha256": "f921d4ee24ac1033c01742e52b26984d5ca163b4681ecd68bec7d561312dbeb3"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 453,
+          "bytes": 26590,
+          "sha256": "ad7cc2459925467aed7ac35389dab352eb6a26bd3b9dd7408daf9eb136be6848",
+          "path": "/assets/img/covers/generated/孤独摇滚-虹夏与凉-f921d4ee24-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 905,
+          "bytes": 95966,
+          "sha256": "ab5a64102af5a77502a720806ffeec8a6b965cc5270a33f80304ea6ee4df9924",
+          "path": "/assets/img/covers/generated/孤独摇滚-虹夏与凉-f921d4ee24-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-山田凉.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-山田凉.webp",
+        "format": "jpeg",
+        "width": 3508,
+        "height": 2480,
+        "bytes": 3075859,
+        "sha256": "1d0273301b8c909e6c319d5fccf3947155c5e0bf503e4845075b205671770079"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 452,
+          "bytes": 19148,
+          "sha256": "9302b9a81cbaf3cd09646e579b58904484eb1e184d4e6d8f964dcd52c2342346",
+          "path": "/assets/img/covers/generated/孤独摇滚-山田凉-1d0273301b-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 905,
+          "bytes": 50126,
+          "sha256": "ae34821c857697a5f80c45ce121bb6a7536fc938e435670721a7c591a9d6f73f",
+          "path": "/assets/img/covers/generated/孤独摇滚-山田凉-1d0273301b-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-山田凉2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-山田凉2.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 426651,
+        "sha256": "c588f6383ecd8ea196545285148785150636878177689f4bb7090ecb6b57f977"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 43886,
+          "sha256": "f9b8f49743f5c504523d3d6a0070c74e302cd7c716fd9b886c66cac72bb632d7",
+          "path": "/assets/img/covers/generated/孤独摇滚-山田凉2-c588f6383e-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 127320,
+          "sha256": "5d1cce9ce076a2a464cc67c0ca4953d9992c74a76a07ddd505382802c6c11b25",
+          "path": "/assets/img/covers/generated/孤独摇滚-山田凉2-c588f6383e-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-四人合照.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-四人合照.webp",
+        "format": "png",
+        "width": 3840,
+        "height": 2160,
+        "bytes": 15636246,
+        "sha256": "3e0748a7758cd6f090e82da2a03ce34d30d99f52357074776e5c9847ec2e6d5b"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 26448,
+          "sha256": "255a0deffeb8122a00b5df5fb294c7085d9fd792ed83f3e16f04c98e3259d7e2",
+          "path": "/assets/img/covers/generated/孤独摇滚-四人合照-3e0748a775-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 82354,
+          "sha256": "c7b4ec3a54aa5cc1762b447b12b768e5d1a60af8ca3283ff97984e00d2ccffde",
+          "path": "/assets/img/covers/generated/孤独摇滚-四人合照-3e0748a775-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-四人合照2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-四人合照2.webp",
+        "format": "jpeg",
+        "width": 4225,
+        "height": 2539,
+        "bytes": 2748430,
+        "sha256": "281ec524b7a58d1b0b1418638f9291cd26a96d88164632c9b01ad116a4238099"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 384,
+          "bytes": 35180,
+          "sha256": "bd1c516ba80f4a2a19dcbada8c69f0c4db2badd5fe341685624f26ca5f203ab7",
+          "path": "/assets/img/covers/generated/孤独摇滚-四人合照2-281ec524b7-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 769,
+          "bytes": 132532,
+          "sha256": "c3f0e363ec7e522da64b636451be92c83146e7a1e55336c9c88963e248d1bc7c",
+          "path": "/assets/img/covers/generated/孤独摇滚-四人合照2-281ec524b7-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/孤独摇滚-喜多和波奇.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/孤独摇滚-喜多和波奇.webp",
+        "format": "jpeg",
+        "width": 4068,
+        "height": 2423,
+        "bytes": 2602622,
+        "sha256": "f492441d65ceb67a1c8ac7a7984680098216d4e36e55ecf2c2f420bc25e000e9"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 381,
+          "bytes": 42796,
+          "sha256": "c2bdfed24b3da2bd5bc52e42a414bc6956547e3c1f0a583bfc1879640235ddd9",
+          "path": "/assets/img/covers/generated/孤独摇滚-喜多和波奇-f492441d65-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 762,
+          "bytes": 129754,
+          "sha256": "534e3244d45a372cc8f6151d2126b4f73cfa085ed3884f42d9499a6aa661da22",
+          "path": "/assets/img/covers/generated/孤独摇滚-喜多和波奇-f492441d65-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/青春恋爱物语-雪乃.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/青春恋爱物语-雪乃.webp",
+        "format": "jpeg",
+        "width": 2560,
+        "height": 1600,
+        "bytes": 1603580,
+        "sha256": "5090e7fa49a58ba847548d9a1ed70142631d18d25552ef6105ae8171b7dc2056"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 400,
+          "bytes": 36270,
+          "sha256": "960aa8ccf672411294441ba13f161a4e4bd6e21aed0c7c02df56482a014dff01",
+          "path": "/assets/img/covers/generated/青春恋爱物语-雪乃-5090e7fa49-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 800,
+          "bytes": 182928,
+          "sha256": "8d13df336cd7c2cd9b536b9a4adfdd39a2199d8d88c07480c345ac8f278476f6",
+          "path": "/assets/img/covers/generated/青春恋爱物语-雪乃-5090e7fa49-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/青春恋爱物语-雪乃和团子.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/青春恋爱物语-雪乃和团子.webp",
+        "format": "jpeg",
+        "width": 2560,
+        "height": 2048,
+        "bytes": 1937412,
+        "sha256": "93d78d3fce315b3b40dfd138ba096788ff1d96ddde685549e7e6b99befe1b4df"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 512,
+          "bytes": 52304,
+          "sha256": "77199dece42da43b4873f8dc9890c78b20cd66fc155b46c9031dbb3f3b785de2",
+          "path": "/assets/img/covers/generated/青春恋爱物语-雪乃和团子-93d78d3fce-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 1024,
+          "bytes": 138802,
+          "sha256": "c611cd55184073d6c0cae8a3d490ff3ca45a07b01dca6fd89872debc8c4e6f8a",
+          "path": "/assets/img/covers/generated/青春恋爱物语-雪乃和团子-93d78d3fce-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/四月是你的谎言-薰.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/四月是你的谎言-薰.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 213989,
+        "sha256": "156bcfe18ac692331871a22067c3c236af893120e4c8ee65789d868d0e07ac81"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 20672,
+          "sha256": "bdc3dd8daf45fd528b631abeb74cbf74ef6dec404678fae3df0edaee202afbeb",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰-156bcfe18a-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 55760,
+          "sha256": "5e213bbca7746f4cb84c49b5f4cd883873df4c3a74e6fa4425209ce840f95ed5",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰-156bcfe18a-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/四月是你的谎言-薰2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/四月是你的谎言-薰2.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 233520,
+        "sha256": "93b478e2da2f69d906a5d7256f82d3c7a8738e6a86d9df8e4305f47537270089"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 24920,
+          "sha256": "3d33f11ac946adc883a6204e4f1fceba9fef77ad8682b67bccceb4cb263085ed",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰2-93b478e2da-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 62554,
+          "sha256": "8696a73cd3b0a72bf80bb7b93a4b51fff2a84f89aad1186cafdbfba4bed32d33",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰2-93b478e2da-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/四月是你的谎言-薰3.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/四月是你的谎言-薰3.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1200,
+        "bytes": 176201,
+        "sha256": "b6099531940309ff96e650d67eaa59b84eb7f152e774d30846522298c1371a26"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 400,
+          "bytes": 14286,
+          "sha256": "460d5b82f8239b128b1377d606069679a33eb9c707e3c9247f7f4aac953bc56f",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰3-b609953194-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 800,
+          "bytes": 45034,
+          "sha256": "7127e7accc9f5805212b6efe6cae07d171d6460965cbd13b8e03a0d03ee3b3e6",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰3-b609953194-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/四月是你的谎言-薰4.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/四月是你的谎言-薰4.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 332906,
+        "sha256": "5c5830e2205dbdefcf4ad9f23999b44981e9c992b4fba3a28fe874d9ac8ddbad"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 22518,
+          "sha256": "ac8aa21894f8483f0233716bb0aa30f00e32588b6979285f84d710cdbe890db1",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰4-5c5830e220-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 85468,
+          "sha256": "027e81034d661093e543cda84171c50da587bb666ae606dc7a69631adee45483",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰4-5c5830e220-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/四月是你的谎言-薰5.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/四月是你的谎言-薰5.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 341806,
+        "sha256": "8f0b0f04955ecb50e86c6163555d1406305e8e35630865c9fbaf5e94c9efe2ac"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 33294,
+          "sha256": "1a18e40df50d0be5c30f6326da1544f994fa9b5c52c15a74d0d1bc6033590809",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰5-8f0b0f0495-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 105540,
+          "sha256": "31b0cd0843d0fd16d04e5e04844f66445327531fe9bf42e724b36492be433d4b",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰5-8f0b0f0495-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/四月是你的谎言-薰6.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/四月是你的谎言-薰6.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 128623,
+        "sha256": "221415f1377fba98920aff4080887dd751a6cc1463a52dd1e53505a7af96d1e1"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 21602,
+          "sha256": "45abc7e8ed395d95b884e84befefd654527b9cf6fb2ec6e514e714814447574e",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰6-221415f137-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 52690,
+          "sha256": "f28e5105ad7f1aa43bd8ce35d989d0ad7108ac5f303b494f243778f69d3a83bf",
+          "path": "/assets/img/covers/generated/四月是你的谎言-薰6-221415f137-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-昴.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-昴.webp",
+        "format": "jpeg",
+        "width": 7559,
+        "height": 4252,
+        "bytes": 3478990,
+        "sha256": "4d4489e51712083d095ad419c645514ad0499c5689b729f59a7f22c7ecb55c5c"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 14938,
+          "sha256": "691afd81f185d65a6ea9b8ccfb8f84dff382667123f566a9c5b13407d36d9b48",
+          "path": "/assets/img/covers/generated/GBC-昴-4d4489e517-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 41570,
+          "sha256": "4bd6cdf0d5114e89540bd783b7e5ee713205fe40a388751ff734c26d94c0c8e7",
+          "path": "/assets/img/covers/generated/GBC-昴-4d4489e517-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-仁菜.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-仁菜.webp",
+        "format": "jpeg",
+        "width": 2156,
+        "height": 1200,
+        "bytes": 2084137,
+        "sha256": "bde4dd8afe460ba7eac2c14e0c8a9f3892f7fc0321fa3659f8120266022b811f"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 356,
+          "bytes": 22716,
+          "sha256": "6689560cc3991908df62d4871bf540b68e41d7d0ce2714be3960bc08ab4fad51",
+          "path": "/assets/img/covers/generated/GBC-仁菜-bde4dd8afe-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 712,
+          "bytes": 86344,
+          "sha256": "63d6db22be47d929b503660eae96f944be72bd2f773582a808379bb40cf7309c",
+          "path": "/assets/img/covers/generated/GBC-仁菜-bde4dd8afe-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-仁菜2.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-仁菜2.webp",
+        "format": "jpeg",
+        "width": 1600,
+        "height": 900,
+        "bytes": 817126,
+        "sha256": "5a6ef5b88f4076640a0c122427607a850974793d00bac54944c15072a1c770ae"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 18930,
+          "sha256": "7aebe971d8fc6c46073669519aebb4fd4223efef56d3123653fa747ba9eee676",
+          "path": "/assets/img/covers/generated/GBC-仁菜2-5a6ef5b88f-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 47858,
+          "sha256": "9bb17ef4e6b7b7d18711a81f40a8f43c0942f8a4150c94d43faa2a7ced90d17c",
+          "path": "/assets/img/covers/generated/GBC-仁菜2-5a6ef5b88f-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-仁菜3.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-仁菜3.webp",
+        "format": "jpeg",
+        "width": 1280,
+        "height": 720,
+        "bytes": 60335,
+        "sha256": "6df073fcc95de816bf3e05beeb39b0b3dccb0715fdc25835c0b6e0568fca3392"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 11398,
+          "sha256": "cdee3c3f4890d7d5a13fa0e209c7ddce2d48d5c1a4e01455ce66ea5b685146bb",
+          "path": "/assets/img/covers/generated/GBC-仁菜3-6df073fcc9-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 30868,
+          "sha256": "236058c5078552c7a80ec05c99ba2446e0d71eb515ed180e4dc2b13bd49daf27",
+          "path": "/assets/img/covers/generated/GBC-仁菜3-6df073fcc9-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-仁菜4.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-仁菜4.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 189287,
+        "sha256": "bb1b48c03b429d28b502e3b303826834243fcb9486fafe33f9fc05ff0c6c45e6"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 19136,
+          "sha256": "023245ed6d7f44c6dd50edde1e20aab565ac1eded8cd61198ac7549d708c468e",
+          "path": "/assets/img/covers/generated/GBC-仁菜4-bb1b48c03b-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 49682,
+          "sha256": "379c77d34269f45bcd29f7bd0d203b53305d21251cbfe10d87069a2dec579c3a",
+          "path": "/assets/img/covers/generated/GBC-仁菜4-bb1b48c03b-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-仁菜和昴.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-仁菜和昴.webp",
+        "format": "jpeg",
+        "width": 2156,
+        "height": 1200,
+        "bytes": 2267768,
+        "sha256": "6c02bb7c1e40233bfa88333894b762001b3b7c5c7d88672d2e9f2d119a0706da"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 356,
+          "bytes": 33806,
+          "sha256": "53b46d93890c8e287e5d7565214e32be8ad71cc62659c563fd64d9ae1bf04fad",
+          "path": "/assets/img/covers/generated/GBC-仁菜和昴-6c02bb7c1e-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 712,
+          "bytes": 109716,
+          "sha256": "8046c7ecc245aebfe1e5fff3bcfc9a2b56612da4f2e574c00866b6a282d40da0",
+          "path": "/assets/img/covers/generated/GBC-仁菜和昴-6c02bb7c1e-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-五人合照.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-五人合照.webp",
+        "format": "jpeg",
+        "width": 2500,
+        "height": 1406,
+        "bytes": 1439547,
+        "sha256": "04ba55ab81b476ebce131ea66f0a3f7714443cc7002d3bef5fcc90172aeea625"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 20002,
+          "sha256": "74001b4c98aea5f143a8cfe9defdd9af235dac3ccc6708d67a61dc57d26a6682",
+          "path": "/assets/img/covers/generated/GBC-五人合照-04ba55ab81-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 74052,
+          "sha256": "5881248999cb60bffc048161005950b15f71e0d93cd5a6caaf345b9f52eaa894",
+          "path": "/assets/img/covers/generated/GBC-五人合照-04ba55ab81-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-五人合照3.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-五人合照3.webp",
+        "format": "jpeg",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 299913,
+        "sha256": "d380534f3875ce2456fef37626d8d39ff77a7f4afe09cb8fe59a40e2d4573ca8"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 42574,
+          "sha256": "11d407d418aebb82bc71d5424dfb26ad09d8f027da18f524c989f1bd9f147f5a",
+          "path": "/assets/img/covers/generated/GBC-五人合照3-d380534f38-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 158186,
+          "sha256": "d25ed473c13776e6b377a5cad48dd1c096b047a8a269ac8ce7ecfc8fc821bbe1",
+          "path": "/assets/img/covers/generated/GBC-五人合照3-d380534f38-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-五人合照4.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-五人合照4.webp",
+        "format": "png",
+        "width": 1920,
+        "height": 1080,
+        "bytes": 2294236,
+        "sha256": "16149d3b6c8d9fe5397b6a99564f18a517d6c50aed763392006af459423e4cd2"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 27374,
+          "sha256": "6a93d90babf5e4338f0ca5d34b6e75a239d60a377db54f1d42b5ad061b981970",
+          "path": "/assets/img/covers/generated/GBC-五人合照4-16149d3b6c-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 72520,
+          "sha256": "c0b0a898134d67a386704cddbaee81f82545422531133976290de061dd07b3f4",
+          "path": "/assets/img/covers/generated/GBC-五人合照4-16149d3b6c-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/covers/GBC-小智和鲁帕.webp": {
+      "group": "cover-directory",
+      "source": {
+        "path": "/assets/img/covers/GBC-小智和鲁帕.webp",
+        "format": "jpeg",
+        "width": 4480,
+        "height": 2520,
+        "bytes": 4822662,
+        "sha256": "596fa5ed0d7b3665f7a196f89000a89e6f98df35eb7519188794a0044f185346"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 360,
+          "bytes": 23338,
+          "sha256": "d22a35739702bea7b7caedac84cc38f98bf0b1db554e14e4a2db5a261e29672e",
+          "path": "/assets/img/covers/generated/GBC-小智和鲁帕-596fa5ed0d-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1280,
+          "height": 720,
+          "bytes": 69606,
+          "sha256": "14eda6d05ccb240fc9711602ca1b031acda699b8866d142e668787ae625819eb",
+          "path": "/assets/img/covers/generated/GBC-小智和鲁帕-596fa5ed0d-1280w.webp"
+        }
+      ]
+    },
+    "/assets/img/observatory/signal-bocchi.webp": {
+      "group": "about-first-view",
+      "source": {
+        "path": "/assets/img/observatory/signal-bocchi.webp",
+        "format": "webp",
+        "width": 1217,
+        "height": 800,
+        "bytes": 108318,
+        "sha256": "198668b10849535a49469f8c595b172a2ee38f9c9b56d77313910d50a3c00a13"
+      },
+      "variants": [
+        {
+          "targetWidth": 640,
+          "width": 640,
+          "height": 421,
+          "bytes": 38510,
+          "sha256": "3d439edb809b4de8d9e26a32437f21db32350a68f2819f25178a6cc93461efef",
+          "path": "/assets/img/covers/generated/signal-bocchi-198668b108-640w.webp"
+        },
+        {
+          "targetWidth": 1280,
+          "width": 1217,
+          "height": 800,
+          "bytes": 112246,
+          "sha256": "7706790e27e7be5b1de97189e774a0e6fdc46b9b73b7c33004b324a170f14c13",
+          "path": "/assets/img/covers/generated/signal-bocchi-198668b108-1280w.webp"
+        }
+      ]
+    }
+  }
+}

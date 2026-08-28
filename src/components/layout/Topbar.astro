@@ -1,4 +1,4 @@
-﻿---
+---
 import Icon from "@/components/ui/Icon.astro";
 
 interface Crumb {
@@ -17,190 +17,65 @@ const showTitle = title !== lastCrumbLabel;
 ---
 
 <header class="topbar">
-  <button class="button drawer-toggle" id="drawer-toggle" type="button" aria-label="Open sidebar">
-    <Icon name="menu" size={16} />
-    <span>Menu</span>
-  </button>
+  <div class="topbar-primary">
+    <button
+      class="button drawer-toggle"
+      id="drawer-toggle"
+      type="button"
+      aria-label="打开主导航"
+      aria-controls="site-sidebar"
+      aria-expanded="false"
+    >
+      <Icon name="menu" size={16} />
+      <span class="drawer-toggle-label">导航</span>
+    </button>
 
-  <div class="topbar-title-wrap">
-    {
-      crumbs.length > 0 && (
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          {crumbs.map((crumb) => <span>{crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <strong>{crumb.label}</strong>}</span>)}
-        </nav>
-      )
-    }
-    {showTitle && <strong>{title}</strong>}
+    <a class="topbar-brand" href="/" aria-label="Lunar Signal Observatory 首页">
+      <span class="topbar-brand-mark" aria-hidden="true"><Icon name="spark" size={16} /></span>
+      <span class="topbar-brand-copy">
+        <strong>Lunar Signal Observatory</strong>
+        <span>Nocturne Research Archive</span>
+      </span>
+    </a>
+
+    <div class="topbar-title-wrap">
+      {
+        crumbs.length > 0 && (
+          <nav class="breadcrumb" aria-label="面包屑导航">
+            {crumbs.map((crumb, index) => (
+              <span>
+                {crumb.href ? (
+                  <a href={crumb.href}>{crumb.label}</a>
+                ) : (
+                  <strong aria-current={index === crumbs.length - 1 ? "page" : undefined}>{crumb.label}</strong>
+                )}
+              </span>
+            ))}
+          </nav>
+        )
+      }
+      {showTitle && <strong class="topbar-page-title">{title}</strong>}
+    </div>
   </div>
 
-  <div class="top-search" id="top-search">
-    <Icon name="search" size={14} />
-    <input id="top-search-input" class="unstyled-input" placeholder="Search everything..." autocomplete="off" />
-    <div class="top-search-results" id="top-search-results" hidden></div>
+  <div class="topbar-actions">
+    <a
+      class="top-search"
+      href="/search/"
+      data-command-palette-trigger
+      aria-label="搜索档案"
+      aria-haspopup="dialog"
+      aria-controls="command-root"
+      aria-expanded="false"
+    >
+      <Icon name="search" size={16} />
+      <span class="top-search-label">搜索档案</span>
+      <kbd class="top-search-shortcut">Ctrl K</kbd>
+    </a>
+
+    <button class="button theme-toggle" type="button" data-theme-toggle>
+      <span class="theme-toggle-orbit" aria-hidden="true"><Icon name="spark" size={16} /></span>
+      <span class="theme-toggle-label" data-theme-label>主题</span>
+    </button>
   </div>
 </header>
-
-<script>
-  // @ts-nocheck
-  let _tsLoaded = false;
-  let _tsItems = [];
-  let _tsDocAbort = null;
-
-  document.addEventListener('astro:page-load', () => {
-    const topSearchRoot = document.getElementById("top-search");
-    if (!topSearchRoot) return;
-
-    const input = document.getElementById("top-search-input");
-    const resultPanel = document.getElementById("top-search-results");
-    let hovering = false;
-    let focused = false;
-
-    const escapeHtml = (str) => str
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/\"/g, "&quot;")
-      .replace(/'/g, "&#39;");
-
-    const hasQuery = () => input instanceof HTMLInputElement && input.value.trim().length > 0;
-    const shouldKeepOpen = () => hasQuery() || hovering || focused;
-
-    const closePanel = () => {
-      if (!resultPanel) return;
-      resultPanel.hidden = true;
-      resultPanel.innerHTML = "";
-    };
-
-    const openPanel = () => {
-      if (resultPanel) resultPanel.hidden = false;
-    };
-
-    const loadItems = async () => {
-      if (_tsLoaded) return;
-      const response = await fetch("/search-index.json", { cache: "no-store" });
-      if (!response.ok) throw new Error("failed");
-      _tsItems = await response.json();
-      _tsLoaded = true;
-    };
-
-    const render = (query) => {
-      if (!resultPanel) return;
-
-      const keyword = query.trim().toLowerCase();
-      if (!keyword && !hovering && !focused) {
-        closePanel();
-        return;
-      }
-
-      const filtered = (keyword
-        ? _tsItems.filter((item) => (`${item.title} ${item.summary || ""} ${(item.tags || []).join(" ")}`).toLowerCase().includes(keyword))
-        : _tsItems
-      ).slice(0, 8);
-
-      if (filtered.length === 0) {
-        if (keyword) {
-          resultPanel.innerHTML = '<p class="meta-row top-search-empty">No match. Press Enter for full search.</p>';
-          openPanel();
-        } else {
-          closePanel();
-        }
-        return;
-      }
-
-      resultPanel.innerHTML = filtered
-        .map(
-          (item) =>
-            `<a class="top-search-item" href="${item.url}"><span>${escapeHtml(item.title)}</span><span class="tag-chip">${escapeHtml(item.kind)}</span></a>`
-        )
-        .join("");
-
-      openPanel();
-    };
-
-    const openWithCurrentValue = async () => {
-      try {
-        await loadItems();
-        const value = input instanceof HTMLInputElement ? input.value : "";
-        if (!shouldKeepOpen() && value.trim().length === 0) {
-          closePanel();
-          return;
-        }
-        render(value);
-      } catch {
-        closePanel();
-      }
-    };
-
-    topSearchRoot.addEventListener("mouseenter", () => {
-      hovering = true;
-      openWithCurrentValue();
-    });
-
-    topSearchRoot.addEventListener("mouseleave", () => {
-      hovering = false;
-      if (!hasQuery() && !focused) {
-        closePanel();
-      }
-    });
-
-    input?.addEventListener("focus", () => {
-      focused = true;
-      openWithCurrentValue();
-    });
-
-    input?.addEventListener("blur", () => {
-      focused = false;
-      window.setTimeout(() => {
-        if (!hasQuery() && !hovering) {
-          closePanel();
-        }
-      }, 20);
-    });
-
-    input?.addEventListener("input", async (event) => {
-      const target = event.target;
-      if (!(target instanceof HTMLInputElement)) return;
-      try {
-        await loadItems();
-        render(target.value);
-        if (!target.value.trim() && !hovering) {
-          closePanel();
-        }
-      } catch {
-        closePanel();
-      }
-    });
-
-    input?.addEventListener("keydown", (event) => {
-      if (!(input instanceof HTMLInputElement)) return;
-
-      if (event.key === "Enter") {
-        event.preventDefault();
-        const q = input.value.trim();
-        window.location.href = q ? `/search/?q=${encodeURIComponent(q)}` : "/search/";
-      }
-
-      if (event.key === "Escape") {
-        if (input instanceof HTMLInputElement) {
-          input.value = "";
-        }
-        closePanel();
-      }
-    });
-
-    if (_tsDocAbort) _tsDocAbort.abort();
-    _tsDocAbort = new AbortController();
-    document.addEventListener("pointerdown", (event) => {
-      if (!(event.target instanceof Node)) return;
-      if (!topSearchRoot.contains(event.target)) {
-        hovering = false;
-        focused = false;
-        if (!hasQuery()) {
-          closePanel();
-        }
-      }
-    }, { signal: _tsDocAbort.signal });
-
-    closePanel();
-  });
-</script>

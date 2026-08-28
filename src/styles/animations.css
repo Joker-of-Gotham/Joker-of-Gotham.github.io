@@ -135,11 +135,11 @@
 
 /* ── View transitions ── */
 ::view-transition-old(root) {
-  animation: var(--duration-normal) var(--ease-out) both fade-out-vt;
+  animation: var(--motion-duration-normal) var(--motion-ease-out) both fade-out-vt;
 }
 
 ::view-transition-new(root) {
-  animation: var(--duration-normal) var(--ease-out) both fade-in-vt;
+  animation: var(--motion-duration-normal) var(--motion-ease-out) both fade-in-vt;
 }
 
 @keyframes fade-out-vt {
@@ -153,13 +153,41 @@
 }
 
 /* ── Reduced motion ── */
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  animation-duration: var(--motion-duration-normal) !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: var(--motion-duration-normal) !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion="reduced"]::view-transition-group(*),
+html[data-motion="reduced"]::view-transition-old(*),
+html[data-motion="reduced"]::view-transition-new(*) {
+  animation-duration: var(--motion-duration-normal) !important;
+}
+
+html[data-motion="reduced"] [data-animate] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
+    animation-duration: var(--motion-duration-normal) !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: var(--motion-duration-normal) !important;
+    scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: var(--motion-duration-normal) !important;
   }
 
   [data-animate] {

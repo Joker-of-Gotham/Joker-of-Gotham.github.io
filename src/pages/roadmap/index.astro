@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import RoadmapExplorer from "@/components/roadmap/RoadmapExplorer.astro";
 import { getRoadmapNodes, getPublishedBlogPosts, getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
 import { computeRoadmapPointSummary } from "@/lib/content/roadmapMetrics";
+import "@/styles/archive.css";
 
 const [nodes, posts, artifacts] = await Promise.all([getRoadmapNodes(), getPublishedBlogPosts(), getArtifacts()]);
 const summary = computeRoadmapPointSummary(nodes);
@@ -75,13 +76,46 @@ const items = nodes.map((entry) => {
     }))
   };
 });
+
+const trackCount = new Set(items.map((item) => item.track)).size;
+const activeCount = items.filter((item) => item.status === "now").length;
+const completedCount = items.filter((item) => item.status === "done").length;
+const latestUpdate = items
+  .slice()
+  .sort((a, b) => Date.parse(b.lastUpdatedISO) - Date.parse(a.lastUpdatedISO))[0];
 ---
 
-<BaseLayout title="Roadmap" crumbs={[{ label: "Home", href: "/" }, { label: "Roadmap" }]}> 
-  <section class="section-stack roadmap-page-head">
-    <h1>Roadmap</h1>
-    <p class="meta-row">Browse all roadmap nodes by hierarchy, metrics, and timeline.</p>
-  </section>
+<BaseLayout
+  title="Roadmap"
+  description="Lunar Signal Observatory 研究路线图：以树、指标与时间轴检视长期研究执行。"
+  crumbs={[{ label: "Home", href: "/" }, { label: "Roadmap" }]}
+>
+  <div class="archive-page archive-page--index archive-roadmap-index">
+    <header class="archive-masthead archive-masthead--trajectory" aria-labelledby="roadmap-archive-title">
+      <div class="archive-masthead-copy">
+        <p class="archive-kicker"><span aria-hidden="true">B—03</span> Trajectory control</p>
+        <h1 id="roadmap-archive-title">Roadmap</h1>
+        <p class="archive-lead">把长期研究目标拆解为可追踪的节点、里程碑与证据链。</p>
+        <p class="archive-note">Tree 呈现依赖，Table 对齐指标，Gantt 校准时间；三个视图共享同一份内容事实。</p>
+      </div>
 
-  <RoadmapExplorer items={items} />
+      <dl class="archive-signal-summary" aria-label="Roadmap summary">
+        <div><dt>Tracks</dt><dd>{trackCount.toString().padStart(2, "0")}</dd></div>
+        <div><dt>Nodes</dt><dd>{items.length.toString().padStart(2, "0")}</dd></div>
+        <div><dt>Active</dt><dd>{activeCount.toString().padStart(2, "0")}</dd></div>
+        <div><dt>Resolved</dt><dd>{completedCount.toString().padStart(2, "0")}</dd></div>
+      </dl>
+    </header>
+
+    <section class="archive-catalogue archive-trajectory-console" aria-labelledby="roadmap-console-title">
+      <div class="archive-section-heading">
+        <div>
+          <p class="archive-kicker">Last calibration {latestUpdate?.lastUpdatedLabel ?? "—"}</p>
+          <h2 id="roadmap-console-title">Trajectory instruments</h2>
+        </div>
+        <span class="archive-coordinate" aria-hidden="true">TREE / TABLE / TIME</span>
+      </div>
+      <RoadmapExplorer items={items} />
+    </section>
+  </div>
 </BaseLayout>

@@ -1,46 +1,92 @@
 ﻿---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
 import { getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
+import "@/styles/archive.css";
 
 const artifacts = await getArtifacts();
+const artifactTypes = new Set(artifacts.map((entry) => entry.data.type));
+const latestArtifact = artifacts[0];
 ---
 
-<BaseLayout title="Artifacts" crumbs={[{ label: "Home", href: "/" }, { label: "Artifacts" }]}> 
-  <section class="section-stack">
-    <div class="section-heading-row">
-      <h1>Artifacts</h1>
-      <span class="meta-row">项目、论文、数据与公开成果</span>
-    </div>
+<BaseLayout
+  title="Artifacts"
+  description="Lunar Signal Observatory 成果档案：项目、论文、数据与可复用的研究输出。"
+  crumbs={[{ label: "Home", href: "/" }, { label: "Artifacts" }]}
+>
+  <div class="archive-page archive-page--index archive-artifact-index">
+    <header class="archive-masthead archive-masthead--instrument" aria-labelledby="artifact-archive-title">
+      <div class="archive-masthead-copy">
+        <p class="archive-kicker"><span aria-hidden="true">B—02</span> Materialized signals</p>
+        <h1 id="artifact-archive-title">Artifacts</h1>
+        <p class="archive-lead">将研究从抽象轨迹压缩为可检验的物证：论文、系统、数据与公开实现。</p>
+        <p class="archive-note">每个条目保留类型、发布时间、主题信号与关联研究路径。</p>
+      </div>
 
-    <div class="editorial-grid-wide">
+      <dl class="archive-signal-summary" aria-label="Artifact archive summary">
+        <div><dt>Objects</dt><dd>{artifacts.length.toString().padStart(2, "0")}</dd></div>
+        <div><dt>Formats</dt><dd>{artifactTypes.size.toString().padStart(2, "0")}</dd></div>
+        <div><dt>Latest</dt><dd>{latestArtifact ? formatDate(latestArtifact.data.date) : "—"}</dd></div>
+        <div><dt>State</dt><dd>OPEN</dd></div>
+      </dl>
+    </header>
+
+    <section class="archive-catalogue" aria-labelledby="artifact-catalogue-title">
+      <div class="archive-section-heading">
+        <div>
+          <p class="archive-kicker">Observation vault</p>
+          <h2 id="artifact-catalogue-title">成果编目</h2>
+        </div>
+        <span class="archive-coordinate" aria-hidden="true">OBJECT / EVIDENCE / LINK</span>
+      </div>
+
+      <ol class="archive-record-list">
       {
         artifacts.map((entry, idx) => (
-          <a class={`card ${idx === 0 ? "card--hero card--overlay" : ""}`} href={`/artifacts/${normalizeSlug(entry)}/`}>
-            {
-              entry.data.cover ? (
-                <img class="card-cover" src={entry.data.cover} alt={entry.data.title} loading={idx === 0 ? "eager" : "lazy"} />
-              ) : (
-                <div class="card-cover placeholder-cover" data-variant={((idx % 6) + 1).toString()}>
-                  <span style="font-size: 0.8rem; opacity: 0.6;">{entry.data.type}</span>
+          <li class={`archive-record ${idx === 0 ? "archive-record--featured" : ""}`}>
+            <article>
+              <a class="archive-record-link" href={`/artifacts/${normalizeSlug(entry)}/`}>
+                <div class="archive-record-media">
+                  {
+                    entry.data.cover ? (
+                      <ResponsiveCover
+                        src={entry.data.cover}
+                        alt={entry.data.title}
+                        loading={idx === 0 ? "eager" : "lazy"}
+                        fetchpriority={idx === 0 ? "high" : "auto"}
+                        sizes={idx === 0
+                          ? "(max-width: 720px) 100vw, (max-width: 1180px) 58vw, 720px"
+                          : "(max-width: 720px) 100vw, (max-width: 1180px) 34vw, 420px"}
+                      />
+                    ) : (
+                      <div class="archive-record-placeholder" data-variant={((idx % 6) + 1).toString()} aria-label={`${entry.data.type} placeholder`}>
+                        <span>{entry.data.type}</span>
+                      </div>
+                    )
+                  }
+                  <span class="archive-record-index" aria-hidden="true">{String(idx + 1).padStart(2, "0")}</span>
                 </div>
-              )
-            }
-            <div class="card-body">
-              <h3>{entry.data.title}</h3>
-              <p>{entry.data.summary}</p>
-              <div class="meta-row">
-                <span class="tag-chip">{entry.data.type}</span>
-                <span>{formatDate(entry.data.date)}</span>
-              </div>
-              {entry.data.tags.length > 0 && (
-                <div class="meta-row">
-                  {entry.data.tags.slice(0, 3).map((tag: string) => <span class="tag-chip">{tag}</span>)}
+
+                <div class="archive-record-copy">
+                  <div class="archive-record-meta">
+                    <span>{entry.data.type}</span>
+                    <time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time>
+                  </div>
+                  <h3>{entry.data.title}</h3>
+                  <p>{entry.data.summary}</p>
+                  {entry.data.tags.length > 0 && (
+                    <ul class="archive-record-tags" aria-label="Tags">
+                      {entry.data.tags.slice(0, 3).map((tag: string) => <li>{tag}</li>)}
+                    </ul>
+                  )}
+                  <span class="archive-record-action">Open artifact <span aria-hidden="true">↗</span></span>
                 </div>
-              )}
-            </div>
-          </a>
+              </a>
+            </article>
+          </li>
         ))
       }
-    </div>
-  </section>
+      </ol>
+    </section>
+  </div>
 </BaseLayout>
