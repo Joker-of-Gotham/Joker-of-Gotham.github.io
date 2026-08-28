@@ -348,6 +348,14 @@ test("homepage remains complete without JavaScript", async ({ browser }) => {
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.locator("[data-observatory-poster]")).toBeVisible();
   await expect(page.locator("[data-observatory-chapter]")).toHaveCount(6);
+  await expect(page.locator("#site-sidebar")).toHaveAttribute("inert", "");
+  for (let index = 0; index < 8; index += 1) {
+    await page.keyboard.press("Tab");
+    const focusInsideHiddenSidebar = await page.evaluate(
+      () => document.activeElement?.closest("#site-sidebar") !== null,
+    );
+    expect(focusInsideHiddenSidebar).toBe(false);
+  }
   await context.close();
 });
 
@@ -433,7 +441,43 @@ test("mobile layout has no horizontal overflow and keeps primary controls reacha
     (element) => getComputedStyle(element).backgroundImage
   );
   expect(stageImage).toContain("guide-pose-");
+  const [stageBounds, figureBounds] = await Promise.all([
+    stages.first().boundingBox(),
+    stages.first().locator(".observatory-mobile-actor-figure").boundingBox(),
+  ]);
+  expect(stageBounds).not.toBeNull();
+  expect(figureBounds).not.toBeNull();
+  expect(figureBounds!.y).toBeGreaterThanOrEqual(stageBounds!.y - 1);
+  expect(figureBounds!.y + figureBounds!.height).toBeLessThanOrEqual(stageBounds!.y + stageBounds!.height + 1);
   await context.close();
+});
+
+test("desktop embodiment keeps the chapter guide clear of the identity panel", async ({ page }) => {
+  await page.goto(homeUrl);
+  const root = page.locator("[data-observatory-root]");
+  await expect(root).toHaveAttribute("data-render-state", /ready|static|failed/, { timeout: 12_000 });
+  test.skip(await root.getAttribute("data-render-state") !== "ready", "Realtime WebGL unavailable");
+
+  const section = page.locator('[data-observatory-chapter="embodiment"]');
+  await section.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await expect(root).toHaveAttribute("data-active-chapter", "embodiment");
+  await page.waitForTimeout(800);
+
+  const [guideBounds, panelBounds] = await Promise.all([
+    page.locator("[data-observatory-character-layer]").boundingBox(),
+    section.locator(".observatory-identity-panel").boundingBox(),
+  ]);
+  expect(guideBounds).not.toBeNull();
+  expect(panelBounds).not.toBeNull();
+  const horizontalOverlap = Math.min(
+    guideBounds!.x + guideBounds!.width,
+    panelBounds!.x + panelBounds!.width,
+  ) - Math.max(guideBounds!.x, panelBounds!.x);
+  const verticalOverlap = Math.min(
+    guideBounds!.y + guideBounds!.height,
+    panelBounds!.y + panelBounds!.height,
+  ) - Math.max(guideBounds!.y, panelBounds!.y);
+  expect(horizontalOverlap > 0 && verticalOverlap > 0).toBe(false);
 });
 
 test("artifact cover title uses a transparent image scrim instead of an opaque card", async ({ page }) => {

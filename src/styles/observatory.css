@@ -187,12 +187,19 @@
   transform: translate3d(0, 1.5rem, 0);
   transition:
     opacity var(--motion-duration-cinematic) var(--motion-ease-out),
-    transform var(--motion-duration-cinematic) var(--motion-ease-out);
+    transform var(--motion-duration-cinematic) var(--motion-ease-out),
+    inset-inline-end 560ms var(--motion-ease-out);
 }
 
 .observatory[data-avatar-state="ready"] .observatory-character-layer {
   opacity: 1;
   transform: translate3d(0, 0, 0);
+}
+
+@media (min-width: 821px) {
+  .observatory[data-active-chapter="embodiment"] .observatory-character-layer {
+    inset-inline-end: calc(100vw - min(42vw, 46svh, 30rem) - clamp(2.5rem, 7vw, 7rem));
+  }
 }
 
 .observatory-character-pose {
@@ -1671,12 +1678,12 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   }
 
   .observatory-chapter--gate .observatory-mobile-actor-stage {
-    height: calc(var(--space-24) + var(--space-20));
+    height: clamp(12rem, 34svh, 15rem);
     margin-block: var(--space-2) var(--space-3);
   }
 
   .observatory-chapter--gate .observatory-mobile-actor-figure {
-    width: min(36vw, calc(var(--space-20) + var(--space-16)));
+    width: min(30vw, 7.5rem);
   }
 }
 
@@ -1803,7 +1810,7 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   .observatory-mobile-actor-figure {
     position: absolute;
     inset-inline-end: clamp(0.75rem, 7vw, 2rem);
-    inset-block-end: -0.6rem;
+    inset-block-end: 0;
     width: min(30vw, 7.5rem);
     aspect-ratio: 1 / 2;
     background-image: url("/assets/img/observatory/guide-pose-dark-present.webp");
