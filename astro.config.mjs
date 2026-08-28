@@ -16,7 +16,15 @@ export default defineConfig({
   vite: {
     server: {
       watch: {
-        ignored: ["**/dist/**", "**/.dist/**", "**/docs/**", "**/.codemap/**"]
+        ignored: [
+          "**/dist/**",
+          "**/.dist/**",
+          "**/docs/**",
+          "**/.codemap/**",
+          "**/.playwright-results/**",
+          "**/test-results/**",
+          "**/playwright-report/**"
+        ]
       }
     }
   },

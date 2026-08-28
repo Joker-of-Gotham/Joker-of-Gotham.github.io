@@ -3,6 +3,7 @@ import type { ObservatorySignalWindow } from "@/lib/observatory/types";
 
 interface Props extends ObservatorySignalWindow {
   priority?: boolean;
+  canvasLens?: boolean;
 }
 
 const {
@@ -12,13 +13,40 @@ const {
   eyebrow = "Memory signal",
   href,
   focalPosition = "center",
-  priority = false
+  priority = false,
+  canvasLens = false
 } = Astro.props;
 ---
 
 <figure class="observatory-signal-window" style={`--signal-focal-position:${focalPosition};`}>
   {
-    href ? (
+    canvasLens ? (
+      <canvas-signal-lens data-canvas-ui="magnify-vanilla">
+        <canvas data-signal-lens-source></canvas>
+        <div data-signal-lens-content>
+          {href ? (
+            <a href={href} class="observatory-signal-link">
+              <img
+                src={src}
+                alt={alt}
+                loading={priority ? "eager" : "lazy"}
+                decoding="async"
+                fetchpriority={priority ? "high" : "auto"}
+              />
+            </a>
+          ) : (
+            <img
+              src={src}
+              alt={alt}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              fetchpriority={priority ? "high" : "auto"}
+            />
+          )}
+        </div>
+        <canvas data-signal-lens-output aria-hidden="true"></canvas>
+      </canvas-signal-lens>
+    ) : href ? (
       <a href={href} class="observatory-signal-link">
         <img
           src={src}
@@ -45,3 +73,97 @@ const {
     </figcaption>
   )}
 </figure>
+
+<script>
+  import { decideSignalLens } from "@/lib/observatory/signal-lens-policy";
+  import type { MagnifyInstance } from "@/lib/canvasui/MagnifyVanilla";
+
+  type NavigatorWithConnection = Navigator & { connection?: { saveData?: boolean } };
+
+  function releaseProbeContext(context: WebGL2RenderingContext | null) {
+    context?.getExtension("WEBGL_lose_context")?.loseContext();
+  }
+
+  function resolveTokenColor(element: Element, property: string): [number, number, number] {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return [0.55, 0.49, 1];
+    context.fillStyle = getComputedStyle(element).getPropertyValue(property).trim();
+    context.fillRect(0, 0, 1, 1);
+    const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
+    return [red / 255, green / 255, blue / 255];
+  }
+
+  class CanvasSignalLens extends HTMLElement {
+    private instance: MagnifyInstance | null = null;
+    private activating = false;
+
+    connectedCallback() {
+      this.addEventListener("pointerenter", this.activate, { once: true, passive: true });
+    }
+
+    disconnectedCallback() {
+      this.instance?.destroy();
+      this.instance = null;
+    }
+
+    private activate = async () => {
+      if (this.activating || this.instance) return;
+      this.activating = true;
+      const probe = document.createElement("canvas").getContext("webgl2");
+      const decision = decideSignalLens({
+        reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        saveData: Boolean((navigator as NavigatorWithConnection).connection?.saveData),
+        finePointer: window.matchMedia("(hover: hover) and (pointer: fine)").matches,
+        webgl2: Boolean(probe)
+      });
+      releaseProbeContext(probe);
+      this.dataset.lensPolicy = decision.reason;
+      if (!decision.enabled || !this.isConnected) return;
+
+      const source = this.querySelector<HTMLCanvasElement>("[data-signal-lens-source]");
+      const content = this.querySelector<HTMLElement>("[data-signal-lens-content]");
+      const output = this.querySelector<HTMLCanvasElement>("[data-signal-lens-output]");
+      if (!source || !content || !output) return;
+      source.setAttribute("layoutsubtree", "true");
+
+      const { createMagnify, supportsHtmlInCanvas } = await import("@/lib/canvasui/MagnifyVanilla");
+      if (!this.isConnected) return;
+      if (supportsHtmlInCanvas()) {
+        source.style.display = "block";
+        source.style.position = "relative";
+        source.style.width = "100%";
+        source.style.height = "100%";
+        source.append(content);
+        this.dataset.lensNative = "true";
+      } else {
+        source.hidden = true;
+      }
+
+      const radiusToken = getComputedStyle(this).getPropertyValue("--component-signal-lens-radius");
+      this.instance = createMagnify(
+        { source, content, output },
+        {
+          size: Number.parseFloat(radiusToken) || 96,
+          zoom: 1.42,
+          follow: 0.34,
+          hud: 0.72,
+          color: resolveTokenColor(this, "--scene-afterlight-color"),
+          grid: true,
+          readout: true,
+          ripples: false,
+          scrollZoom: false,
+          aberration: 0.24,
+          haze: 0.08
+        }
+      );
+      this.dataset.lensState = this.instance ? "ready" : "unavailable";
+    };
+  }
+
+  if (!customElements.get("canvas-signal-lens")) {
+    customElements.define("canvas-signal-lens", CanvasSignalLens);
+  }
+</script>

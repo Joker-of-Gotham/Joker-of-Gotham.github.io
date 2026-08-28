@@ -161,8 +161,12 @@ function installChapterBridge(root: HTMLElement, signal: AbortSignal) {
   if (sections.length === 0) return;
 
   let frameId = 0;
+  const liveControllerOwnsChapterState = () => {
+    return ["ready", "suspended", "degraded"].includes(root.dataset.renderState ?? "");
+  };
   const sync = () => {
     frameId = 0;
+    if (liveControllerOwnsChapterState()) return;
     const readingLine = window.scrollY + Math.min(window.innerHeight * 0.36, 360);
     let activeIndex = 0;
     for (let index = 0; index < sections.length; index += 1) {
@@ -277,7 +281,6 @@ export async function mountObservatory() {
     const decision = decideObservatoryQuality(root, canvas);
     root.dataset.qualityTier = decision.profile.tier;
     root.dataset.renderReason = decision.reason;
-
     if (decision.profile.tier === "poster" || !decision.context) {
       root.dataset.renderState = "static";
       return;

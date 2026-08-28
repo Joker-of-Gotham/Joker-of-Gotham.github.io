@@ -114,14 +114,16 @@ Audio is always opt-in. Theme and scene initialization cannot start playback, re
 - Selection, focus, heading hierarchy, tables, KaTeX, Mermaid, code overflow, and print output are release checks.
 - Continuous particles are off by default while the user reads long-form content.
 
-### 5.5 WebGL scene and multi-pose actor
+### 5.5 WebGL scene and articulated volume actor
 
-- One shared Three.js renderer owns the fixed macro world, camera/look routes, fog, lighting, environmental fields, foreground observatory kit, and landscape/desktop avatar transitions. See [ADR-0004](../docs/adr/0004-continuous-world-and-multi-pose-actor.md).
+- One shared Three.js renderer owns the fixed macro world, camera/look routes, fog, lighting, environmental fields, foreground observatory kit, and desktop articulated avatar. See [ADR-0005](../docs/adr/0005-full-realtime-world-and-volumetric-guide.md).
 - DOM owns copy, links, controls, SEO, search, and accessibility.
 - Canvas UI Particle Object is no longer the actor representation; environmental particles provide scale and atmosphere only.
-- The avatar is an adult original observatory character with two aligned theme variants, eight true-alpha poses and one identity. A deterministic runtime step bakes the silhouette rim into each atlas so the fragment shader does not perform neighborhood sampling.
+- Desktop live mode uses one original adult observatory guide built as an articulated Three.js volume. Opaque PBR body surfaces consume semantic avatar tokens; chapter choreography drives joint pivots, gaze, breathing, hair, skirt and gait. No visible image plane or runtime atlas request is permitted in the desktop live path.
+- The aligned pose atlas remains a portrait/static fallback only. It preserves identity and chapter silhouettes for Reduced Motion, Save-Data, no-WebGL and initialization-failure paths.
 - Portrait viewports at or below 820 px keep the Three.js world but use in-flow pose stages sourced from the same atlas; the real-time actor is not initialized. Static portrait tiers use the poster and must not request the atlas.
 - Every scene has Poster, loading, live, degraded, context-lost, and reduced-motion states.
+- The poster/world plate is completely hidden after the first live frame. Canvas UI Magnify is permitted only as a lazy, single-instance signal-window instrument and never as a second full-page renderer.
 
 ## 6. Layout and responsive contracts
 

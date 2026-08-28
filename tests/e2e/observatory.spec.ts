@@ -3,6 +3,8 @@ import { expect, test } from "@playwright/test";
 
 const homeUrl = "http://127.0.0.1:4321/";
 
+test.describe.configure({ mode: "serial" });
+
 const chapterIds = [
   "signal-gate",
   "observe",

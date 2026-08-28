@@ -141,17 +141,26 @@ describe("observatory world-v3 director", () => {
       afterlight: new THREE.Color("#f0a8cf"),
       metal: new THREE.Color("#8390a8"),
       particleBase: new THREE.Color("#d8e1ff"),
+      avatarHair: new THREE.Color("#090a10"),
+      avatarSkin: new THREE.Color("#f0c9bd"),
+      avatarUniform: new THREE.Color("#161925"),
+      avatarUniformSecondary: new THREE.Color("#292e42"),
+      avatarEye: new THREE.Color("#6ca6ff"),
+      avatarShoe: new THREE.Color("#0b0d14"),
     };
     const world = createProceduralObservatoryWorld(getQualityProfile("low"), palette);
     const initialPosition = world.group.position.clone();
     const initialQuaternion = world.group.quaternion.clone();
 
     world.update(interpolateObservatoryTimeline(4.2), 9, 1 / 30);
-    expect(world.group.name).toBe("ObservatoryWorldV3FixedCoordinates");
+    expect(world.group.name).toBe("ObservatoryWorldV4FullRealtime");
     expect(world.group.userData.fixedWorldCoordinates).toBe(true);
+    expect(world.group.userData.livePlateDependency).toBe(false);
     expect(world.group.position).toEqual(initialPosition);
     expect(world.group.quaternion.angleTo(initialQuaternion)).toBeCloseTo(0);
     expect(world.group.getObjectByName("TerrainFieldSurface")).toBeTruthy();
+    expect(world.group.getObjectByName("AtmosphericLunarSkyDome")).toBeTruthy();
+    expect(world.group.getObjectByName("AtmosphericHorizonGlowBand")).toBeTruthy();
     expect(world.group.getObjectByName("TerrainContourAtmosphericLines")).toBeTruthy();
     expect(world.group.getObjectByName("PeriapsisHeroDishAssembly")).toBeTruthy();
     expect(world.group.getObjectByName("OrbitalLatticeMegastructure")).toBeTruthy();
@@ -162,10 +171,9 @@ describe("observatory world-v3 director", () => {
 
     const terrain = world.group.getObjectByName("TerrainFieldSurface") as THREE.Mesh;
     const terrainMaterial = terrain.material as THREE.MeshStandardMaterial;
-    expect(terrainMaterial.transparent).toBe(true);
-    expect(terrainMaterial.depthWrite).toBe(false);
-    expect(terrainMaterial.opacity).toBeLessThanOrEqual(0.12);
-    const darkTerrainOpacity = terrainMaterial.opacity;
+    expect(terrainMaterial.transparent).toBe(false);
+    expect(terrainMaterial.depthWrite).toBe(true);
+    expect(terrainMaterial.opacity).toBe(1);
 
     const kitMaterials = new Set<THREE.Material>();
     world.group.getObjectByName("RecognizableObservatoryKit")?.traverse((object) => {
@@ -173,11 +181,15 @@ describe("observatory world-v3 director", () => {
       const objectMaterials = Array.isArray(object.material) ? object.material : [object.material];
       objectMaterials.forEach((material) => kitMaterials.add(material));
     });
-    expect(kitMaterials.size).toBeGreaterThanOrEqual(4);
-    kitMaterials.forEach((material) => {
-      expect(material.transparent).toBe(true);
-      expect(material.depthWrite).toBe(false);
-      expect(material.opacity).toBeLessThanOrEqual(0.58);
+    expect(kitMaterials.size).toBeGreaterThanOrEqual(5);
+    const structuralMaterials = [...kitMaterials].filter((material) =>
+      ["ObservatoryKitMetal", "ObservatoryKitStructuralVeil", "ObservatoryKitSolarMembrane"].includes(material.name),
+    );
+    expect(structuralMaterials).toHaveLength(3);
+    structuralMaterials.forEach((material) => {
+      expect(material.transparent).toBe(false);
+      expect(material.depthWrite).toBe(true);
+      expect(material.opacity).toBe(1);
     });
     world.setPalette({
       fog: new THREE.Color("#eae6e0"),
@@ -186,11 +198,15 @@ describe("observatory world-v3 director", () => {
       afterlight: new THREE.Color("#9e4266"),
       metal: new THREE.Color("#8d7138"),
       particleBase: new THREE.Color("#212536"),
+      avatarHair: new THREE.Color("#161925"),
+      avatarSkin: new THREE.Color("#f0c9bd"),
+      avatarUniform: new THREE.Color("#f5f2ec"),
+      avatarUniformSecondary: new THREE.Color("#cdd2df"),
+      avatarEye: new THREE.Color("#345eaa"),
+      avatarShoe: new THREE.Color("#212536"),
     });
-    expect(terrainMaterial.opacity).toBeLessThan(darkTerrainOpacity);
-    kitMaterials.forEach((material) => {
-      expect(material.opacity).toBeLessThanOrEqual(0.46);
-    });
+    expect(terrainMaterial.opacity).toBe(1);
+    structuralMaterials.forEach((material) => expect(material.opacity).toBe(1));
     world.dispose();
   });
 });

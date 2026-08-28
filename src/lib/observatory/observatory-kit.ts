@@ -65,7 +65,9 @@ function createTrussBridge(
   group.name = name;
   group.userData = { kit: "triangulated-bridge", segments };
   const forward = end.clone().sub(start);
-  const right = new THREE.Vector3(forward.z, 0, -forward.x).normalize().multiplyScalar(width * 0.5);
+  const right = new THREE.Vector3(forward.z, 0, -forward.x);
+  if (right.lengthSq() < 0.0001) right.set(1, 0, 0);
+  right.normalize().multiplyScalar(width * 0.5);
   const up = new THREE.Vector3(0, width * 0.42, 0);
   const rails: THREE.BufferGeometry[] = [];
   for (const side of [-1, 1]) {
@@ -522,6 +524,44 @@ function createArchiveDome(
   return { group: root, lod, halo };
 }
 
+function createSolarMembraneArray(
+  terrain: TerrainField,
+  frameMaterial: THREE.Material,
+  panelMaterial: THREE.Material,
+  detail: number
+) {
+  const group = new THREE.Group();
+  group.name = "CantedSolarMembraneField";
+  group.userData = { landmark: "solar-membrane-field", role: "power-and-scale" };
+
+  const rows = detail === 1 ? 2 : 3;
+  const columns = detail === 1 ? 5 : 7;
+  for (let row = 0; row < rows; row += 1) {
+    for (let column = 0; column < columns; column += 1) {
+      const x = -52 + column * 7.8 + row * 2.4;
+      const z = -142 - row * 11.5 - Math.sin(column * 0.6) * 2.8;
+      const y = terrain.sampleHeight(x, z) + 3.2 + row * 0.28;
+      const panel = new THREE.Mesh(new THREE.PlaneGeometry(5.6, 2.7, 1, 1), panelMaterial);
+      panel.name = `SolarMembranePanel:${row + 1}:${column + 1}`;
+      panel.position.set(x, y, z);
+      panel.rotation.set(-1.12, 0.18 + row * 0.05, -0.22);
+      group.add(panel);
+
+      const post = createTrussBridge(
+        `SolarMembranePost:${row + 1}:${column + 1}`,
+        new THREE.Vector3(x, terrain.sampleHeight(x, z), z),
+        new THREE.Vector3(x, y - 0.2, z),
+        0.7,
+        2,
+        frameMaterial
+      );
+      group.add(post);
+    }
+  }
+
+  return { group };
+}
+
 export function createObservatoryKit(
   quality: ObservatoryQualityProfile,
   palette: ThreeObservatoryPalette,
@@ -535,9 +575,9 @@ export function createObservatoryKit(
     emissiveIntensity: 0.035,
     metalness: 0.68,
     roughness: 0.4,
-    transparent: true,
-    opacity: initialLightPalette ? 0.18 : 0.28,
-    depthWrite: false,
+    transparent: false,
+    opacity: 1,
+    depthWrite: true,
     dithering: true
   });
   const darkMetalMaterial = new THREE.MeshStandardMaterial({
@@ -547,9 +587,9 @@ export function createObservatoryKit(
     emissiveIntensity: 0.025,
     metalness: 0.48,
     roughness: 0.62,
-    transparent: true,
-    opacity: initialLightPalette ? 0.12 : 0.19,
-    depthWrite: false,
+    transparent: false,
+    opacity: 1,
+    depthWrite: true,
     dithering: true
   });
   const signalMaterial = new THREE.MeshStandardMaterial({
@@ -576,16 +616,30 @@ export function createObservatoryKit(
     depthWrite: false,
     dithering: true
   });
+  const membraneMaterial = new THREE.MeshStandardMaterial({
+    name: "ObservatoryKitSolarMembrane",
+    color: palette.orbit.clone().lerp(palette.fog, 0.28),
+    emissive: palette.signal.clone(),
+    emissiveIntensity: 0.18,
+    metalness: 0.42,
+    roughness: 0.34,
+    transparent: false,
+    opacity: 1,
+    side: THREE.DoubleSide,
+    depthWrite: true,
+    dithering: true
+  });
   const materials = new Set<THREE.Material>([
     metalMaterial,
     darkMetalMaterial,
     signalMaterial,
-    afterlightMaterial
+    afterlightMaterial,
+    membraneMaterial
   ]);
 
   const group = new THREE.Group();
   group.name = "RecognizableObservatoryKit";
-  group.userData = { worldVersion: 3, proceduralAsset: true };
+  group.userData = { worldVersion: 4, proceduralAsset: true, livePlateDependency: false };
 
   const gate = createSignalGate(terrain, darkMetalMaterial, signalMaterial);
   const heroDish = createHeroDish(metalMaterial, signalMaterial);
@@ -607,6 +661,7 @@ export function createObservatoryKit(
   );
   const canyon = createRelayCanyonInfrastructure(terrain, darkMetalMaterial, afterlightMaterial, quality.worldDetail);
   const archive = createArchiveDome(terrain, darkMetalMaterial, afterlightMaterial);
+  const solarMembranes = createSolarMembraneArray(terrain, metalMaterial, membraneMaterial, quality.worldDetail);
   const bridgeA = createTrussBridge(
     "DishToOrbitalServiceBridge",
     new THREE.Vector3(-10, terrain.sampleHeight(-10, -86) + 3, -86),
@@ -630,6 +685,7 @@ export function createObservatoryKit(
     dishArray.supports,
     dishArray.receivers,
     orbital.group,
+    solarMembranes.group,
     city.group,
     farCity.group,
     canyon.group,
@@ -654,6 +710,7 @@ export function createObservatoryKit(
       canyonIntensity = THREE.MathUtils.damp(canyonIntensity, state.canyonIntensity, 2.6, deltaSeconds);
       signalMaterial.emissiveIntensity = 0.9 + state.signalIntensity * 2.2;
       afterlightMaterial.emissiveIntensity = 0.55 + state.afterlightIntensity * 2.35 + canyonIntensity * 0.4;
+      membraneMaterial.emissiveIntensity = 0.08 + state.signalIntensity * 0.16 + ringIntensity * 0.12;
       metalMaterial.emissiveIntensity = 0.025 + cityIntensity * 0.07;
       darkMetalMaterial.emissiveIntensity = 0.018 + ringIntensity * 0.055;
       if (dishPivot) {
@@ -678,16 +735,19 @@ export function createObservatoryKit(
       const lightPalette = isLightWorldPalette(nextPalette);
       metalMaterial.color.copy(nextPalette.metal);
       metalMaterial.emissive.copy(nextPalette.fog);
-      metalMaterial.opacity = lightPalette ? 0.18 : 0.28;
+      metalMaterial.opacity = 1;
       darkMetalMaterial.color.copy(nextPalette.fog).lerp(nextPalette.metal, 0.72);
       darkMetalMaterial.emissive.copy(nextPalette.fog);
-      darkMetalMaterial.opacity = lightPalette ? 0.12 : 0.19;
+      darkMetalMaterial.opacity = 1;
       signalMaterial.color.copy(nextPalette.signal);
       signalMaterial.emissive.copy(nextPalette.signal);
       signalMaterial.opacity = lightPalette ? 0.46 : 0.58;
       afterlightMaterial.color.copy(nextPalette.afterlight);
       afterlightMaterial.emissive.copy(nextPalette.afterlight);
       afterlightMaterial.opacity = lightPalette ? 0.38 : 0.48;
+      membraneMaterial.color.copy(nextPalette.orbit).lerp(nextPalette.fog, 0.28);
+      membraneMaterial.emissive.copy(nextPalette.signal);
+      membraneMaterial.opacity = 1;
     },
     setQuality(nextQuality) {
       dishArray.dishes.count = Math.min(dishArray.maximumCount, nextQuality.dishInstanceCount);

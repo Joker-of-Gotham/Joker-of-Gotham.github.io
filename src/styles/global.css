@@ -2608,6 +2608,15 @@ pre.astro-code > code {
   white-space: pre;
 }
 
+@media (max-width: 480px) {
+  .archive-page .archive-prose pre,
+  .archive-page .archive-prose pre.astro-code {
+    box-sizing: border-box;
+    inline-size: calc(100vw - (var(--space-4) * 2));
+    max-inline-size: calc(100vw - (var(--space-4) * 2));
+  }
+}
+
 .code-copy-button {
   position: absolute;
   inset-block-start: var(--space-2);

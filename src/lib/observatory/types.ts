@@ -59,6 +59,12 @@ export interface ObservatoryPalette {
   afterlight: string;
   metal: string;
   particleBase: string;
+  avatarHair: string;
+  avatarSkin: string;
+  avatarUniform: string;
+  avatarUniformSecondary: string;
+  avatarEye: string;
+  avatarShoe: string;
 }
 
 export interface ObservatoryTimelineKeyframe {

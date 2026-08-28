@@ -12,7 +12,7 @@
 
 Visual review established that reconstructing the observatory character from sparse points sacrifices the face, uniform, silhouette, and emotional expression that make the character valuable. The owner therefore rejected particles as the character medium and requested a clear animated 3D or Live2D-like character plus a more concrete, monumental world comparable in spatial ambition—not copied assets or code—to cinematic WebGL portfolios.
 
-The repository currently has two matched, transparent, original-direction raster masters, but it does not have a layered Cubism model, `.model3.json`, VRM/GLB rig, motion files, or reviewed runtime license for those ecosystems. Acquiring an unrelated third-party anime model would create identity and provenance drift and is outside the approved asset boundary.
+The repository currently has two matched, transparent, original-direction raster masters, but it does not have a layered Cubism model, `.model3.json`, GLB rig, motion files, or reviewed runtime license for those ecosystems. Acquiring an unrelated third-party anime model would create identity and provenance drift and is outside the approved asset boundary.
 
 ## Decision
 
@@ -24,7 +24,7 @@ Use a project-authored **Three.js 2.5D deformable character rig** for the curren
 4. drive pose, position, scale and facing from the same six-chapter timeline as the camera;
 5. retain responsive raster Posters when motion, data, GPU capability or context state requires fallback.
 
-This is not Cubism Live2D and not a fully volumetric humanoid. Product copy and code comments must call it a 2.5D/deformable rig. A future legal, layered `.model3.json`, VRM or GLB asset may replace the rig behind the controller boundary after a separate dependency/provenance decision.
+This is not Cubism Live2D and not a fully volumetric humanoid. Product copy and code comments must call it a 2.5D/deformable rig. A future legal, layered `.model3.json` or GLB asset may replace the rig behind the controller boundary after a separate dependency/provenance decision.
 
 The shared world becomes a continuous concrete environment with procedural geometry only: lunar terrain, a distant planetary body, observatory architecture, orbital rings/megastucture, light transit paths and a cyber-geological canyon. Chapters interpolate visibility, material energy, fog, camera targets and character pose within one world; they do not mount separate renderers or hijack native scroll.
 
@@ -40,7 +40,7 @@ Closed cards are no longer the default spatial unit. Homepage and archive surfac
 - The world gains recognizable scale without new external model provenance; procedural geometry must stay within tier budgets.
 - The renderer still initializes only after first-paint opportunity and must pause/dispose/recover exactly as ADR-0001 requires.
 - Poster, reduced-motion, Save-Data, no-WebGL, context-loss and semantic DOM paths remain equivalent.
-- True Live2D/VRM adoption requires model files, author/rightsholder evidence, runtime-license review, motion/accessibility review and a new or amended ADR.
+- True Live2D or authored GLB adoption requires model files, author/rightsholder evidence, runtime-license review, motion/accessibility review and a new or amended ADR.
 - Release remains Stop-Ship for unresolved raster-source and anime-image provenance recorded in the asset ledger.
 
 ## Validation status

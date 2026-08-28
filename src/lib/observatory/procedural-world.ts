@@ -72,14 +72,15 @@ function createTerrainSurface(quality: ObservatoryQualityProfile, palette: Three
     emissiveIntensity: 0.025,
     metalness: 0.18,
     roughness: 0.82,
-    transparent: true,
-    opacity: 0.11,
-    depthWrite: false,
+    transparent: false,
+    opacity: 1,
+    depthWrite: true,
     dithering: true
   });
   const mesh = new THREE.Mesh(geometry, material);
   mesh.name = "TerrainFieldSurface";
   mesh.renderOrder = -4;
+  mesh.receiveShadow = true;
   mesh.userData = {
     generator: "ridged-fbm-craters-canyon-path-platforms",
     width: field.width,
@@ -88,9 +89,8 @@ function createTerrainSurface(quality: ObservatoryQualityProfile, palette: Three
   };
 
   const recolor = (nextPalette: ThreeObservatoryPalette) => {
-    // The raster plate carries the macro silhouette. This mesh only contributes
-    // camera-reactive relief, so keep every region inside the same atmospheric
-    // family instead of painting opaque black/grey land masses over the plate.
+    // The live terrain owns the macro silhouette. Every region stays within the
+    // semantic lunar palette so the poster can disappear after first frame.
     const base = nextPalette.fog.clone().lerp(nextPalette.metal, 0.64);
     const ridgeColor = nextPalette.fog.clone().lerp(nextPalette.orbit, 0.52);
     const canyonColor = nextPalette.fog.clone().lerp(nextPalette.particleBase, 0.18);
@@ -111,7 +111,7 @@ function createTerrainSurface(quality: ObservatoryQualityProfile, palette: Three
     }
     geometry.getAttribute("color").needsUpdate = true;
     material.emissive.copy(nextPalette.fog);
-    material.opacity = isLightWorldPalette(nextPalette) ? 0.055 : 0.09;
+    material.opacity = 1;
   };
   recolor(palette);
   return { field, mesh, geometry, material, recolor };
@@ -212,9 +212,9 @@ function createCelestialAnchor(quality: ObservatoryQualityProfile, palette: Thre
     emissiveIntensity: 0.06,
     metalness: 0.03,
     roughness: 0.97,
-    transparent: true,
-    opacity: isLightWorldPalette(palette) ? 0.04 : 0.065,
-    depthWrite: false,
+    transparent: false,
+    opacity: 1,
+    depthWrite: true,
     dithering: true
   });
   const body = new THREE.Mesh(geometry, material);
@@ -244,9 +244,9 @@ function createCelestialAnchor(quality: ObservatoryQualityProfile, palette: Thre
     emissiveIntensity: 0.02,
     metalness: 0.12,
     roughness: 0.9,
-    transparent: true,
-    opacity: isLightWorldPalette(palette) ? 0.13 : 0.2,
-    depthWrite: false,
+    transparent: false,
+    opacity: 1,
+    depthWrite: true,
     dithering: true
   });
   const debris = new THREE.InstancedMesh(debrisGeometry, debrisMaterial, debrisMaximum);
@@ -318,6 +318,52 @@ function createGroundLightway(quality: ObservatoryQualityProfile, palette: Three
   return { group, material };
 }
 
+function createRegolithBoulderField(
+  quality: ObservatoryQualityProfile,
+  palette: ThreeObservatoryPalette,
+  sampleHeight: (x: number, z: number) => number
+) {
+  const maximumCount = quality.worldDetail === 1 ? 54 : quality.worldDetail === 2 ? 96 : 138;
+  const geometry = new THREE.IcosahedronGeometry(1, quality.worldDetail === 1 ? 0 : 1);
+  const material = new THREE.MeshStandardMaterial({
+    name: "RegolithBoulderLayeredStoneMaterial",
+    color: palette.metal.clone().lerp(palette.particleBase, 0.22),
+    emissive: palette.fog.clone(),
+    emissiveIntensity: 0.018,
+    metalness: 0.05,
+    roughness: 0.96,
+    transparent: false,
+    opacity: 1,
+    depthWrite: true,
+    dithering: true
+  });
+  const instances = new THREE.InstancedMesh(geometry, material, maximumCount);
+  instances.name = "RegolithForegroundAndRouteBoulders";
+  instances.userData = { role: "foreground-occlusion-and-scale", maximumCount };
+
+  const random = createSeededRandom(WORLD_SEED ^ 0x524f434b);
+  const matrix = new THREE.Matrix4();
+  const quaternion = new THREE.Quaternion();
+  const position = new THREE.Vector3();
+  const scale = new THREE.Vector3();
+  for (let index = 0; index < maximumCount; index += 1) {
+    const lane = index % 6;
+    const routeT = index / Math.max(1, maximumCount - 1);
+    const z = 18 - routeT * 430 + randomSigned(random) * 11;
+    const routeX = Math.sin(routeT * Math.PI * 5.2) * 18 + Math.cos(routeT * Math.PI * 2.1) * 9;
+    const side = lane < 3 ? -1 : 1;
+    const x = routeX + side * (10 + random() * 52) + randomSigned(random) * 8;
+    const radius = 0.28 + random() ** 2 * (index < 18 ? 3.4 : 1.8);
+    position.set(x, sampleHeight(x, z) + radius * 0.42, z);
+    quaternion.setFromEuler(new THREE.Euler(random() * Math.PI, random() * Math.PI, random() * Math.PI));
+    scale.set(radius * (0.55 + random() * 1.6), radius * (0.34 + random() * 0.9), radius * (0.52 + random() * 1.3));
+    matrix.compose(position, quaternion, scale);
+    instances.setMatrixAt(index, matrix);
+  }
+  instances.instanceMatrix.needsUpdate = true;
+  return { instances, geometry, material, maximumCount };
+}
+
 function createAtmosphereVeils(palette: ThreeObservatoryPalette) {
   const vertexShader = /* glsl */ `
     varying vec2 vUv;
@@ -362,17 +408,89 @@ function createAtmosphereVeils(palette: ThreeObservatoryPalette) {
   return { group, material };
 }
 
+function createAtmosphericSky(palette: ThreeObservatoryPalette) {
+  const vertexShader = /* glsl */ `
+    varying vec3 vWorldDirection;
+
+    void main() {
+      vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+      vWorldDirection = normalize(worldPosition.xyz);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+  const fragmentShader = /* glsl */ `
+    uniform vec3 uZenith;
+    uniform vec3 uHorizon;
+    uniform vec3 uSignal;
+    uniform float uMoon;
+    uniform float uAfterlight;
+    varying vec3 vWorldDirection;
+
+    void main() {
+      float height = clamp(vWorldDirection.y * 0.5 + 0.5, 0.0, 1.0);
+      float horizon = 1.0 - smoothstep(0.08, 0.48, height);
+      float moonLimb = smoothstep(0.985, 1.0, dot(vWorldDirection, normalize(vec3(-0.42, 0.58, -0.7))));
+      vec3 color = mix(uHorizon, uZenith, smoothstep(0.0, 0.92, height));
+      color += uSignal * moonLimb * (0.14 + uMoon * 0.26);
+      color += uHorizon * horizon * (0.12 + uAfterlight * 0.1);
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+  const skyMaterial = new THREE.ShaderMaterial({
+    name: "AtmosphericLunarSkyMaterial",
+    vertexShader,
+    fragmentShader,
+    uniforms: {
+      uZenith: { value: palette.fog.clone().lerp(palette.particleBase, 0.18) },
+      uHorizon: { value: palette.fog.clone().lerp(palette.orbit, 0.24) },
+      uSignal: { value: palette.signal.clone() },
+      uMoon: { value: 0 },
+      uAfterlight: { value: 0 }
+    },
+    transparent: false,
+    depthWrite: false,
+    side: THREE.BackSide,
+    blending: THREE.NormalBlending
+  });
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(560, 48, 24), skyMaterial);
+  dome.name = "AtmosphericLunarSkyDome";
+  dome.renderOrder = -10;
+  dome.frustumCulled = false;
+
+  const horizonMaterial = new THREE.MeshBasicMaterial({
+    name: "AtmosphericHorizonGlowMaterial",
+    color: palette.orbit.clone().lerp(palette.metal, 0.2),
+    transparent: true,
+    opacity: isLightWorldPalette(palette) ? 0.08 : 0.16,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+  const horizon = new THREE.Mesh(new THREE.RingGeometry(150, 380, 96), horizonMaterial);
+  horizon.name = "AtmosphericHorizonGlowBand";
+  horizon.position.set(0, -18, -230);
+  horizon.rotation.x = -Math.PI / 2;
+  horizon.renderOrder = -9;
+
+  const group = new THREE.Group();
+  group.name = "ProceduralAtmosphericSkyLayer";
+  group.userData = { role: "programmatic-atmosphere", fixedWorldCoordinates: true };
+  group.add(dome, horizon);
+  return { group, skyMaterial, horizonMaterial };
+}
+
 export function createProceduralObservatoryWorld(
   quality: ObservatoryQualityProfile,
   palette: ThreeObservatoryPalette
 ): ProceduralObservatoryWorld {
   const group = new THREE.Group();
-  group.name = "ObservatoryWorldV3FixedCoordinates";
+  group.name = "ObservatoryWorldV4FullRealtime";
   group.userData = {
-    worldVersion: 3,
+    worldVersion: 4,
     coordinateSpan: OBSERVATORY_WORLD_SPAN,
     fixedWorldCoordinates: true,
-    characterParticles: false
+    characterParticles: false,
+    livePlateDependency: false,
+    visualSource: "procedural-pbr-threejs"
   };
 
   const terrain = createTerrainSurface(quality, palette);
@@ -381,15 +499,20 @@ export function createProceduralObservatoryWorld(
   const celestial = createCelestialAnchor(quality, palette);
   const kit = createObservatoryKit(quality, palette, terrain.field);
   const lightway = createGroundLightway(quality, palette, terrain.field.sampleHeight);
+  const boulders = createRegolithBoulderField(quality, palette, terrain.field.sampleHeight);
+  const sky = createAtmosphericSky(palette);
   const atmosphere = createAtmosphereVeils(palette);
+  let skyIsLight = isLightWorldPalette(palette);
   let atmosphereOpacityScale = isLightWorldPalette(palette) ? 0.48 : 1;
   atmosphere.group.visible = quality.worldDetail > 1;
   kit.setQuality(quality);
   group.add(
+    sky.group,
     stars.points,
     celestial.group,
     terrain.mesh,
     terrainContours.lines,
+    boulders.instances,
     lightway.group,
     kit.group,
     atmosphere.group
@@ -423,6 +546,11 @@ export function createProceduralObservatoryWorld(
       celestial.material.emissiveIntensity = 0.025 + moonIntensity * 0.09;
       celestial.haloMaterial.opacity = 0.025 + moonIntensity * 0.07;
       celestial.debrisMaterial.emissiveIntensity = 0.012 + moonIntensity * 0.035;
+      sky.skyMaterial.uniforms.uMoon.value = moonIntensity;
+      sky.skyMaterial.uniforms.uAfterlight.value = afterlightIntensity;
+      sky.horizonMaterial.opacity = (skyIsLight ? 0.06 : 0.13)
+        + afterlightIntensity * 0.07
+        + state.ringIntensity * 0.035;
       terrain.material.emissiveIntensity = 0.012 + state.ringIntensity * 0.022;
       lightway.material.emissiveIntensity = 0.75 + state.canyonIntensity * 0.8 + afterlightIntensity * 1.25;
       atmosphere.material.uniforms.uOpacity.value =
@@ -438,13 +566,22 @@ export function createProceduralObservatoryWorld(
       terrainContours.material.color.copy(nextPalette.orbit).lerp(nextPalette.metal, 0.34);
       const lightPalette = isLightWorldPalette(nextPalette);
       terrainContours.material.opacity = lightPalette ? 0.09 : 0.14;
+      boulders.material.color.copy(nextPalette.metal).lerp(nextPalette.particleBase, 0.22);
+      boulders.material.emissive.copy(nextPalette.fog);
+      boulders.material.opacity = 1;
       celestial.material.color.copy(nextPalette.particleBase).multiplyScalar(0.72);
       celestial.material.emissive.copy(nextPalette.orbit);
-      celestial.material.opacity = lightPalette ? 0.04 : 0.065;
+      celestial.material.opacity = 1;
       celestial.haloMaterial.color.copy(nextPalette.orbit);
       celestial.debrisMaterial.color.copy(nextPalette.metal);
       celestial.debrisMaterial.emissive.copy(nextPalette.fog);
-      celestial.debrisMaterial.opacity = lightPalette ? 0.13 : 0.2;
+      celestial.debrisMaterial.opacity = 1;
+      skyIsLight = lightPalette;
+      sky.skyMaterial.uniforms.uZenith.value.copy(nextPalette.fog).lerp(nextPalette.particleBase, 0.18);
+      sky.skyMaterial.uniforms.uHorizon.value.copy(nextPalette.fog).lerp(nextPalette.orbit, 0.24);
+      sky.skyMaterial.uniforms.uSignal.value.copy(nextPalette.signal);
+      sky.horizonMaterial.color.copy(nextPalette.orbit).lerp(nextPalette.metal, 0.2);
+      sky.horizonMaterial.opacity = lightPalette ? 0.08 : 0.16;
       lightway.material.color.copy(nextPalette.afterlight);
       lightway.material.emissive.copy(nextPalette.afterlight);
       atmosphere.material.uniforms.uColor.value.copy(nextPalette.fog);
@@ -458,6 +595,10 @@ export function createProceduralObservatoryWorld(
     },
     setQuality(nextQuality) {
       stars.geometry.setDrawRange(0, Math.min(stars.maximumCount, nextQuality.starCount));
+      boulders.instances.count = Math.min(
+        boulders.maximumCount,
+        nextQuality.worldDetail === 1 ? 54 : nextQuality.worldDetail === 2 ? 96 : 138
+      );
       celestial.debris.count = Math.min(celestial.debrisMaximum, Math.max(18, nextQuality.starCount / 10));
       atmosphere.group.visible = nextQuality.worldDetail > 1;
       kit.setQuality(nextQuality);

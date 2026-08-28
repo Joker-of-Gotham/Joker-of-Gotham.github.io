@@ -40,7 +40,7 @@ const { posts, signals } = Astro.props;
       </div>
 
       <div class="observatory-signal-strip" aria-label="个人记忆信号">
-        {signals.slice(0, 5).map((signal) => <SignalWindow {...signal} />)}
+        {signals.slice(0, 5).map((signal, index) => <SignalWindow {...signal} canvasLens={index === 0} />)}
       </div>
     </div>
 

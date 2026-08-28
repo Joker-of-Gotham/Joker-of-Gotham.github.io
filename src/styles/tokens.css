@@ -188,6 +188,12 @@
   --scene-afterlight-color: var(--color-accent);
   --scene-metal-color: var(--color-metal);
   --scene-particle-base: var(--color-foreground-soft);
+  --scene-avatar-hair-color: color-mix(in oklch, var(--primitive-color-rose-700) 72%, var(--primitive-color-ink-900));
+  --scene-avatar-skin-color: color-mix(in oklch, var(--primitive-color-paper-50) 82%, var(--primitive-color-rose-500));
+  --scene-avatar-uniform-color: var(--primitive-color-ink-800);
+  --scene-avatar-uniform-secondary-color: var(--primitive-color-ink-700);
+  --scene-avatar-eye-color: var(--primitive-color-gold-500);
+  --scene-avatar-shoe-color: var(--primitive-color-ink-900);
 
   --font-display: var(--primitive-font-display);
   --font-sans: var(--primitive-font-body);
@@ -286,6 +292,7 @@
   --component-avatar-particle: var(--scene-particle-base);
   --component-avatar-signal: var(--scene-signal-color);
   --component-avatar-edge: var(--scene-orbit-color);
+  --component-signal-lens-radius: var(--primitive-space-24);
   --component-audio-control-bg: color-mix(in oklch, var(--color-surface-strong) 82%, transparent);
   --component-audio-control-text: var(--color-foreground);
 
@@ -456,6 +463,12 @@
   --scene-afterlight-color: var(--color-accent);
   --scene-metal-color: var(--color-metal);
   --scene-particle-base: var(--color-foreground-soft);
+  --scene-avatar-hair-color: color-mix(in oklch, var(--primitive-color-rose-700) 82%, var(--primitive-color-ink-700));
+  --scene-avatar-skin-color: color-mix(in oklch, var(--primitive-color-paper-50) 86%, var(--primitive-color-rose-500));
+  --scene-avatar-uniform-color: var(--primitive-color-paper-50);
+  --scene-avatar-uniform-secondary-color: var(--primitive-color-mist-300);
+  --scene-avatar-eye-color: var(--primitive-color-gold-700);
+  --scene-avatar-shoe-color: var(--primitive-color-ink-750);
 }
 
 /* OS preference is the fallback only; an explicit data-theme always wins. */
@@ -507,6 +520,12 @@
     --scene-afterlight-color: var(--color-accent);
     --scene-metal-color: var(--color-metal);
     --scene-particle-base: var(--color-foreground-soft);
+    --scene-avatar-hair-color: color-mix(in oklch, var(--primitive-color-rose-700) 82%, var(--primitive-color-ink-700));
+    --scene-avatar-skin-color: color-mix(in oklch, var(--primitive-color-paper-50) 86%, var(--primitive-color-rose-500));
+    --scene-avatar-uniform-color: var(--primitive-color-paper-50);
+    --scene-avatar-uniform-secondary-color: var(--primitive-color-mist-300);
+    --scene-avatar-eye-color: var(--primitive-color-gold-700);
+    --scene-avatar-shoe-color: var(--primitive-color-ink-750);
   }
 }
 

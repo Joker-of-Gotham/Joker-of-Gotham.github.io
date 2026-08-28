@@ -796,6 +796,7 @@
 
 .archive-prose pre,
 .archive-prose pre.astro-code {
+  box-sizing: border-box;
   border: var(--line-hairline) solid var(--component-code-border);
   border-inline-start: var(--line-emphasis) solid var(--color-secondary);
   background: var(--component-code-bg) !important;
@@ -1758,9 +1759,13 @@
   .page-main .archive-page .archive-prose > :where(figure, .image-grid, .mermaid-block, .katex-display, .table-wrap),
   .page-main .archive-page .archive-prose > table,
   .page-main .archive-page .archive-prose > p:has(> img:only-child) {
-    inline-size: 100%;
-    max-inline-size: 100%;
+    inline-size: min(100%, calc(100vw - (var(--space-4) * 2)));
+    max-inline-size: calc(100vw - (var(--space-4) * 2));
     margin-inline-start: 0;
+  }
+
+  .archive-prose :where(img, .image-grid, .table-wrap, pre, pre.astro-code) {
+    max-inline-size: calc(100vw - (var(--space-4) * 2));
   }
 
   .archive-pagination > div + div {

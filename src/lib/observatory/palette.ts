@@ -8,6 +8,12 @@ export interface ThreeObservatoryPalette {
   afterlight: THREE.Color;
   metal: THREE.Color;
   particleBase: THREE.Color;
+  avatarHair: THREE.Color;
+  avatarSkin: THREE.Color;
+  avatarUniform: THREE.Color;
+  avatarUniformSecondary: THREE.Color;
+  avatarEye: THREE.Color;
+  avatarShoe: THREE.Color;
 }
 
 const PALETTE_PROPERTIES: Record<keyof ObservatoryPalette, string> = {
@@ -16,7 +22,13 @@ const PALETTE_PROPERTIES: Record<keyof ObservatoryPalette, string> = {
   orbit: "--scene-orbit-color",
   afterlight: "--scene-afterlight-color",
   metal: "--scene-metal-color",
-  particleBase: "--scene-particle-base"
+  particleBase: "--scene-particle-base",
+  avatarHair: "--scene-avatar-hair-color",
+  avatarSkin: "--scene-avatar-skin-color",
+  avatarUniform: "--scene-avatar-uniform-color",
+  avatarUniformSecondary: "--scene-avatar-uniform-secondary-color",
+  avatarEye: "--scene-avatar-eye-color",
+  avatarShoe: "--scene-avatar-shoe-color"
 };
 
 export function readObservatoryPalette(element: Element): ObservatoryPalette {
@@ -54,6 +66,12 @@ export function createThreeObservatoryPalette(palette: ObservatoryPalette): Thre
     orbit: resolveCssColor(palette.orbit, context),
     afterlight: resolveCssColor(palette.afterlight, context),
     metal: resolveCssColor(palette.metal, context),
-    particleBase: resolveCssColor(palette.particleBase, context)
+    particleBase: resolveCssColor(palette.particleBase, context),
+    avatarHair: resolveCssColor(palette.avatarHair, context),
+    avatarSkin: resolveCssColor(palette.avatarSkin, context),
+    avatarUniform: resolveCssColor(palette.avatarUniform, context),
+    avatarUniformSecondary: resolveCssColor(palette.avatarUniformSecondary, context),
+    avatarEye: resolveCssColor(palette.avatarEye, context),
+    avatarShoe: resolveCssColor(palette.avatarShoe, context)
   };
 }
