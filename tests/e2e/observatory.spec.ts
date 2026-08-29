@@ -164,7 +164,7 @@ test("live observatory canvas uses a resident procedural runtime without reloads
 
   await expect(root).toHaveAttribute("data-render-state", /ready|suspended|degraded/);
   await expect(page.locator("[data-observatory-canvas]")).toHaveCount(1);
-  await expect(root).toHaveAttribute("data-world-version", "5");
+  await expect(root).toHaveAttribute("data-world-version", "6");
   await expect(root).toHaveAttribute("data-avatar-representation", "chapter-pose-raster", {
     timeout: 12_000,
   });

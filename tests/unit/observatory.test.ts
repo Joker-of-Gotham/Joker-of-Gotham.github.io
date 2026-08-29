@@ -102,7 +102,7 @@ describe("observatory chapter timeline", () => {
   });
 });
 
-describe("observatory world-v5 director", () => {
+describe("observatory world-v6 director", () => {
   it("travels a fixed macro world on independent camera and look splines", () => {
     const length = getObservatoryCameraRouteLength();
     const start = sampleObservatoryCameraRoute(0);
