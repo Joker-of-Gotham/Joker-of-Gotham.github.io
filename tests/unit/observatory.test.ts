@@ -129,6 +129,64 @@ describe("observatory world-v5 director", () => {
     });
   });
 
+  it("composes one continuous campus instead of disconnected showcase islands", () => {
+    const palette = {
+      fog: new THREE.Color("#070b18"),
+      signal: new THREE.Color("#7de6ff"),
+      orbit: new THREE.Color("#9caeff"),
+      afterlight: new THREE.Color("#f0a8cf"),
+      metal: new THREE.Color("#8390a8"),
+      particleBase: new THREE.Color("#d8e1ff"),
+      avatarHair: new THREE.Color("#090a10"),
+      avatarSkin: new THREE.Color("#f0c9bd"),
+      avatarUniform: new THREE.Color("#161925"),
+      avatarUniformSecondary: new THREE.Color("#292e42"),
+      avatarEye: new THREE.Color("#6ca6ff"),
+      avatarShoe: new THREE.Color("#0b0d14"),
+    };
+    const world = createProceduralObservatoryWorld(getQualityProfile("low"), palette);
+
+    const campus = world.group.getObjectByName("UnifiedObservatoryCampus") as THREE.Group;
+    expect(campus).toBeTruthy();
+    expect(campus.userData).toMatchObject({
+      role: "continuous-observatory-campus",
+      spatialContinuity: true,
+      connectedChapters: [
+        "signal-gate",
+        "observe",
+        "structure",
+        "orchestrate",
+        "embodiment",
+        "archive-afterlight",
+      ],
+    });
+    expect(campus.getObjectByName("CampusProcessionalDeck")).toBeTruthy();
+    expect(campus.getObjectByName("CampusCourtyardTerraces")).toBeTruthy();
+    expect(campus.getObjectByName("CampusColonnade")).toBeTruthy();
+    expect(campus.getObjectByName("UnifiedGateAtrium")).toBeTruthy();
+    expect(campus.getObjectByName("UnifiedDofObservationHall")).toBeTruthy();
+    expect(campus.getObjectByName("UnifiedKeyframedSignalSpire")).toBeTruthy();
+    expect(campus.getObjectByName("UnifiedArchiveCivicQuarter")).toBeTruthy();
+    expect(campus.getObjectByName("UnifiedAfterlightArchiveHall")).toBeTruthy();
+    expect(campus.getObjectByName("UnifiedDistantCivicField")).toBeTruthy();
+
+    for (const disconnectedName of [
+      "InteriorDepthOfFieldRoom",
+      "KeyframedSignalArchitecture",
+      "SponzaInspiredArchivePalace",
+      "ThreeDTilesInspiredTownField",
+      "RecognizableObservatoryKit",
+      "OrbitalLatticeMegastructure",
+      "RegolithForegroundAndRouteBoulders",
+      "TerrainContourAtmosphericLines",
+    ]) {
+      expect(world.group.getObjectByName(disconnectedName)).toBeFalsy();
+    }
+    expect(world.group.userData.composition).toBe("single-continuous-observatory-campus");
+
+    world.dispose();
+  });
+
   it("keeps a named landmark world fixed while only animating its internals", () => {
     const palette = {
       fog: new THREE.Color("#070b18"),
@@ -149,8 +207,8 @@ describe("observatory world-v5 director", () => {
     const initialQuaternion = world.group.quaternion.clone();
 
     world.update(interpolateObservatoryTimeline(4.2), 9, 1 / 30);
-    expect(world.group.name).toBe("ObservatoryWorldV5ArchitecturalRealtime");
-    expect(world.group.userData.worldVersion).toBe(5);
+    expect(world.group.name).toBe("ObservatoryWorldV6UnifiedCampusRealtime");
+    expect(world.group.userData.worldVersion).toBe(6);
     expect(world.group.userData.fixedWorldCoordinates).toBe(true);
     expect(world.group.userData.livePlateDependency).toBe(false);
     expect(world.group.userData.characterParticles).toBe(false);
@@ -165,17 +223,13 @@ describe("observatory world-v5 director", () => {
     expect(world.group.getObjectByName("TerrainFieldSurface")).toBeTruthy();
     expect(world.group.getObjectByName("AtmosphericLunarSkyDome")).toBeTruthy();
     expect(world.group.getObjectByName("AtmosphericHorizonGlowBand")).toBeTruthy();
-    expect(world.group.getObjectByName("TerrainContourAtmosphericLines")).toBeTruthy();
-    expect(world.group.getObjectByName("InteriorDepthOfFieldRoom")).toBeTruthy();
-    expect(world.group.getObjectByName("KeyframedSignalArchitecture")).toBeTruthy();
-    expect(world.group.getObjectByName("SponzaInspiredArchivePalace")).toBeTruthy();
-    expect(world.group.getObjectByName("ThreeDTilesInspiredTownField")).toBeTruthy();
-    expect(world.group.getObjectByName("PeriapsisHeroDishAssembly")).toBeTruthy();
-    expect(world.group.getObjectByName("OrbitalLatticeMegastructure")).toBeTruthy();
-    expect(world.group.getObjectByName("TerracedObservatoryCity")).toBeTruthy();
-    expect(world.group.getObjectByName("FarHorizonObservatoryCity")).toBeTruthy();
-    expect(world.group.getObjectByName("RelayCanyonInfrastructure")).toBeTruthy();
-    expect(world.group.getObjectByName("ArchiveAfterlightBasin")).toBeTruthy();
+    expect(world.group.getObjectByName("UnifiedObservatoryCampus")).toBeTruthy();
+    expect(world.group.getObjectByName("UnifiedGateAtrium")).toBeTruthy();
+    expect(world.group.getObjectByName("UnifiedDofObservationHall")).toBeTruthy();
+    expect(world.group.getObjectByName("UnifiedKeyframedSignalSpire")).toBeTruthy();
+    expect(world.group.getObjectByName("UnifiedArchiveCivicQuarter")).toBeTruthy();
+    expect(world.group.getObjectByName("UnifiedAfterlightArchiveHall")).toBeTruthy();
+    expect(world.group.getObjectByName("UnifiedDistantCivicField")).toBeTruthy();
 
     const terrain = world.group.getObjectByName("TerrainFieldSurface") as THREE.Mesh;
     const terrainMaterial = terrain.material as THREE.MeshStandardMaterial;
@@ -183,17 +237,16 @@ describe("observatory world-v5 director", () => {
     expect(terrainMaterial.depthWrite).toBe(true);
     expect(terrainMaterial.opacity).toBe(1);
 
-    const kitMaterials = new Set<THREE.Material>();
-    world.group.getObjectByName("RecognizableObservatoryKit")?.traverse((object) => {
+    const campusMaterials = new Set<THREE.Material>();
+    world.group.getObjectByName("UnifiedObservatoryCampus")?.traverse((object) => {
       if (!(object instanceof THREE.Mesh)) return;
       const objectMaterials = Array.isArray(object.material) ? object.material : [object.material];
-      objectMaterials.forEach((material) => kitMaterials.add(material));
+      objectMaterials.forEach((material) => campusMaterials.add(material));
     });
-    expect(kitMaterials.size).toBeGreaterThanOrEqual(5);
-    const structuralMaterials = [...kitMaterials].filter((material) =>
-      ["ObservatoryKitMetal", "ObservatoryKitStructuralVeil", "ObservatoryKitSolarMembrane"].includes(material.name),
+    const structuralMaterials = [...campusMaterials].filter((material) =>
+      ["CampusStoneMaterial", "CampusStructuralMetalMaterial"].includes(material.name),
     );
-    expect(structuralMaterials).toHaveLength(3);
+    expect(structuralMaterials).toHaveLength(2);
     structuralMaterials.forEach((material) => {
       expect(material.transparent).toBe(false);
       expect(material.depthWrite).toBe(true);
@@ -217,6 +270,7 @@ describe("observatory world-v5 director", () => {
     structuralMaterials.forEach((material) => expect(material.opacity).toBe(1));
     world.dispose();
   });
+
 });
 
 describe("observatory terrain field", () => {
