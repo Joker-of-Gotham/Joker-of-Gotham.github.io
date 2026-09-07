@@ -25,6 +25,7 @@
     "@astrojs/mdx": "^4.3.14",
     "@astrojs/sitemap": "^3.6.0",
     "astro": "^5.18.2",
+    "gsap": "^3.15.0",
     "katex": "^0.16.28",
     "mermaid": "^11.17.2",
     "rehype-katex": "^7.0.1",

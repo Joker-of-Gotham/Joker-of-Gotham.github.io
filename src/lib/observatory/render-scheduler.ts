@@ -41,6 +41,42 @@ export interface PointerSample {
   strength: number;
 }
 
+export type RuntimeVisibilityState =
+  | "visible"
+  | "document-hidden"
+  | "root-offscreen"
+  | "context-lost"
+  | "manually-paused"
+  | "disposed";
+
+export interface RuntimeActivityInput {
+  disposed: boolean;
+  documentVisible: boolean;
+  rootVisible: boolean;
+  contextAvailable: boolean;
+  manualPauseRequested: boolean;
+}
+
+export interface RuntimeActivity {
+  shouldRun: boolean;
+  visibility: RuntimeVisibilityState;
+}
+
+export interface DeferredQualityInput {
+  hasPendingProfile: boolean;
+  scrollDirty: boolean;
+  documentVisible: boolean;
+  rootVisible: boolean;
+  timestamp: number;
+  lastScrollEventAt: number;
+  settleDurationMs: number;
+}
+
+export interface FrameDurationSummary {
+  median: number;
+  p95: number;
+}
+
 export function createRendererResizeState(): RendererResizeState {
   return { width: 0, height: 0, pixelRatio: 0 };
 }
@@ -107,4 +143,32 @@ export function queuePointerSample(_: PointerSample | null, sample: PointerSampl
 
 export function consumePendingPointerSample(sample: PointerSample | null): PointerSample | null {
   return sample;
+}
+
+export function resolveRuntimeActivity(input: RuntimeActivityInput): RuntimeActivity {
+  if (input.disposed) return { shouldRun: false, visibility: "disposed" };
+  if (!input.contextAvailable) return { shouldRun: false, visibility: "context-lost" };
+  if (!input.documentVisible) return { shouldRun: false, visibility: "document-hidden" };
+  if (!input.rootVisible) return { shouldRun: false, visibility: "root-offscreen" };
+  if (input.manualPauseRequested) return { shouldRun: false, visibility: "manually-paused" };
+  return { shouldRun: true, visibility: "visible" };
+}
+
+export function shouldApplyDeferredQuality(input: DeferredQualityInput): boolean {
+  if (!input.hasPendingProfile) return false;
+  if (!input.documentVisible || !input.rootVisible) return true;
+  if (input.scrollDirty) return false;
+  return input.timestamp - input.lastScrollEventAt >= input.settleDurationMs;
+}
+
+export function shouldUpdateProjection(currentFov: number, nextFov: number, epsilon = 0.01): boolean {
+  return Math.abs(currentFov - nextFov) >= epsilon;
+}
+
+export function summarizeFrameDurations(samples: readonly number[]): FrameDurationSummary | null {
+  if (samples.length === 0) return null;
+  const sorted = [...samples].sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)] ?? 0;
+  const p95Index = Math.min(sorted.length - 1, Math.ceil(sorted.length * 0.95) - 1);
+  return { median, p95: sorted[p95Index] ?? median };
 }

@@ -26,12 +26,12 @@ Realism comes from coherent scale, materials, lighting, depth and camera blockin
 
 | Chapter | Camera and reveal | World landmark | Guide choreography | Material/light cue |
 |---|---|---|---|---|
-| Signal Gate | low, slightly wide arrival shot; gate occludes the route before opening the vista | signal arch, beacon, near boulders | palm presentation, direct gaze | violet beacon against nearly black regolith |
+| Signal Gate | low, slightly wide arrival shot; gate occludes the route before opening the vista | signal arch, beacon, near boulders | palm presentation, direct gaze | sparse cobalt beacon against nearly black regolith |
 | Observe | slower lateral drift; dish rim crosses foreground | hero radio dish and layered array | head/eye tracking, raised pointing hand | blue lunar key light, brushed metal, restrained signal rim |
 | Structure | camera rises and lengthens focal distance | orbital lattice, maintenance pods, solar membrane field | profile step and upward indication | hard metal highlights, long structural shadows |
 | Orchestrate | city terraces reveal in depth, not as card grid | observatory city, service bridge, window bands | open-arm presentation, weight shift | warmer gold service lights balanced by blue orbit light |
-| Embodiment | camera compresses through a darker relay canyon | cable trunks, canyon infrastructure, near rock occlusion | quick turn, gait and hair/skirt lag | rose afterlight begins to enter, fog grows denser |
-| Archive Afterlight | wide final basin, then quiet settle | archive dome, concourse ring and signal windows | shoulders settle, gaze returns to visitor | rose/gold afterlight, sparse bloom only on energy elements |
+| Embodiment | camera compresses through a darker relay canyon | cable trunks, canyon infrastructure, near rock occlusion | quick turn, gait and hair/skirt lag | muted warm aperture light begins to enter, fog grows denser |
+| Archive Afterlight | wide final basin, then quiet settle | mineral archive shell, concourse ring and signal windows | shoulders settle, gaze returns to visitor | muted warm apertures, sparse bloom only on energy elements |
 
 No chapter swaps the whole scene. Each chapter changes camera route, look target, FOV, roll, fog and authored intensity values inside one fixed world.
 

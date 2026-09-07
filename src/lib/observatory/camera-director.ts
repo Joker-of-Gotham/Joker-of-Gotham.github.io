@@ -1,28 +1,30 @@
 import * as THREE from "three";
+import { OBSERVATORY_TIMELINE } from "./timeline";
 import type { Vec3Tuple } from "./types";
 
 export const OBSERVATORY_WORLD_SPAN = 459;
 
+/**
+ * Six composed chapter endpoints. The lateral alternation is intentional: it
+ * reveals a new relationship at every stop instead of repeating a centre-line
+ * dolly along the meridian deck.
+ */
 export const OBSERVATORY_CAMERA_CONTROL_POINTS: readonly Vec3Tuple[] = [
-  [0, 10, 28],
-  [-18, 15, -30],
-  [20, 20, -88],
-  [42, 12, -145],
-  [3, 9, -208],
-  [-34, 17, -268],
-  [-12, 29, -326],
-  [20, 45, -366]
+  [-17, 10.5, 38],
+  [14, 16, -39],
+  [-8, 14, -118],
+  [31, 16, -188],
+  [-20, 11, -262],
+  [-8, 21, -352]
 ] as const;
 
 export const OBSERVATORY_LOOK_CONTROL_POINTS: readonly Vec3Tuple[] = [
-  [0, 7, -12],
-  [-10, 7, -60],
-  [12, 12, -116],
-  [34, 8, -172],
-  [-5, 7, -236],
-  [-28, 11, -296],
-  [0, 20, -350],
-  [30, 32, -405]
+  [-2, 8, -18],
+  [-13, 5.5, -75],
+  [2, 4, -163],
+  [12, 12, -243],
+  [-24, 3.5, -307],
+  [20, 7, -402]
 ] as const;
 
 export interface ObservatoryCameraRouteSample {
@@ -41,6 +43,25 @@ const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const vectors = (points: readonly Vec3Tuple[]) => points.map(([x, y, z]) => new THREE.Vector3(x, y, z));
 const cameraCurve = new THREE.CatmullRomCurve3(vectors(OBSERVATORY_CAMERA_CONTROL_POINTS), false, "centripetal");
 const lookCurve = new THREE.CatmullRomCurve3(vectors(OBSERVATORY_LOOK_CONTROL_POINTS), false, "centripetal");
+const routeStops = OBSERVATORY_TIMELINE.map((keyframe) => keyframe.routeProgress);
+
+/** Maps the non-uniform story route values onto the six exact spline knots. */
+function routeProgressToSplineProgress(progress: number): number {
+  const bounded = clamp01(progress);
+  if (bounded <= routeStops[0]) return 0;
+  if (bounded >= routeStops[routeStops.length - 1]) return 1;
+
+  for (let index = 0; index < routeStops.length - 1; index += 1) {
+    const start = routeStops[index];
+    const end = routeStops[index + 1];
+    if (bounded <= end) {
+      const localProgress = (bounded - start) / Math.max(Number.EPSILON, end - start);
+      return (index + localProgress) / (routeStops.length - 1);
+    }
+  }
+
+  return 1;
+}
 
 /** Keeps authored widescreen composition legible on portrait and ultrawide viewports. */
 export function calculateObservatoryAspectFraming(aspect: number): ObservatoryAspectFraming {
@@ -74,12 +95,16 @@ export function calculateObservatoryAspectFraming(aspect: number): ObservatoryAs
   return { lateralScale: 1, verticalOffset: 0, avatarScale: 1 };
 }
 
-/** Samples the independent camera and look curves by arc length. */
+/**
+ * Samples independent position and look splines while pinning every authored
+ * chapter route value to its exact composition. Inter-chapter motion remains a
+ * single continuous Catmull-Rom journey.
+ */
 export function sampleObservatoryCameraRoute(progress: number): ObservatoryCameraRouteSample {
-  const t = clamp01(progress);
-  const position = cameraCurve.getPointAt(t);
-  const lookAt = lookCurve.getPointAt(t);
-  const tangent = cameraCurve.getTangentAt(t).normalize();
+  const t = routeProgressToSplineProgress(progress);
+  const position = cameraCurve.getPoint(t);
+  const lookAt = lookCurve.getPoint(t);
+  const tangent = cameraCurve.getTangent(t).normalize();
   return {
     position: [position.x, position.y, position.z],
     lookAt: [lookAt.x, lookAt.y, lookAt.z],

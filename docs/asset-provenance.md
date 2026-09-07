@@ -14,6 +14,14 @@ The underlying contracts, license files, purchase records, or rightsholder corre
 
 Release decision: **Conditional Go for the current `main` push**. The Owner accepts responsibility for the accuracy and scope of the rights statement and for satisfying any private attribution or use conditions. Any newly added visual requires a new provenance review.
 
+## Tsukuyomi background — local implementation, 2026-09-07
+
+The owner requested a background inspired by the Tsukuyomi world in *Cosmic Princess Kaguya!* on 2026-09-07. The city geometry, material textures, Japanese sign layouts, flower sprites, fish and lighting are authored locally in `src/lib/observatory/tsukuyomi-world.ts` and `tsukuyomi-geometry.ts`. No downloaded film image, third-party model, HDR or texture is used in the running scene.
+
+Six `public/assets/img/observatory/tsukuyomi-world-*.webp` fallback plates are exports of this rendered scene, made with `scripts/prepare-tsukuyomi-posters.mjs`. Their exact filenames, source captures, sizes and SHA-256 hashes are recorded in `docs/research/tsukuyomi-poster-manifest.json`. The existing character assets keep their earlier provenance records.
+
+Reference-only film images are in `artifacts/tsukuyomi-reference/`, outside public assets. Source pages and the visual interpretation are documented in `docs/research/tsukuyomi-world-v8.md`. This records the origin of a personal fan-inspired local implementation; it does not assert an official film affiliation or extend the earlier release authorization to a new publication.
+
 ## Status vocabulary
 
 | Status | Meaning | Release treatment |

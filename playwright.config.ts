@@ -6,7 +6,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: true,
   retries: 0,
-  workers: 3,
+  // Heavy WebGL pages contend for the same headless GPU context. Run E2E
+  // serially so stability checks measure the page, not parallel renderer load.
+  workers: 1,
   timeout: 45_000,
   expect: { timeout: 8_000 },
   reporter: [["list"]],

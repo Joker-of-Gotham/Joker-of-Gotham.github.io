@@ -295,6 +295,17 @@ describe("observatory terrain field", () => {
     expect(platform.buildable).toBeGreaterThan(0.8);
     expect(platform.height).not.toBe(ridge.height);
   });
+
+  it("cuts the meridian route below deterministic wind-packed shoulders", () => {
+    const field = createObservatoryTerrainField();
+    const routeFloor = field.sample(24, -120);
+    const shoulder = field.sample(36, -120);
+
+    expect(routeFloor.regions.path).toBeGreaterThan(0.9);
+    expect(shoulder.regions.path).toBeLessThan(0.1);
+    expect(shoulder.height).toBeGreaterThan(routeFloor.height);
+    expect(field.sample(36, -120)).toEqual(shoulder);
+  });
 });
 
 describe("observatory authored raster guide assets", () => {

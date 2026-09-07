@@ -95,33 +95,8 @@ async function waitForFirstContentfulPaint(signal: AbortSignal): Promise<void> {
 
 async function waitForRendererOpportunity(signal: AbortSignal): Promise<void> {
   await waitForFirstContentfulPaint(signal);
-  if (signal.aborted) return;
-
-  await new Promise<void>((resolve) => {
-    let settled = false;
-    let idleId: number | null = null;
-    let timeoutId: number | null = null;
-    const requestIdle = Reflect.get(window, "requestIdleCallback") as
-      | ((callback: IdleRequestCallback, options?: IdleRequestOptions) => number)
-      | undefined;
-    const cancelIdle = Reflect.get(window, "cancelIdleCallback") as
-      | ((handle: number) => void)
-      | undefined;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      if (idleId !== null && typeof cancelIdle === "function") cancelIdle.call(window, idleId);
-      if (timeoutId !== null) window.clearTimeout(timeoutId);
-      resolve();
-    };
-
-    signal.addEventListener("abort", finish, { once: true });
-    if (typeof requestIdle === "function") {
-      idleId = requestIdle.call(window, finish, { timeout: 1_200 });
-    } else {
-      timeoutId = window.setTimeout(finish, 0);
-    }
-  });
+  // Content gets first paint; the world needs no remote scene assets or idle timeout.
+  if (!signal.aborted) await waitForAnimationFrames(signal);
 }
 
 function syncPoster(root: HTMLElement) {
@@ -139,6 +114,10 @@ function syncPoster(root: HTMLElement) {
       : image.dataset.darkCompactSource;
     const nextSource = prefersCompact ? compactSource ?? regularSource : regularSource;
     if (nextSource && image.getAttribute("src") !== nextSource) image.src = nextSource;
+  }
+  for (const source of root.querySelectorAll<HTMLSourceElement>("[data-observatory-portrait-source]")) {
+    const nextSource = theme === "light" ? source.dataset.lightSource : source.dataset.darkSource;
+    if (nextSource && source.getAttribute("srcset") !== nextSource) source.srcset = nextSource;
   }
   root.dataset.resolvedTheme = theme;
 }
@@ -328,7 +307,11 @@ export function installObservatoryBootstrap() {
   window.addEventListener("pagehide", unmountObservatory);
   window.addEventListener("pageshow", () => void mountObservatory());
   window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", remountForMotionPreference);
-  window.matchMedia("(max-width: 820px) and (orientation: portrait)").addEventListener("change", remountForMotionPreference);
+  // Viewport and orientation changes must stay inside the resident controller.
+  // Destroying and immediately recreating a WebGL context on the same canvas
+  // can leave getContextAttributes() null, and was experienced as a full scene
+  // refresh whenever a browser panel crossed this breakpoint. ResizeObserver
+  // already coalesces the backing-store/projection update without rebuilding.
   document.addEventListener("observatory:remount", remountForMotionPreference);
 
   if (document.readyState === "loading") {

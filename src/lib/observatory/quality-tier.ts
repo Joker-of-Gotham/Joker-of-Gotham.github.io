@@ -24,6 +24,10 @@ const PROFILES: Record<ObservatoryQualityTier, ObservatoryQualityProfile> = {
     tier: "low",
     pixelRatioCap: 1,
     avatarSegments: 20,
+    // Low is the steady-state tier on many integrated GPUs. The art-directed
+    // facade rhythm is authored at detail 1; repeated remote fixtures remain
+    // detail 2/3 so degradation still removes real work without hollowing out
+    // the visible architecture.
     worldDetail: 1,
     terrainSegments: 56,
     cityInstanceCount: 42,
@@ -37,7 +41,7 @@ const PROFILES: Record<ObservatoryQualityTier, ObservatoryQualityProfile> = {
   },
   standard: {
     tier: "standard",
-    pixelRatioCap: 1.5,
+    pixelRatioCap: 1.35,
     avatarSegments: 44,
     worldDetail: 2,
     terrainSegments: 88,
@@ -52,7 +56,7 @@ const PROFILES: Record<ObservatoryQualityTier, ObservatoryQualityProfile> = {
   },
   enhanced: {
     tier: "enhanced",
-    pixelRatioCap: 1.6,
+    pixelRatioCap: 1.5,
     avatarSegments: 64,
     worldDetail: 3,
     terrainSegments: 120,
@@ -63,7 +67,7 @@ const PROFILES: Record<ObservatoryQualityTier, ObservatoryQualityProfile> = {
     orbitSegments: 144,
     frameRateCap: 60,
     pointerInteraction: true,
-    postProcessing: true
+    postProcessing: false
   }
 };
 
@@ -93,7 +97,7 @@ function createWebGL2Context(canvas: HTMLCanvasElement): WebGL2RenderingContext 
   try {
     return canvas.getContext("webgl2", {
       alpha: true,
-      antialias: false,
+      antialias: true,
       depth: true,
       desynchronized: true,
       failIfMajorPerformanceCaveat: false,

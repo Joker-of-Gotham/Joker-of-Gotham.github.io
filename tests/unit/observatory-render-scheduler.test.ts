@@ -5,9 +5,13 @@ import {
   consumePendingPointerSample,
   createRendererResizeState,
   queuePointerSample,
+  resolveRuntimeActivity,
   resolveRendererViewport,
+  shouldApplyDeferredQuality,
   shouldMeasureLayout,
   shouldResizeRenderer,
+  shouldUpdateProjection,
+  summarizeFrameDurations,
 } from "../../src/lib/observatory/render-scheduler";
 
 describe("observatory render scheduler", () => {
@@ -66,5 +70,56 @@ describe("observatory render scheduler", () => {
     expect(shouldMeasureLayout(state, first)).toBe(true);
     expect(shouldMeasureLayout(state, { ...first, rootHeight: 5120.34 })).toBe(false);
     expect(shouldMeasureLayout(state, { ...first, windowHeight: 801 })).toBe(true);
+  });
+
+  it("runs only while the document, root, and WebGL context are available", () => {
+    const visible = {
+      disposed: false,
+      documentVisible: true,
+      rootVisible: true,
+      contextAvailable: true,
+      manualPauseRequested: false,
+    };
+
+    expect(resolveRuntimeActivity(visible)).toEqual({ shouldRun: true, visibility: "visible" });
+    expect(resolveRuntimeActivity({ ...visible, rootVisible: false })).toEqual({
+      shouldRun: false,
+      visibility: "root-offscreen",
+    });
+    expect(resolveRuntimeActivity({ ...visible, documentVisible: false, rootVisible: false }).visibility).toBe(
+      "document-hidden",
+    );
+    expect(resolveRuntimeActivity({ ...visible, contextAvailable: false }).visibility).toBe("context-lost");
+    expect(resolveRuntimeActivity({ ...visible, disposed: true }).visibility).toBe("disposed");
+  });
+
+  it("defers adaptive quality work until scrolling settles or the world is offscreen", () => {
+    const input = {
+      hasPendingProfile: true,
+      scrollDirty: false,
+      documentVisible: true,
+      rootVisible: true,
+      timestamp: 1_000,
+      lastScrollEventAt: 900,
+      settleDurationMs: 240,
+    };
+
+    expect(shouldApplyDeferredQuality(input)).toBe(false);
+    expect(shouldApplyDeferredQuality({ ...input, timestamp: 1_141 })).toBe(true);
+    expect(shouldApplyDeferredQuality({ ...input, timestamp: 2_000, scrollDirty: true })).toBe(false);
+    expect(shouldApplyDeferredQuality({ ...input, rootVisible: false, scrollDirty: true })).toBe(true);
+    expect(shouldApplyDeferredQuality({ ...input, hasPendingProfile: false, rootVisible: false })).toBe(false);
+  });
+
+  it("avoids projection-matrix work for imperceptible FOV changes", () => {
+    expect(shouldUpdateProjection(42, 42.005)).toBe(false);
+    expect(shouldUpdateProjection(42, 42.02)).toBe(true);
+  });
+
+  it("summarizes a bounded frame sample without mutating it", () => {
+    const samples = [17, 8, 33, 16, 20];
+    expect(summarizeFrameDurations(samples)).toEqual({ median: 17, p95: 33 });
+    expect(samples).toEqual([17, 8, 33, 16, 20]);
+    expect(summarizeFrameDurations([])).toBeNull();
   });
 });

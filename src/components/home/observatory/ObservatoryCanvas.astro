@@ -8,19 +8,31 @@ interface Props {
   worldPlateLight?: string;
   worldPlateDarkCompact?: string;
   worldPlateLightCompact?: string;
+  worldPlateDarkPortrait?: string;
+  worldPlateLightPortrait?: string;
 }
 
 const {
   posterDark = "/assets/img/observatory/signal-guide-dark-poster.webp",
   posterLight = "/assets/img/observatory/signal-guide-light-poster.webp",
-  worldPlateDark = "/assets/img/observatory/observatory-world-dark.webp",
-  worldPlateLight = "/assets/img/observatory/observatory-world-light.webp",
-  worldPlateDarkCompact = "/assets/img/observatory/observatory-world-dark-compact.webp",
-  worldPlateLightCompact = "/assets/img/observatory/observatory-world-light-compact.webp"
+  worldPlateDark = "/assets/img/observatory/tsukuyomi-world-dark.webp",
+  worldPlateLight = "/assets/img/observatory/tsukuyomi-world-light.webp",
+  worldPlateDarkCompact = "/assets/img/observatory/tsukuyomi-world-dark-compact.webp",
+  worldPlateLightCompact = "/assets/img/observatory/tsukuyomi-world-light-compact.webp",
+  worldPlateDarkPortrait = "/assets/img/observatory/tsukuyomi-world-dark-portrait.webp",
+  worldPlateLightPortrait = "/assets/img/observatory/tsukuyomi-world-light-portrait.webp"
 } = Astro.props;
 ---
 
 <div class="observatory-visual" data-observatory-visual aria-hidden="true">
+  <picture>
+  <source
+    media="(max-width: 720px)"
+    srcset={worldPlateDarkPortrait}
+    data-observatory-portrait-source
+    data-dark-source={worldPlateDarkPortrait}
+    data-light-source={worldPlateLightPortrait}
+  />
   <img
     class="observatory-world-plate"
     data-observatory-themed-visual
@@ -29,13 +41,14 @@ const {
     data-light-source={worldPlateLight}
     data-dark-compact-source={worldPlateDarkCompact}
     data-light-compact-source={worldPlateLightCompact}
-    src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+    src={worldPlateDark}
     alt=""
-    width="1774"
-    height="887"
+    width="1440"
+    height="900"
     decoding="async"
     fetchpriority="high"
   />
+  </picture>
   <div class="observatory-character-layer" data-observatory-character-layer>
     <img
       class="observatory-character-pose is-active"
@@ -61,11 +74,6 @@ const {
       decoding="async"
     />
   </div>
-  <div class="observatory-poster-field">
-    <span class="observatory-poster-orbit observatory-poster-orbit--outer"></span>
-    <span class="observatory-poster-orbit observatory-poster-orbit--inner"></span>
-    <span class="observatory-poster-moon"></span>
-  </div>
   <img
     class="observatory-poster-avatar"
     data-observatory-themed-visual
@@ -80,6 +88,13 @@ const {
     fetchpriority="high"
   />
   <canvas class="observatory-canvas" data-observatory-canvas aria-hidden="true"></canvas>
+  <div class="observatory-visual-scrim" data-observatory-visual-scrim></div>
   <div class="observatory-visual-vignette"></div>
   <div class="observatory-visual-grid"></div>
 </div>
+
+<script>
+  import { installObservatoryDomMotion } from "@/lib/observatory/dom-motion";
+
+  installObservatoryDomMotion();
+</script>

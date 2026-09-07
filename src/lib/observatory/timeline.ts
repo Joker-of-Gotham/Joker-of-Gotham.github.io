@@ -14,7 +14,7 @@ export const OBSERVATORY_TIMELINE: readonly ObservatoryTimelineKeyframe[] = [
   {
     chapter: "signal-gate",
     routeProgress: 0.015,
-    fieldOfView: 34,
+    fieldOfView: 43,
     cameraRoll: -0.012,
     avatarOffset: [2.05, -0.72, -7.4],
     avatarScale: 0.92,
@@ -33,7 +33,7 @@ export const OBSERVATORY_TIMELINE: readonly ObservatoryTimelineKeyframe[] = [
   {
     chapter: "observe",
     routeProgress: 0.19,
-    fieldOfView: 39,
+    fieldOfView: 43,
     cameraRoll: 0.018,
     avatarOffset: [2.35, -0.78, -8.1],
     avatarScale: 0.82,
@@ -52,7 +52,7 @@ export const OBSERVATORY_TIMELINE: readonly ObservatoryTimelineKeyframe[] = [
   {
     chapter: "structure",
     routeProgress: 0.385,
-    fieldOfView: 45,
+    fieldOfView: 42,
     cameraRoll: -0.026,
     avatarOffset: [2.65, -0.95, -8.9],
     avatarScale: 0.72,
@@ -71,7 +71,7 @@ export const OBSERVATORY_TIMELINE: readonly ObservatoryTimelineKeyframe[] = [
   {
     chapter: "orchestrate",
     routeProgress: 0.585,
-    fieldOfView: 41,
+    fieldOfView: 45,
     cameraRoll: 0.022,
     avatarOffset: [3.18, -0.78, -7.9],
     avatarScale: 0.74,
@@ -90,7 +90,7 @@ export const OBSERVATORY_TIMELINE: readonly ObservatoryTimelineKeyframe[] = [
   {
     chapter: "embodiment",
     routeProgress: 0.79,
-    fieldOfView: 37,
+    fieldOfView: 44,
     cameraRoll: -0.016,
     avatarOffset: [-3.45, -0.82, -9.25],
     avatarScale: 0.68,
@@ -109,7 +109,7 @@ export const OBSERVATORY_TIMELINE: readonly ObservatoryTimelineKeyframe[] = [
   {
     chapter: "archive-afterlight",
     routeProgress: 0.985,
-    fieldOfView: 50,
+    fieldOfView: 47,
     cameraRoll: 0.008,
     avatarOffset: [3.38, -1.12, -10.2],
     avatarScale: 0.52,

@@ -65,6 +65,7 @@
 .observatory-canvas,
 .observatory-world-plate,
 .observatory-poster-field,
+.observatory-visual-scrim,
 .observatory-visual-vignette,
 .observatory-visual-grid {
   position: absolute;
@@ -78,10 +79,10 @@
   display: block;
   max-width: none;
   object-fit: cover;
-  object-position: 54% 50%;
-  opacity: 0.95;
-  filter: saturate(0.94) contrast(1.1) brightness(0.88);
-  transform: scale(1.1) translate3d(2%, 1%, 0);
+  object-position: center;
+  opacity: 1;
+  filter: none;
+  transform: none;
   transform-origin: center;
   transition:
     opacity var(--motion-duration-cinematic) var(--motion-ease-out),
@@ -90,8 +91,8 @@
 }
 
 .observatory[data-resolved-theme="light"] .observatory-world-plate {
-  opacity: 0.96;
-  filter: saturate(0.9) contrast(1.1) brightness(0.98);
+  opacity: 1;
+  filter: none;
 }
 
 .observatory[data-render-state="ready"] .observatory-world-plate,
@@ -109,31 +110,11 @@
   filter: none;
 }
 
-.observatory[data-active-chapter="observe"] .observatory-world-plate {
-  transform: scale(1.15) translate3d(-1%, 0, 0);
-}
-
-.observatory[data-active-chapter="structure"] .observatory-world-plate {
-  transform: scale(1.2) translate3d(-4%, -1%, 0);
-}
-
-.observatory[data-active-chapter="orchestrate"] .observatory-world-plate {
-  transform: scale(1.24) translate3d(-7%, 1%, 0);
-}
-
-.observatory[data-active-chapter="embodiment"] .observatory-world-plate {
-  transform: scale(1.28) translate3d(-10%, 3%, 0);
-}
-
-.observatory[data-active-chapter="archive-afterlight"] .observatory-world-plate {
-  transform: scale(1.16) translate3d(-5%, -2%, 0);
-}
-
 .observatory-canvas {
   z-index: 1;
   display: block;
   opacity: 0;
-  transition: opacity var(--motion-duration-cinematic) var(--motion-ease-out);
+  transition: opacity 260ms var(--motion-ease-out);
 }
 
 .observatory-poster-field {
@@ -173,22 +154,21 @@
 
 .observatory[data-avatar-state="ready"] .observatory-poster-avatar {
   opacity: 0;
-  filter: blur(var(--motion-distance-sm));
+  filter: drop-shadow(0 1rem 3rem color-mix(in oklch, var(--scene-signal-color) 10%, transparent));
 }
 
 .observatory-character-layer {
   position: absolute;
-  inset-block-end: -6vh;
-  inset-inline-end: clamp(-4rem, -1vw, 1rem);
-  z-index: 2;
-  width: min(42vw, 46svh, 30rem);
+  inset-block-end: clamp(-4.5rem, -6vh, -2rem);
+  inset-inline-end: clamp(-2.5rem, 1vw, 2rem);
+  z-index: 6;
+  width: min(38vw, 48svh, 29rem);
   aspect-ratio: 1 / 2;
   opacity: 0;
   transform: translate3d(0, 1.5rem, 0);
   transition:
     opacity var(--motion-duration-cinematic) var(--motion-ease-out),
-    transform var(--motion-duration-cinematic) var(--motion-ease-out),
-    inset-inline-end 560ms var(--motion-ease-out);
+    transform var(--motion-duration-cinematic) var(--motion-ease-out);
 }
 
 .observatory[data-avatar-state="ready"] .observatory-character-layer {
@@ -197,8 +177,36 @@
 }
 
 @media (min-width: 821px) {
-  .observatory[data-active-chapter="embodiment"] .observatory-character-layer {
-    inset-inline-end: calc(100vw - min(42vw, 46svh, 30rem) - clamp(2.5rem, 7vw, 7rem));
+  .observatory[data-observatory-root] .observatory-character-layer {
+    width: min(25vw, 34svh, 20rem);
+    inset-block-end: -3vh;
+  }
+}
+
+@media (min-width: 821px) {
+  .observatory-character-layer[data-guide-chapter="observe"] {
+    inset-inline-start: clamp(1rem, 5vw, 5.5rem);
+    inset-inline-end: auto;
+  }
+
+  .observatory-character-layer[data-guide-chapter="structure"] {
+    inset-inline-end: clamp(-3.5rem, -2vw, -1rem);
+    width: min(34vw, 46svh, 27rem);
+  }
+
+  .observatory-character-layer[data-guide-chapter="orchestrate"] {
+    inset-inline-end: clamp(-4rem, -2.5vw, -1.5rem);
+    width: min(33vw, 44svh, 26rem);
+  }
+
+  .observatory-character-layer[data-guide-chapter="embodiment"] {
+    inset-inline-start: clamp(1.5rem, 7vw, 7rem);
+    inset-inline-end: auto;
+  }
+
+  .observatory-character-layer[data-guide-chapter="archive-afterlight"] {
+    inset-inline-end: clamp(-3rem, 0vw, 1.5rem);
+    width: min(35vw, 46svh, 27rem);
   }
 }
 
@@ -212,36 +220,55 @@
   object-fit: contain;
   object-position: center bottom;
   opacity: 0;
-  filter: blur(0.22rem) drop-shadow(0 2rem 4rem color-mix(in oklch, var(--scene-signal-color) 22%, transparent));
+  filter: brightness(0.9) saturate(0.92) drop-shadow(0 1.2rem 2.4rem color-mix(in oklch, var(--scene-signal-color) 14%, transparent));
   transform: translate3d(0, 0.8rem, 0) scale(0.82);
   transform-origin: center bottom;
   transition:
     opacity 360ms var(--motion-ease-out),
-    filter 360ms var(--motion-ease-out),
     transform 360ms var(--motion-ease-out);
-  will-change: opacity, filter, transform;
+  will-change: auto;
 }
 
 .observatory-character-pose.is-active,
 .observatory-character-pose[data-pose-state="settled"],
 .observatory-character-pose[data-pose-state="arriving"] {
   opacity: 1;
-  filter: blur(0) drop-shadow(0 2rem 4rem color-mix(in oklch, var(--scene-signal-color) 28%, transparent));
+  filter: brightness(0.9) saturate(0.92) drop-shadow(0 1.4rem 2.8rem color-mix(in oklch, var(--scene-signal-color) 18%, transparent));
   transform: translate3d(0, 0, 0) scale(1);
 }
 
 .observatory-character-pose[data-pose-state="leaving"] {
   opacity: 0;
-  filter: blur(0.38rem) drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 14%, transparent));
-  transform: translate3d(0, 1.2rem, 0) scale(0.78);
+  filter: brightness(0.9) saturate(0.92) drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 14%, transparent));
+  transform: translate3d(0, 0.72rem, 0) scale(0.78);
   transition-duration: 220ms;
+  will-change: opacity, transform;
+}
+
+.observatory[data-resolved-theme="light"] .observatory-character-pose,
+.observatory[data-resolved-theme="light"] .observatory-character-pose.is-active,
+.observatory[data-resolved-theme="light"] .observatory-character-pose[data-pose-state="settled"],
+.observatory[data-resolved-theme="light"] .observatory-character-pose[data-pose-state="arriving"] {
+  filter: brightness(0.96) saturate(0.94) drop-shadow(0 0.75rem 1.25rem color-mix(in oklch, var(--color-foreground) 7%, transparent));
+}
+
+.observatory-character-pose[data-pose-state="idle"] {
+  visibility: hidden;
+  opacity: 0;
+  transition: none;
 }
 
 .observatory-character-pose[data-pose-state="entering"] {
+  visibility: visible;
   opacity: 0;
-  filter: blur(0.22rem) drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 18%, transparent));
-  transform: translate3d(0, 0.8rem, 0) scale(0.82);
+  filter: brightness(0.9) saturate(0.92) drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 18%, transparent));
+  transform: translate3d(0, 0.64rem, 0) scale(0.82);
   transition: none;
+  will-change: opacity, transform;
+}
+
+.observatory-character-pose[data-pose-state="arriving"] {
+  will-change: opacity, transform;
 }
 
 :root[data-motion="reduced"] .observatory-character-layer,
@@ -285,22 +312,68 @@
   border-color: color-mix(in oklch, var(--scene-metal-color) 23%, transparent);
 }
 
-.observatory-visual-vignette {
+.observatory-visual-scrim {
   z-index: 3;
+  opacity: 0.62;
   background:
-    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 76%, transparent), transparent 58%),
-    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 48%, transparent), transparent 26%, color-mix(in oklch, var(--color-background-deep) 68%, transparent));
+    radial-gradient(ellipse 58% 72% at 4% 52%, color-mix(in oklch, var(--color-background-deep) 48%, transparent), transparent 78%),
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 34%, transparent), transparent 54%);
+  transition: opacity 520ms var(--motion-ease-out), background 720ms var(--motion-ease-out);
+}
+
+.observatory[data-active-chapter="observe"] .observatory-visual-scrim,
+.observatory[data-active-chapter="embodiment"] .observatory-visual-scrim {
+  background:
+    radial-gradient(ellipse 58% 74% at 98% 52%, color-mix(in oklch, var(--color-background-deep) 50%, transparent), transparent 80%),
+    linear-gradient(270deg, color-mix(in oklch, var(--color-background-deep) 34%, transparent), transparent 56%);
+}
+
+.observatory[data-active-chapter="structure"] .observatory-visual-scrim {
+  opacity: 0.5;
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 26%, transparent), transparent 25% 70%, color-mix(in oklch, var(--color-background-deep) 42%, transparent)),
+    radial-gradient(ellipse 92% 46% at 46% 36%, transparent 40%, color-mix(in oklch, var(--color-background-deep) 25%, transparent));
+}
+
+.observatory[data-active-chapter="orchestrate"] .observatory-visual-scrim,
+.observatory[data-active-chapter="archive-afterlight"] .observatory-visual-scrim {
+  opacity: 0.56;
+  background:
+    radial-gradient(ellipse 70% 74% at 12% 50%, color-mix(in oklch, var(--color-background-deep) 40%, transparent), transparent 82%),
+    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 24%, transparent), transparent 32% 70%, color-mix(in oklch, var(--color-background-deep) 38%, transparent));
+}
+
+.observatory[data-resolved-theme="light"] .observatory-visual-scrim {
+  opacity: 0.28;
+  background:
+    radial-gradient(ellipse 58% 72% at 4% 52%, color-mix(in oklch, var(--color-background) 30%, transparent), transparent 78%),
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background) 20%, transparent), transparent 54%);
+}
+
+.observatory[data-resolved-theme="light"][data-active-chapter="observe"] .observatory-visual-scrim,
+.observatory[data-resolved-theme="light"][data-active-chapter="embodiment"] .observatory-visual-scrim {
+  opacity: 0.32;
+  background:
+    radial-gradient(ellipse 60% 74% at 98% 52%, color-mix(in oklch, var(--color-background) 48%, transparent), transparent 82%),
+    linear-gradient(270deg, color-mix(in oklch, var(--color-background) 34%, transparent), transparent 60%);
+}
+
+.observatory-visual-vignette {
+  z-index: 4;
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 34%, transparent), transparent 23% 72%, color-mix(in oklch, var(--color-background-deep) 62%, transparent)),
+    radial-gradient(ellipse 112% 98% at 50% 48%, transparent 54%, color-mix(in oklch, var(--color-background-deep) 48%, transparent));
 }
 
 .observatory[data-resolved-theme="light"] .observatory-visual-vignette {
   background:
-    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 48%, transparent), transparent 60%),
-    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 28%, transparent), transparent 28%, color-mix(in oklch, var(--color-background-deep) 52%, transparent));
+    linear-gradient(180deg, color-mix(in oklch, var(--color-foreground) 7%, transparent), transparent 20% 78%, color-mix(in oklch, var(--color-foreground) 10%, transparent)),
+    radial-gradient(ellipse 112% 98% at 50% 48%, transparent 60%, color-mix(in oklch, var(--color-foreground) 8%, transparent));
 }
 
 .observatory-visual-grid {
-  z-index: 4;
-  opacity: 0.14;
+  z-index: 5;
+  opacity: 0;
   background-image:
     linear-gradient(color-mix(in oklch, var(--color-border) 36%, transparent) 1px, transparent 1px),
     linear-gradient(90deg, color-mix(in oklch, var(--color-border) 36%, transparent) 1px, transparent 1px);
@@ -336,11 +409,12 @@
   gap: var(--space-4);
   min-height: 3.5rem;
   padding: var(--space-2) var(--space-3);
-  border: var(--line-hairline) solid var(--component-nav-border);
-  border-radius: var(--radius-lg);
-  background: var(--component-nav-bg);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: var(--glass-blur-regular) saturate(1.14);
+  border: 0;
+  border-block-end: var(--line-hairline) solid var(--component-nav-border);
+  border-radius: 0;
+  background: linear-gradient(90deg, color-mix(in oklch, var(--component-nav-bg) 86%, transparent), color-mix(in oklch, var(--component-nav-bg) 54%, transparent) 52%, color-mix(in oklch, var(--component-nav-bg) 86%, transparent));
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .observatory-brand {
@@ -448,7 +522,7 @@
   grid-template-columns: auto 1fr;
   gap: var(--space-2);
   color: var(--color-foreground);
-  background: color-mix(in oklch, var(--component-nav-active) 13%, transparent);
+  background: transparent;
 }
 
 .observatory-chapter-nav a[aria-current="location"]::after {
@@ -601,12 +675,61 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.22;
-  background: linear-gradient(180deg, transparent, color-mix(in oklch, var(--color-background-deep) 55%, transparent), transparent);
+  opacity: 1;
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 46%, transparent), color-mix(in oklch, var(--color-background-deep) 20%, transparent) 30%, transparent 54%),
+    linear-gradient(180deg, transparent 5%, color-mix(in oklch, var(--color-background-deep) 10%, transparent) 52%, transparent 95%);
+}
+
+.observatory-chapter--observe::before,
+.observatory-chapter--embodiment::before {
+  background:
+    linear-gradient(270deg, color-mix(in oklch, var(--color-background-deep) 48%, transparent), color-mix(in oklch, var(--color-background-deep) 20%, transparent) 32%, transparent 58%),
+    linear-gradient(180deg, transparent 5%, color-mix(in oklch, var(--color-background-deep) 10%, transparent) 52%, transparent 95%);
+}
+
+.observatory-chapter--structure::before {
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 36%, transparent), color-mix(in oklch, var(--color-background-deep) 8%, transparent) 43%, color-mix(in oklch, var(--color-background-deep) 26%, transparent)),
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 23%, transparent), transparent 62%);
+}
+
+.observatory-chapter--orchestrate::before,
+.observatory-chapter--afterlight::before {
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 40%, transparent), transparent 38%, color-mix(in oklch, var(--color-background-deep) 18%, transparent) 67%, transparent),
+    linear-gradient(180deg, transparent 5%, color-mix(in oklch, var(--color-background-deep) 11%, transparent) 52%, transparent 95%);
+}
+
+.observatory[data-resolved-theme="light"] .observatory-chapter::before {
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background) 42%, transparent), color-mix(in oklch, var(--color-background) 18%, transparent) 36%, transparent 65%),
+    linear-gradient(180deg, transparent 5%, color-mix(in oklch, var(--color-background) 10%, transparent) 52%, transparent 95%);
+}
+
+.observatory[data-resolved-theme="light"] .observatory-chapter--observe::before,
+.observatory[data-resolved-theme="light"] .observatory-chapter--embodiment::before {
+  background:
+    linear-gradient(270deg, color-mix(in oklch, var(--color-background) 48%, transparent), color-mix(in oklch, var(--color-background) 20%, transparent) 38%, transparent 68%),
+    linear-gradient(180deg, transparent 5%, color-mix(in oklch, var(--color-background) 9%, transparent) 52%, transparent 95%);
+}
+
+.observatory[data-resolved-theme="light"] .observatory-chapter--structure::before {
+  background:
+    linear-gradient(180deg, color-mix(in oklch, var(--color-background) 38%, transparent), color-mix(in oklch, var(--color-background) 8%, transparent) 46%, color-mix(in oklch, var(--color-background) 26%, transparent)),
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background) 20%, transparent), transparent 72%);
+}
+
+.observatory[data-resolved-theme="light"] .observatory-chapter--orchestrate::before,
+.observatory[data-resolved-theme="light"] .observatory-chapter--afterlight::before {
+  background:
+    linear-gradient(90deg, color-mix(in oklch, var(--color-background) 40%, transparent), transparent 43%, color-mix(in oklch, var(--color-background) 18%, transparent) 72%, transparent),
+    linear-gradient(180deg, transparent 5%, color-mix(in oklch, var(--color-background) 10%, transparent) 52%, transparent 95%);
 }
 
 .observatory-chapter-frame {
   position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--layout-grid-gap);
@@ -617,22 +740,20 @@
 .observatory[data-render-state="ready"] .observatory-chapter-frame > * {
   transition:
     opacity var(--motion-duration-cinematic) var(--motion-ease-out),
-    transform var(--motion-duration-cinematic) var(--motion-ease-out),
-    filter var(--motion-duration-slow) var(--motion-ease-out);
+    transform var(--motion-duration-cinematic) var(--motion-ease-out);
 }
 
 .observatory[data-render-state="ready"] .observatory-chapter:not(.is-active) .observatory-chapter-frame > * {
-  opacity: 0.48;
-  filter: saturate(0.72);
-  transform: translateY(var(--motion-distance-md));
+  opacity: 0.68;
+  transform: translateY(var(--motion-distance-sm));
 }
 
 .observatory-chapter-frame--leading > * {
-  grid-column: 1 / span 6;
+  grid-column: 1 / span 5;
 }
 
 .observatory-chapter-frame--trailing > * {
-  grid-column: 7 / -1;
+  grid-column: 8 / -1;
 }
 
 .observatory-chapter-frame--wide > * {
@@ -644,20 +765,25 @@
 }
 
 .observatory-chapter-frame--orchestrate > .observatory-copy {
-  grid-column: 1 / span 5;
+  grid-column: 1 / span 4;
   grid-row: 1 / span 2;
   padding-inline-end: var(--space-4);
 }
 
+.observatory-chapter-frame--orchestrate > .observatory-copy h2 {
+  max-width: 10ch;
+  font-size: clamp(2.8rem, 3.55vw, 4rem);
+}
+
 .observatory-chapter-frame--orchestrate > .observatory-entry-stack {
-  grid-column: 6 / span 5;
+  grid-column: 6 / span 4;
   grid-row: 1;
   align-self: center;
   margin-block-start: 0;
 }
 
 .observatory-chapter-frame--orchestrate > .observatory-text-link {
-  grid-column: 6 / span 5;
+  grid-column: 6 / span 4;
   grid-row: 2;
   margin-block-start: var(--space-3);
 }
@@ -667,35 +793,90 @@
 }
 
 .observatory-chapter-frame--afterlight > .observatory-section-heading {
-  grid-column: 1 / span 4;
+  grid-column: 1 / span 3;
   grid-row: 1;
 }
 
 .observatory-chapter-frame--afterlight > .observatory-afterlight-layout {
-  grid-column: 5 / -1;
+  grid-column: 4 / span 7;
   grid-row: 1 / span 2;
 }
 
 .observatory-chapter-frame--afterlight > .observatory-final-signal {
-  grid-column: 1 / span 4;
+  grid-column: 1 / span 3;
   grid-row: 2;
   align-self: end;
 }
 
 .observatory-chapter-frame--afterlight .observatory-section-heading h2 {
-  font-size: clamp(2.35rem, 3.7vw, 4.35rem);
+  font-size: clamp(2.2rem, 3.25vw, 3.75rem);
 }
 
 .observatory-copy,
 .observatory-section-heading {
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: var(--space-5);
   align-content: center;
   max-width: 47rem;
 }
 
+.observatory-copy::before,
+.observatory-section-heading::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: clamp(-2rem, -2.8vw, -1.1rem) clamp(-3.75rem, -4.5vw, -1.75rem);
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 72% 88% at 34% 50%,
+    color-mix(in oklch, var(--color-background-deep) 72%, transparent),
+    color-mix(in oklch, var(--color-background-deep) 34%, transparent) 52%,
+    transparent 100%
+  );
+}
+
+.observatory-chapter-frame--trailing .observatory-copy::before {
+  background: radial-gradient(
+    ellipse 76% 90% at 62% 50%,
+    color-mix(in oklch, var(--color-background-deep) 74%, transparent),
+    color-mix(in oklch, var(--color-background-deep) 34%, transparent) 54%,
+    transparent 100%
+  );
+}
+
+.observatory[data-resolved-theme="light"] .observatory-copy::before,
+.observatory[data-resolved-theme="light"] .observatory-section-heading::before {
+  background: radial-gradient(
+    ellipse 68% 88% at 34% 50%,
+    color-mix(in oklch, var(--color-background) 64%, transparent),
+    color-mix(in oklch, var(--color-background) 26%, transparent) 56%,
+    transparent 100%
+  );
+}
+
+.observatory[data-resolved-theme="light"] .observatory-chapter-frame--trailing .observatory-copy::before {
+  inset: clamp(-2rem, -2.8vw, -1.1rem) clamp(-3.75rem, -4.5vw, -1.75rem);
+  background: radial-gradient(
+    ellipse 78% 92% at 62% 48%,
+    color-mix(in oklch, var(--color-background) 72%, transparent),
+    color-mix(in oklch, var(--color-background) 32%, transparent) 54%,
+    transparent 100%
+  );
+}
+
+.observatory[data-resolved-theme="light"][data-active-chapter="observe"] .observatory-chapter-frame--trailing .observatory-copy::before {
+  background: radial-gradient(
+    ellipse 82% 94% at 62% 46%,
+    color-mix(in oklch, var(--color-background) 76%, transparent),
+    color-mix(in oklch, var(--color-background) 34%, transparent) 56%,
+    transparent 100%
+  );
+}
+
 .observatory-copy--hero {
-  max-width: 50rem;
+  max-width: 43rem;
 }
 
 .observatory-copy h1,
@@ -706,18 +887,27 @@
   font-family: var(--font-display);
   font-weight: 700;
   line-height: var(--leading-tight);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   text-wrap: balance;
+  text-shadow: 0 0.12rem 1.2rem color-mix(in oklch, var(--color-background-deep) 64%, transparent);
+}
+
+.observatory[data-resolved-theme="light"] .observatory-copy h1,
+.observatory[data-resolved-theme="light"] .observatory-copy h2,
+.observatory[data-resolved-theme="light"] .observatory-section-heading h2 {
+  text-shadow: 0 0.12rem 1.4rem color-mix(in oklch, var(--color-background) 62%, transparent);
 }
 
 .observatory-copy h1 {
   max-width: 10ch;
-  font-size: var(--text-5xl);
+  font-size: clamp(3.75rem, 6vw, 6.25rem);
+  line-height: 0.92;
 }
 
 .observatory-copy h2,
 .observatory-section-heading h2 {
-  font-size: var(--text-4xl);
+  font-size: clamp(2.75rem, 4.25vw, 4.75rem);
+  line-height: 1.02;
 }
 
 .observatory-kicker {
@@ -732,6 +922,13 @@
   text-transform: uppercase;
 }
 
+.observatory-kicker::before {
+  content: "";
+  flex: 0 0 clamp(1.5rem, 3vw, 2.75rem);
+  height: var(--line-hairline);
+  background: linear-gradient(90deg, var(--scene-signal-color), transparent);
+}
+
 .observatory-kicker span {
   color: var(--color-foreground-soft);
   font-weight: 600;
@@ -742,7 +939,7 @@
   margin: 0;
   color: var(--color-foreground);
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
   line-height: var(--leading-heading);
   text-wrap: balance;
 }
@@ -843,34 +1040,37 @@
 
 .observatory-panel {
   position: relative;
-  padding: clamp(var(--space-6), 4vw, var(--space-10));
+  padding: clamp(var(--space-4), 2.5vw, var(--space-7)) 0;
   border: 0;
   border-radius: 0;
-  background: var(--component-field-bg);
+  background: transparent;
   box-shadow: none;
   backdrop-filter: none;
 }
 
-.observatory-panel::before,
+@media (max-width: 1599px) {
+  .observatory-coordinate {
+    display: none;
+  }
+}
+
+.observatory[data-resolved-theme="light"] .observatory-nav-shell {
+  background: linear-gradient(90deg, color-mix(in oklch, var(--component-nav-bg) 48%, transparent), color-mix(in oklch, var(--component-nav-bg) 22%, transparent) 52%, color-mix(in oklch, var(--component-nav-bg) 48%, transparent));
+}
+
+.observatory[data-resolved-theme="light"] .observatory-panel {
+  background: transparent;
+}
+
 .observatory-panel::after {
   content: "";
   position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 1;
+  inline-size: var(--line-emphasis);
+  block-size: clamp(4rem, 22%, 8rem);
   pointer-events: none;
-  background: var(--component-field-edge);
-}
-
-.observatory-panel::before {
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: min(72%, 34rem);
-  block-size: var(--line-hairline);
-}
-
-.observatory-panel::after {
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: var(--line-hairline);
-  block-size: min(68%, 18rem);
   background: linear-gradient(180deg, var(--color-secondary), transparent);
 }
 
@@ -914,7 +1114,7 @@
 }
 
 .observatory-section-heading {
-  max-width: 61rem;
+  max-width: min(39rem, 68vw);
   margin-block-end: var(--space-10);
 }
 
@@ -922,18 +1122,19 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(var(--space-5), 3vw, var(--space-10));
+  width: min(70%, 60rem);
 }
 
 .observatory-track {
   position: relative;
   display: grid;
   gap: var(--space-4);
-  min-height: 16rem;
-  padding: var(--space-6) var(--space-4) var(--space-5);
+  min-height: 14rem;
+  padding: var(--space-5) var(--space-3) var(--space-4) 0;
   border: 0;
   border-block-start: var(--line-hairline) solid var(--component-card-border);
   border-radius: 0;
-  background: var(--component-field-bg);
+  background: linear-gradient(180deg, color-mix(in oklch, var(--component-field-bg) 48%, transparent), transparent 62%);
   box-shadow: none;
   text-decoration: none;
   transition:
@@ -956,9 +1157,9 @@
 }
 
 .observatory-track:hover {
-  transform: translateX(var(--motion-distance-sm));
+  transform: translateY(calc(-1 * var(--motion-distance-sm)));
   border-color: var(--component-card-border-hover);
-  background: var(--component-field-bg-hover);
+  background: linear-gradient(180deg, color-mix(in oklch, var(--component-field-bg-hover) 58%, transparent), transparent 72%);
 }
 
 .observatory-track:hover::before,
@@ -975,11 +1176,21 @@
   font-size: var(--text-xs);
 }
 
+.observatory-track-head > span {
+  color: color-mix(in oklch, var(--scene-signal-color) 74%, var(--color-muted));
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 3.2rem);
+  line-height: 0.8;
+  letter-spacing: -0.04em;
+}
+
 .observatory-track h3 {
   margin: 0;
   color: var(--color-foreground);
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
+  font-size: clamp(1.45rem, 2.1vw, 2.2rem);
+  line-height: 1.04;
+  text-wrap: balance;
 }
 
 .observatory-track p {
@@ -991,7 +1202,7 @@
 
 .observatory-progress {
   align-self: end;
-  height: var(--line-emphasis);
+  height: var(--line-hairline);
   overflow: hidden;
   border-radius: var(--radius-full);
   background: var(--color-border);
@@ -1002,13 +1213,39 @@
   width: var(--track-progress, 0%);
   height: 100%;
   border-radius: inherit;
-  background: var(--scene-signal-color);
+  background: linear-gradient(90deg, var(--scene-signal-color), var(--scene-afterlight-color));
+  box-shadow: 0 0 0.8rem color-mix(in oklch, var(--scene-signal-color) 42%, transparent);
 }
 
 .observatory-entry-stack {
+  position: relative;
+  isolation: isolate;
   display: grid;
   gap: var(--space-2);
   margin-block-start: var(--space-5);
+}
+
+.observatory-entry-stack::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2rem -5rem;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 92% at 44% 50%,
+    color-mix(in oklch, var(--color-background-deep) 58%, transparent),
+    color-mix(in oklch, var(--color-background-deep) 22%, transparent) 58%,
+    transparent 100%
+  );
+}
+
+.observatory[data-resolved-theme="light"] .observatory-entry-stack::before {
+  background: radial-gradient(
+    ellipse 80% 92% at 44% 50%,
+    color-mix(in oklch, var(--color-background) 72%, transparent),
+    color-mix(in oklch, var(--color-background) 30%, transparent) 58%,
+    transparent 100%
+  );
 }
 
 .observatory-entry {
@@ -1042,7 +1279,7 @@
 
 .observatory-entry:hover {
   padding-inline: var(--space-5) var(--space-3);
-  background: var(--component-field-bg-hover);
+  background: linear-gradient(90deg, color-mix(in oklch, var(--component-field-bg-hover) 52%, transparent), transparent 88%);
 }
 
 .observatory-entry:hover::before,
@@ -1106,11 +1343,11 @@
 .observatory-identity-grid > div {
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-3) 0;
   border: 0;
-  border-inline-start: var(--line-hairline) solid var(--component-card-border);
+  border-block-start: var(--line-hairline) solid var(--component-card-border);
   border-radius: 0;
-  background: var(--component-field-bg);
+  background: transparent;
 }
 
 .observatory-identity-grid dt {
@@ -1127,18 +1364,13 @@
 }
 
 .observatory-identity-panel {
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklch, var(--color-background) 76%, transparent),
-    color-mix(in oklch, var(--color-background) 94%, transparent) 24%,
-    color-mix(in oklch, var(--color-background) 90%, transparent)
-  );
-  backdrop-filter: var(--glass-blur-regular);
+  background: transparent;
+  backdrop-filter: none;
 }
 
 .observatory-afterlight-layout {
   display: grid;
-  grid-template-columns: minmax(14rem, 0.72fr) minmax(0, 1.28fr);
+  grid-template-columns: minmax(17rem, 0.85fr) minmax(0, 1.15fr);
   gap: var(--layout-grid-gap);
   align-items: start;
 }
@@ -1191,6 +1423,15 @@
   box-shadow: none;
 }
 
+.observatory-signal-window::after {
+  content: "";
+  position: absolute;
+  inset: 42% 0 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, color-mix(in oklch, var(--color-background-deep) 84%, transparent));
+}
+
 .observatory-signal-window:first-child,
 .observatory-signal-window:nth-child(2) {
   grid-column: span 3;
@@ -1210,9 +1451,11 @@
 
 canvas-signal-lens {
   position: relative;
+  z-index: 3;
   display: block;
   isolation: isolate;
   min-width: 0;
+  scroll-margin-top: calc(var(--space-24) + var(--space-4));
   cursor: crosshair;
 }
 
@@ -1252,10 +1495,15 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
 }
 
 .observatory-signal-window figcaption {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 2;
   display: grid;
   gap: var(--space-1);
-  padding: var(--space-2) var(--space-3) var(--space-3);
-  background: var(--component-field-bg);
+  padding: var(--space-8) var(--space-3) var(--space-3);
+  pointer-events: none;
+  background: transparent;
 }
 
 .observatory-signal-window figcaption small {
@@ -1267,8 +1515,9 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
 }
 
 .observatory-signal-window figcaption span {
-  color: var(--color-foreground);
+  color: oklch(0.96 0.01 255);
   font-size: var(--text-sm);
+  text-shadow: 0 0.1rem 0.7rem oklch(0.08 0.02 255 / 0.9);
 }
 
 .observatory-final-signal {
@@ -1325,9 +1574,9 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
 
 .observatory-supplement .commit-activity-card {
   border-color: var(--component-card-border);
-  background: var(--component-card-bg);
+  background: color-mix(in oklch, var(--component-card-bg) 82%, transparent);
   box-shadow: var(--component-card-shadow);
-  backdrop-filter: var(--glass-blur-regular);
+  backdrop-filter: none;
 }
 
 .observatory-final-signal span {
@@ -1375,37 +1624,16 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
     width: min(64vw, 43rem);
   }
 
-  .observatory-world-plate {
-    object-position: 64% 50%;
-    transform: scale(1.18);
-  }
-
-  .observatory[data-active-chapter="observe"] .observatory-world-plate {
-    transform: scale(1.2) translate3d(-1%, 0, 0);
-  }
-
-  .observatory[data-active-chapter="structure"] .observatory-world-plate {
-    transform: scale(1.24) translate3d(-3%, -1%, 0);
-  }
-
-  .observatory[data-active-chapter="orchestrate"] .observatory-world-plate {
-    transform: scale(1.28) translate3d(-5%, 1%, 0);
-  }
-
-  .observatory[data-active-chapter="embodiment"] .observatory-world-plate {
-    transform: scale(1.31) translate3d(-7%, 2%, 0);
-  }
-
-  .observatory[data-active-chapter="archive-afterlight"] .observatory-world-plate {
-    transform: scale(1.21) translate3d(-3%, -1%, 0);
+  .observatory-character-layer {
+    width: min(38vw, 48svh, 28rem);
   }
 
   .observatory-chapter-frame--leading > * {
-    grid-column: 1 / span 7;
+    grid-column: 1 / span 6;
   }
 
   .observatory-chapter-frame--trailing > * {
-    grid-column: 6 / -1;
+    grid-column: 7 / -1;
   }
 }
 
@@ -1434,6 +1662,11 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
 
   .observatory-track-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .observatory-chapter-frame--afterlight {
+    padding-inline-end: 0;
   }
 
   .observatory-track:last-child:nth-child(odd) {
@@ -1547,16 +1780,32 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   }
 
   .observatory-copy h1 {
-    font-size: var(--text-4xl);
+    font-size: clamp(2.85rem, 12vw, 3.6rem);
   }
 
   .observatory-copy h2,
   .observatory-section-heading h2 {
-    font-size: var(--text-3xl);
+    font-size: clamp(2.3rem, 9.5vw, 3rem);
+  }
+
+  .observatory-chapter-frame--orchestrate > .observatory-copy h2,
+  .observatory-chapter-frame--afterlight .observatory-section-heading h2 {
+    font-size: clamp(2.3rem, 9.5vw, 3rem);
   }
 
   .observatory-lede {
-    font-size: var(--text-xl);
+    font-size: clamp(1.15rem, 5.5vw, 1.4rem);
+  }
+
+  .observatory-copy,
+  .observatory-section-heading {
+    gap: var(--space-4);
+  }
+
+  .observatory-copy::before,
+  .observatory-section-heading::before,
+  .observatory-chapter-frame--trailing .observatory-copy::before {
+    inset: calc(-1 * var(--space-5)) calc(-1 * var(--space-4));
   }
 
   .observatory-coordinate {
@@ -1582,8 +1831,24 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
 
   .observatory-visual-vignette {
     background:
-      linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 72%, transparent), transparent 28%, color-mix(in oklch, var(--color-background-deep) 79%, transparent)),
-      linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 56%, transparent), transparent);
+      linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 58%, transparent), transparent 25% 66%, color-mix(in oklch, var(--color-background-deep) 72%, transparent)),
+      radial-gradient(ellipse 132% 94% at 50% 48%, transparent 43%, color-mix(in oklch, var(--color-background-deep) 43%, transparent));
+  }
+
+  .observatory-visual-scrim,
+  .observatory[data-active-chapter="observe"] .observatory-visual-scrim,
+  .observatory[data-active-chapter="structure"] .observatory-visual-scrim,
+  .observatory[data-active-chapter="orchestrate"] .observatory-visual-scrim,
+  .observatory[data-active-chapter="embodiment"] .observatory-visual-scrim,
+  .observatory[data-active-chapter="archive-afterlight"] .observatory-visual-scrim {
+    opacity: 0.76;
+    background:
+      linear-gradient(180deg, color-mix(in oklch, var(--color-background-deep) 52%, transparent), transparent 31% 57%, color-mix(in oklch, var(--color-background-deep) 65%, transparent)),
+      linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 45%, transparent), transparent 86%);
+  }
+
+  .observatory[data-resolved-theme="light"] .observatory-visual-scrim {
+    opacity: 0.62;
   }
 
   .observatory-panel {
@@ -1647,8 +1912,8 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   }
 
   .observatory-chapter-nav {
-    inset-block-start: calc(var(--space-2) + 3.25rem + var(--space-2));
-    inset-block-end: auto;
+    inset-block-start: auto;
+    inset-block-end: max(var(--space-3), env(safe-area-inset-bottom));
     inset-inline: var(--space-2);
   }
 
@@ -1671,6 +1936,10 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
 
   .observatory-copy--hero {
     gap: var(--space-4);
+  }
+
+  .observatory-kicker::before {
+    display: none;
   }
 
   .observatory-copy--hero .observatory-lede {
@@ -1744,7 +2013,7 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   }
 }
 
-@media (max-width: 820px) and (orientation: portrait) {
+@media (max-width: 1024px) and (orientation: portrait) {
   .observatory-character-layer {
     display: none;
   }
@@ -1759,13 +2028,13 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
     display: grid;
     grid-column: 1 / -1;
     width: 100%;
-    height: clamp(12rem, 34svh, 15rem);
+    height: clamp(12rem, 31svh, 17rem);
     margin-block: var(--space-3) var(--space-5);
     overflow: hidden;
     border-block: var(--line-hairline) solid color-mix(in oklch, var(--scene-orbit-color) 32%, transparent);
     background:
-      radial-gradient(circle at 78% 52%, color-mix(in oklch, var(--scene-signal-color) 18%, transparent), transparent 34%),
-      linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 34%, transparent), transparent 78%);
+      radial-gradient(circle at 78% 52%, color-mix(in oklch, var(--scene-signal-color) 16%, transparent), transparent 37%),
+      linear-gradient(90deg, color-mix(in oklch, var(--color-background-deep) 28%, transparent), transparent 82%);
   }
 
   .observatory-mobile-actor-stage::before {
@@ -1811,7 +2080,7 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
     position: absolute;
     inset-inline-end: clamp(0.75rem, 7vw, 2rem);
     inset-block-end: 0;
-    width: min(30vw, 7.5rem);
+    width: min(29vw, 9rem);
     aspect-ratio: 1 / 2;
     background-image: url("/assets/img/observatory/guide-pose-dark-present.webp");
     background-repeat: no-repeat;
@@ -1819,15 +2088,25 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
     background-size: contain;
     filter: drop-shadow(0 1rem 2rem color-mix(in oklch, var(--scene-signal-color) 28%, transparent));
     transform-origin: center bottom;
-    animation: observatory-mobile-guide-breathe 5.4s ease-in-out infinite;
+  }
+
+  .observatory[data-dom-motion="active"] .observatory-mobile-actor-figure {
+    opacity: 0;
+    transform: translate3d(0, 0.4rem, 0) scale(0.78);
+    transition:
+      opacity 220ms var(--motion-ease-out),
+      transform 220ms var(--motion-ease-out);
+  }
+
+  .observatory[data-dom-motion="active"] .observatory-chapter.is-active .observatory-mobile-actor-figure {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    transition-duration: 360ms;
+    transition-delay: 292ms;
   }
 
   .observatory[data-resolved-theme="light"] .observatory-mobile-actor-figure {
     background-image: url("/assets/img/observatory/guide-pose-light-present.webp");
-  }
-
-  .observatory[data-quality-tier="poster"] .observatory-mobile-actor-figure {
-    animation: none;
   }
 
   .observatory-mobile-actor-stage[data-pose="point-up"] .observatory-mobile-actor-figure {
@@ -1871,11 +2150,6 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
   }
 }
 
-@keyframes observatory-mobile-guide-breathe {
-  0%, 100% { transform: translateY(0) rotate(-0.35deg); }
-  50% { transform: translateY(-0.28rem) rotate(0.35deg); }
-}
-
 :root[data-motion="reduced"] .observatory-canvas {
   display: none;
 }
@@ -1886,12 +2160,11 @@ canvas-signal-lens[data-lens-policy="no-webgl2"] {
 }
 
 :root[data-motion="reduced"] .observatory-mobile-actor-figure {
-  animation: none;
+  transition: none;
 }
 
 @supports not (backdrop-filter: blur(1px)) {
   .observatory-nav-shell,
-  .observatory-panel,
   .observatory-chapter-nav {
     background: var(--color-surface);
   }

@@ -1,0 +1,38 @@
+[
+  {
+    "file": "/assets/img/observatory/tsukuyomi-world-dark.webp",
+    "bytes": 136944,
+    "sha256": "3c69fce20cfdb432998b52b423db4e9575fdda47a4d79920657b9cfdc322b206",
+    "source": "desktop-world.png"
+  },
+  {
+    "file": "/assets/img/observatory/tsukuyomi-world-dark-compact.webp",
+    "bytes": 76324,
+    "sha256": "19dce82414197a0abbb2017105481d83da5274ab2ddb58039daec60960eb561c",
+    "source": "desktop-world.png"
+  },
+  {
+    "file": "/assets/img/observatory/tsukuyomi-world-dark-portrait.webp",
+    "bytes": 37520,
+    "sha256": "ad601fdb13f9635cb8366c829b77de11fa70c87ac486ff887c7373788ad6756c",
+    "source": "phone-world.png"
+  },
+  {
+    "file": "/assets/img/observatory/tsukuyomi-world-light.webp",
+    "bytes": 120562,
+    "sha256": "f27536d695d392cff47cff906b16c30755edbe7f9c4750a491c64b403d6f917e",
+    "source": "day-world.png"
+  },
+  {
+    "file": "/assets/img/observatory/tsukuyomi-world-light-compact.webp",
+    "bytes": 67046,
+    "sha256": "21ef5c0b173195806cae2f0801fdbff9282261ddebc8d9d79a4a8afb3af755ef",
+    "source": "day-world.png"
+  },
+  {
+    "file": "/assets/img/observatory/tsukuyomi-world-light-portrait.webp",
+    "bytes": 31858,
+    "sha256": "98254924e472b3d04e14bf7eaace6d12a498d64d22b58b079b878dfb9f8735d8",
+    "source": "phone-day-world.png"
+  }
+]
