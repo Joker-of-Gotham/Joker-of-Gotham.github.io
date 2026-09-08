@@ -10,6 +10,9 @@ test-results/
 .codemap/
 .agents/mengto-skills-source/
 
+# Reproducible visual checks and local diagnostics
+/artifacts/
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
