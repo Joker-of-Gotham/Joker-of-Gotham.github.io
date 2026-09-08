@@ -4,13 +4,16 @@ type MarkdownNode = {
   children?: MarkdownNode[];
 };
 
+function containsH1(node: MarkdownNode): boolean {
+  return (node.type === "heading" && node.depth === 1) || Boolean(node.children?.some(containsH1));
+}
+
 function normalizeHeadings(node: MarkdownNode) {
-  // Detail-page chrome owns the document H1. Preserve the source Markdown while
-  // rendering any author-level H1 as a section heading beneath that page title.
-  if (node.type === "heading" && node.depth === 1) node.depth = 2;
+  // Shift the complete outline together, preserving parent/child hierarchy.
+  if (node.type === "heading" && node.depth) node.depth = Math.min(6, node.depth + 1);
   node.children?.forEach(normalizeHeadings);
 }
 
 export default function remarkNormalizeDocumentHeadings() {
-  return (tree: MarkdownNode) => normalizeHeadings(tree);
+  return (tree: MarkdownNode) => { if (containsH1(tree)) normalizeHeadings(tree); };
 }

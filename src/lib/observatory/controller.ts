@@ -22,6 +22,7 @@ import {
 } from "./render-scheduler";
 import type { LayoutMeasureState, PointerSample, RendererResizeState } from "./render-scheduler";
 import { calculateAbsoluteScrollProgress, interpolateObservatoryTimeline } from "./timeline";
+import { OBSERVATORY_CHAPTERS } from './types';
 import type {
   ObservatoryControllerOptions,
   ObservatoryQualityProfile,
@@ -37,7 +38,7 @@ const QUALITY_SCROLL_SETTLE_MS = 240;
 const DIAGNOSTIC_INTERVAL_MS = 1_000;
 const DIAGNOSTIC_SAMPLE_LIMIT = 120;
 const LIGHT_WORLD_EXPOSURE = 0.68;
-const DARK_WORLD_EXPOSURE = 1.13;
+const DARK_WORLD_EXPOSURE = .88;
 const LIGHT_FOG_DENSITY_SCALE = 0.42;
 const DARK_FOG_DENSITY_SCALE = 0.78;
 
@@ -58,20 +59,6 @@ function damp(current: number, target: number, lambda: number, deltaSeconds: num
   return THREE.MathUtils.lerp(current, target, 1 - Math.exp(-lambda * deltaSeconds));
 }
 
-function dampVector(current: THREE.Vector3, target: readonly [number, number, number], lambda: number, deltaSeconds: number) {
-  const factor = 1 - Math.exp(-lambda * deltaSeconds);
-  current.set(
-    THREE.MathUtils.lerp(current.x, target[0], factor),
-    THREE.MathUtils.lerp(current.y, target[1], factor),
-    THREE.MathUtils.lerp(current.z, target[2], factor)
-  );
-}
-
-function dampThreeVector(current: THREE.Vector3, target: THREE.Vector3, lambda: number, deltaSeconds: number) {
-  const factor = 1 - Math.exp(-lambda * deltaSeconds);
-  current.lerp(target, factor);
-}
-
 function clonePalette(palette: ThreeObservatoryPalette): ThreeObservatoryPalette {
   return {
     fog: palette.fog.clone(),
@@ -90,13 +77,14 @@ function clonePalette(palette: ThreeObservatoryPalette): ThreeObservatoryPalette
 }
 
 export class ObservatoryController {
-  readonly root: HTMLElement;
+  root: HTMLElement;
   readonly canvas: HTMLCanvasElement;
 
   private readonly context: WebGL2RenderingContext;
   private readonly abortController = new AbortController();
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(42, 1, 0.2, 1800);
+  private readonly initialPixelRatio = window.devicePixelRatio || 1;
   private readonly cameraLookAt = new THREE.Vector3();
   private readonly cameraTarget = new THREE.Vector3();
   private readonly pointer = new THREE.Vector2();
@@ -156,6 +144,48 @@ export class ObservatoryController {
     this.canvas = options.canvas;
     this.context = options.context;
     this.quality = { ...options.quality };
+    if (this.fixedProgress !== undefined) {
+      this.timelineState = interpolateObservatoryTimeline(this.fixedProgress);
+      this.directorProgress = this.fixedProgress;
+    }
+  }
+
+  private get fixedProgress(): number | undefined {
+    const index = OBSERVATORY_CHAPTERS.findIndex(chapter => chapter === this.root.dataset.sceneChapter);
+    return index < 0 ? undefined : index;
+  }
+
+  /** Astro retains the canvas; only the page-owned DOM and layout observers change. */
+  rebindRoot(root: HTMLElement) {
+    const previous = this.root;
+    for (const [key, value] of Object.entries(previous.dataset)) {
+      if (value !== undefined && !['sceneChapter', 'sceneDormant', 'domMotion', 'activeChapter'].includes(key)) root.dataset[key] = value;
+    }
+    this.root = root;
+    this.sections = [...root.querySelectorAll<HTMLElement>('[data-observatory-chapter]')];
+    this.activeChapterIndex = -1;
+    this.exactScrollY = window.scrollY;
+    this.pointer.set(0, 0);
+    this.pendingPointerSample = null;
+    this.resizeObserver?.disconnect();
+    this.resizeObserver?.observe(root);
+    this.sections.forEach(section => this.resizeObserver?.observe(section));
+    this.rootIntersectionObserver?.disconnect();
+    if (root.dataset.sceneDormant) {
+      this.resizeObserver?.disconnect();
+      window.clearTimeout(this.resizeSettleHandle);
+      window.cancelAnimationFrame(this.resizeFrameHandle);
+      this.pause();
+      return;
+    }
+    this.rootIntersectionObserver?.observe(root);
+    this.rootVisible = true;
+    this.updateLayout();
+    this.updateScrollState();
+    // Returning to home restores the history position without flying through every scene.
+    this.directorProgress = this.timelineState.absoluteProgress;
+    this.scheduleResize();
+    this.resume();
   }
 
   async initialize(): Promise<void> {
@@ -212,8 +242,6 @@ export class ObservatoryController {
       if (this.disposed) return;
       this.initialized = true;
       this.synchronizeRuntimeActivity();
-      this.root.dataset.avatarRepresentation = "chapter-pose-raster";
-      this.root.dataset.avatarState = "ready";
     } catch (error) {
       // Initialization may already have installed observers or started async
       // environment work. Use the same complete teardown path as navigation.
@@ -263,8 +291,8 @@ export class ObservatoryController {
     this.canvas.addEventListener("webglcontextrestored", () => this.handleContextRestored(), { signal });
 
     if (this.quality.pointerInteraction) {
-      this.root.addEventListener("pointermove", (event) => this.handlePointerMove(event), { passive: true, signal });
-      this.root.addEventListener("pointerleave", () => {
+      window.addEventListener("pointermove", (event) => this.handlePointerMove(event), { passive: true, signal });
+      document.addEventListener("pointerleave", () => {
         this.pointer.set(0, 0);
         this.pendingPointerSample = null;
       }, { signal });
@@ -329,7 +357,7 @@ export class ObservatoryController {
     const bounds = this.sections.map((section) => section.getBoundingClientRect());
     this.sectionStarts = bounds.map((sectionBounds) => sectionBounds.top + scrollTop);
     this.sectionCenters = bounds.map((sectionBounds) => {
-      return sectionBounds.top + scrollTop + sectionBounds.height * 0.5;
+      return sectionBounds.top + scrollTop + window.innerHeight * 0.5;
     });
     this.scrollDirty = true;
   }
@@ -344,11 +372,12 @@ export class ObservatoryController {
   }
 
   private scheduleResize() {
+    if (this.root.dataset.sceneDormant) return;
     this.canvasBoundsDirty = true;
     window.clearTimeout(this.resizeSettleHandle);
     this.resizeSettleHandle = window.setTimeout(() => {
       this.resizeSettleHandle = 0;
-      if (this.disposed) return;
+      if (this.disposed || this.root.dataset.sceneDormant) return;
       window.cancelAnimationFrame(this.resizeFrameHandle);
       this.resizeFrameHandle = window.requestAnimationFrame(() => {
         this.resizeFrameHandle = 0;
@@ -372,6 +401,12 @@ export class ObservatoryController {
   }
 
   private updateScrollState() {
+    if (this.fixedProgress !== undefined) {
+      this.timelineState = interpolateObservatoryTimeline(this.fixedProgress);
+      this.root.dataset.activeChapter = OBSERVATORY_CHAPTERS[this.fixedProgress];
+      this.scrollDirty = false;
+      return;
+    }
     const scrollY = this.exactScrollY;
     const viewportCenter = scrollY + window.innerHeight * 0.5;
     const progress = calculateAbsoluteScrollProgress(this.sectionCenters, viewportCenter);
@@ -411,6 +446,7 @@ export class ObservatoryController {
   }
 
   private handlePointerMove(event: PointerEvent) {
+    if (this.fixedProgress !== undefined || this.root.dataset.sceneDormant) return;
     if (event.pointerType === "touch" || !this.quality.pointerInteraction) return;
     if (this.canvasBoundsDirty) this.updateCanvasBounds();
     const normalizedX = ((event.clientX - this.canvasBounds.left) / this.canvasBounds.width) * 2 - 1;
@@ -423,7 +459,7 @@ export class ObservatoryController {
   }
 
   private resize() {
-    if (!this.renderer || this.disposed) return;
+    if (!this.renderer || this.disposed || this.root.dataset.sceneDormant) return;
     const viewport = resolveRendererViewport({
       canvasWidth: this.canvas.clientWidth,
       canvasHeight: this.canvas.clientHeight,
@@ -490,8 +526,12 @@ export class ObservatoryController {
     this.resize();
   }
 
+  private directorProgress = 0;
   private applyTimelineState(deltaSeconds: number) {
-    const state = this.timelineState;
+    this.directorProgress = damp(this.directorProgress, this.timelineState.absoluteProgress, 4.2, deltaSeconds);
+    this.setDebugValue('cameraProgress', this.directorProgress.toFixed(5));
+    const state = interpolateObservatoryTimeline(this.directorProgress);
+    this.root.dispatchEvent(new CustomEvent("observatory:direct", { detail: this.directorProgress }));
     const route = sampleObservatoryCameraRoute(state.routeProgress);
     const framing = calculateObservatoryAspectFraming(this.camera.aspect);
     const portrait = THREE.MathUtils.clamp((1.05 - this.camera.aspect) / .6, 0, 1);
@@ -499,20 +539,24 @@ export class ObservatoryController {
     const nextStation = Math.min(5, stationIndex + 1);
     const blend = state.absoluteProgress - stationIndex;
     const landmarkX = THREE.MathUtils.lerp(TSUKUYOMI_LANDMARKS[stationIndex][0], TSUKUYOMI_LANDMARKS[nextStation][0], blend);
-    const parallax = this.quality.pointerInteraction ? 0.75 : 0;
+    const parallax = this.quality.pointerInteraction && this.fixedProgress === undefined ? 0.75 : 0;
     this.cameraTarget.set(
       route.position[0] + this.pointer.x * parallax,
       route.position[1] + this.pointer.y * parallax * 0.42,
       route.position[2]
     );
-    dampThreeVector(this.camera.position, this.cameraTarget, 3.7, deltaSeconds);
+    this.camera.position.copy(this.cameraTarget);
     const lookTarget = [
-      THREE.MathUtils.lerp(route.lookAt[0], landmarkX, portrait * .8) + this.pointer.x * parallax * 0.68,
+      THREE.MathUtils.lerp(route.lookAt[0], landmarkX, portrait * .08) + this.pointer.x * parallax * 0.68,
       route.lookAt[1] + this.pointer.y * parallax * 0.32,
       route.lookAt[2]
     ] as const;
-    dampVector(this.cameraLookAt, lookTarget, 4.1, deltaSeconds);
-    const nextFov = damp(this.camera.fov, state.fieldOfView + framing.verticalOffset * 5 + portrait * 19, 3.2, deltaSeconds);
+    this.cameraLookAt.set(...lookTarget);
+    // Native page zoom scales the DOM and also magnifies the rendered world.
+    const pageZoom = THREE.MathUtils.clamp(window.devicePixelRatio / this.initialPixelRatio, .5, 3);
+    const baseFov = state.fieldOfView + framing.verticalOffset * 5 + portrait * 19;
+    const zoomFov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(baseFov) / 2) / pageZoom));
+    const nextFov = damp(this.camera.fov, zoomFov, 3.2, deltaSeconds);
     this.camera.fov = nextFov;
     if (shouldUpdateProjection(this.lastProjectedFieldOfView, nextFov)) {
       this.camera.updateProjectionMatrix();
@@ -564,7 +608,7 @@ export class ObservatoryController {
     this.applyPendingPalette();
 
     const elapsedSeconds = timestamp / 1_000;
-    this.world.update(this.timelineState, elapsedSeconds, deltaSeconds);
+    this.world.update(interpolateObservatoryTimeline(this.directorProgress), elapsedSeconds, deltaSeconds);
     this.renderer.info.reset();
     if (this.composer && this.quality.postProcessing) this.composer.render();
     else this.renderer.render(this.scene, this.camera);
@@ -643,6 +687,12 @@ export class ObservatoryController {
     const environmentStatus = (this.world as ProceduralObservatoryWorld & { environmentStatus?: string } | null)
       ?.environmentStatus;
     if (environmentStatus) this.root.dataset.environmentStatus = environmentStatus;
+    const weather = this.world?.group.userData.weather;
+    if (weather) {
+      this.root.dataset.weatherRain = weather.rain.toFixed(3);
+      this.root.dataset.weatherFestival = weather.festival.toFixed(3);
+      this.root.dataset.weatherWind = weather.wind.toFixed(3);
+    }
   }
 
   private collectPerformanceSample(frameDuration: number, timestamp: number) {

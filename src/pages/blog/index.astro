@@ -189,10 +189,6 @@ const items = posts.map((entry) => {
     cover: entry.data.cover
   };
 });
-
-const collectionCount = new Set(items.map((item) => item.collection)).size;
-const tagCount = new Set(items.flatMap((item) => item.tags)).size;
-const latestPost = posts[0];
 ---
 
 <BaseLayout
@@ -205,38 +201,10 @@ const latestPost = posts[0];
       <div class="archive-masthead-copy">
         <p class="archive-kicker"><span aria-hidden="true">A—01</span> Nocturne Research Archive</p>
         <h1 id="blog-archive-title">Blog</h1>
-        <p class="archive-lead">将结构、语义与心理信号编入一套可检索、可追溯的研究记录。</p>
-        <p class="archive-note" id="blog-filter-note">按标签、集合、年份与关键词交叉筛选；每个条目保留原始阅读路径。</p>
       </div>
-
-      <dl class="archive-signal-summary" aria-label="Blog archive summary">
-        <div>
-          <dt>Records</dt>
-          <dd>{items.length.toString().padStart(2, "0")}</dd>
-        </div>
-        <div>
-          <dt>Collections</dt>
-          <dd>{collectionCount.toString().padStart(2, "0")}</dd>
-        </div>
-        <div>
-          <dt>Signals</dt>
-          <dd>{tagCount.toString().padStart(2, "0")}</dd>
-        </div>
-        <div>
-          <dt>Latest</dt>
-          <dd>{latestPost ? formatDate(latestPost.data.date) : "—"}</dd>
-        </div>
-      </dl>
     </header>
 
-    <section class="archive-catalogue" aria-labelledby="blog-catalogue-title" aria-describedby="blog-filter-note">
-      <div class="archive-section-heading">
-        <div>
-          <p class="archive-kicker">Indexed transmissions</p>
-          <h2 id="blog-catalogue-title">文章编目</h2>
-        </div>
-        <span class="archive-coordinate" aria-hidden="true">SORT / FILTER / READ</span>
-      </div>
+    <section class="archive-catalogue">
       <BlogExplorer items={items} />
     </section>
   </div>

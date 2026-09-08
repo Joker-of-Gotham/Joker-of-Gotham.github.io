@@ -1,110 +1,80 @@
 import { expect, test } from "@playwright/test";
 
-const homeUrl = "http://127.0.0.1:4321/";
-
-test.describe.configure({ mode: "serial" });
-
-test("chapter guide uses a decoded two-slot shrink-gap-grow handoff", async ({ page }) => {
-  await page.goto(homeUrl);
+test("DOM composition follows the rendered director in both scroll directions", async ({ page }) => {
+  await page.goto("/");
   const root = page.locator("[data-observatory-root]");
-  const layer = page.locator("[data-observatory-character-layer]");
-  await expect(root).toHaveAttribute("data-render-state", /ready|static|failed/, { timeout: 18_000 });
-  await page.waitForLoadState("networkidle");
-  await expect(root).toHaveAttribute("data-avatar-state", "ready");
-  await expect(root).toHaveAttribute("data-active-chapter", "signal-gate");
-  await expect(layer).toHaveAttribute("data-guide-state", "settled");
-
-  const transitionTrace = await page.evaluate(() => new Promise<{
-    states: string[];
-    gapOpacity: number[];
-  }>((resolve) => {
-    const observatory = document.querySelector<HTMLElement>("[data-observatory-root]");
-    const guide = document.querySelector<HTMLElement>("[data-observatory-character-layer]");
-    if (!observatory || !guide) {
-      resolve({ states: [], gapOpacity: [] });
-      return;
-    }
-
-    const states: string[] = [];
-    const finish = (gapOpacity: number[] = []) => {
-      observer.disconnect();
-      window.clearTimeout(timeout);
-      resolve({ states, gapOpacity });
-    };
-    const observer = new MutationObserver(() => {
-      const state = guide.dataset.guideState ?? "";
-      if (state && states.at(-1) !== state) states.push(state);
-      if (state !== "gap") return;
-      const opacity = Array.from(guide.querySelectorAll<HTMLElement>("[data-character-slot]"))
-        .map((slot) => Number.parseFloat(getComputedStyle(slot).opacity));
-      finish(opacity);
-    });
-    observer.observe(guide, { attributes: true, subtree: true, attributeFilter: ["data-guide-state", "data-pose-state"] });
-    const timeout = window.setTimeout(() => finish(), 2_500);
-    const observe = document.querySelector<HTMLElement>('[data-observatory-chapter="observe"]');
-    if (!observe) {
-      finish();
-      return;
-    }
-    const bounds = observe.getBoundingClientRect();
-    scrollTo(0, Math.max(0, bounds.top + scrollY + bounds.height * 0.5 - innerHeight * 0.5));
-  }));
-
-  expect(transitionTrace.states).toContain("leaving");
-  expect(transitionTrace.states).toContain("gap");
-  expect(transitionTrace.gapOpacity).toHaveLength(2);
-  expect(transitionTrace.gapOpacity.every((opacity) => opacity === 0)).toBe(true);
-  await expect(root).toHaveAttribute("data-active-chapter", "observe", { timeout: 12_000 });
-  await expect(layer).toHaveAttribute("data-guide-state", "settled", { timeout: 15_000 });
-  await expect(root).toHaveAttribute("data-avatar-pose", "point-up");
-
-  const filters = await layer.locator("[data-character-slot]").evaluateAll((slots) => (
-    slots.map((slot) => getComputedStyle(slot).filter)
-  ));
-  expect(filters.every((filter) => !filter.includes("blur("))).toBe(true);
+  await expect(root).toHaveAttribute("data-render-state", "ready");
+  for (const [id, index] of [["observe",1],["orchestrate",3],["archive-afterlight",5],["signal-gate",0]] as const) {
+    await page.locator("#"+id).evaluate(el => scrollTo({top: el.getBoundingClientRect().top + scrollY, behavior:"instant"}));
+    await expect.poll(() => root.evaluate(el => Number(el.style.getPropertyValue("--journey-progress")) * 5)).toBeCloseTo(index, 1);
+    const visible = await page.locator(".observatory-chapter-frame").evaluateAll(frames => frames.filter(f => getComputedStyle(f).visibility === "visible").map(f => f.parentElement?.id));
+    expect(visible).toEqual([id]);
+    await expect(page.locator("#"+id+" .observatory-chapter-frame")).not.toHaveAttribute("inert");
+  }
 });
 
-test("chapter guide cancels stale entrances during rapid reverse navigation", async ({ page }) => {
-  await page.goto(homeUrl);
-  const root = page.locator("[data-observatory-root]");
-  const layer = page.locator("[data-observatory-character-layer]");
-  await expect(root).toHaveAttribute("data-avatar-state", "ready");
-  await expect(root).toHaveAttribute("data-active-chapter", "signal-gate");
-  await expect(layer).toHaveAttribute("data-guide-state", "settled");
-
-  await page.evaluate(() => {
-    const observe = document.querySelector<HTMLElement>('[data-observatory-chapter="observe"]');
-    if (!observe) return;
-    const bounds = observe.getBoundingClientRect();
-    scrollTo(0, Math.max(0, bounds.top + scrollY + bounds.height * 0.5 - innerHeight * 0.5));
-  });
-  await expect(layer).toHaveAttribute("data-guide-state", /leaving|gap|entering/);
-
-  await page.evaluate(() => {
-    scrollTo(0, 0);
-  });
-
-  await expect(layer).toHaveAttribute("data-guide-state", "settled");
-  await expect(root).toHaveAttribute("data-avatar-pose", "present");
-  await expect(layer.locator("[data-character-slot='active']")).toHaveAttribute(
-    "src",
-    /guide-pose-(?:dark|light)-present\.webp$/,
-  );
+test("bridge stop has a readable research composition", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("[data-observatory-root]")).toHaveAttribute("data-render-state","ready");
+  await page.locator("#structure").evaluate(el => scrollTo({top:el.getBoundingClientRect().top+scrollY,behavior:"instant"}));
+  await expect.poll(()=>page.locator(".observatory-chapter-frame").evaluateAll(fs=>fs.filter(f=>getComputedStyle(f).visibility==="visible").length )).toBe(1);
 });
 
-test("reduced motion leaves DOM choreography in its final readable state", async ({ browser }) => {
-  const context = await browser.newContext({ reducedMotion: "reduce" });
-  const page = await context.newPage();
-  await page.goto(homeUrl);
+test("reduced motion retains six readable in-flow sections", async ({ page }) => {
+  await page.emulateMedia({reducedMotion:"reduce"});
+  await page.goto("/");
+  await expect(page.locator("[data-observatory-root]")).toHaveAttribute("data-render-state","static");
+  await expect(page.locator(".observatory-chapter-frame")).toHaveCount(6);
+  const styles=await page.locator(".observatory-chapter-frame").evaluateAll(fs=>fs.map(f=>({position:getComputedStyle(f).position,visibility:getComputedStyle(f).visibility,inert:(f as HTMLElement).inert})));
+  expect(styles.every(s=>s.position==="relative"&&s.visibility==="visible"&&!s.inert)).toBe(true);
+});
 
-  const root = page.locator("[data-observatory-root]");
-  await expect(root).toHaveAttribute("data-render-reason", "reduced-motion");
-  const frames = page.locator(".observatory-chapter-frame");
-  await expect(frames).toHaveCount(6);
-  const styles = await frames.evaluateAll((items) => items.map((item) => {
-    const style = getComputedStyle(item);
-    return { opacity: style.opacity, visibility: style.visibility, transform: style.transform };
-  }));
-  expect(styles.every((style) => style.opacity === "1" && style.visibility === "visible" && style.transform === "none")).toBe(true);
-  await context.close();
+test("editorial cards stay vertically stacked and inside the viewport", async ({ page }) => {
+  for (const viewport of [{width:1440,height:900},{width:390,height:844},{width:960,height:480}]) {
+    await page.setViewportSize(viewport); await page.goto('/');
+    await expect(page.locator('[data-observatory-root]')).toHaveAttribute('data-render-state','ready');
+    for (const id of ['observe','orchestrate']) {
+      await page.locator('#'+id).evaluate(el => scrollTo({top:el.getBoundingClientRect().top+scrollY,behavior:'instant'}));
+      await expect.poll(() => page.locator('#'+id+' .observatory-chapter-frame').evaluate(el => Number(getComputedStyle(el).opacity))).toBe(1);
+      await page.waitForTimeout(1600);
+      const cards = await page.locator('#'+id+' .home-entry').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right};}));
+      expect(cards[1].top).toBeGreaterThan(cards[0].bottom);
+      cards.forEach(card=>{ expect(card.left).toBeGreaterThanOrEqual(0);expect(card.right).toBeLessThanOrEqual(viewport.width);expect(card.bottom).toBeLessThan(viewport.height); });
+    }
+  }
+});
+
+test('reading poses stay front-facing while the camera continues across a reading interval', async ({ page }) => {
+  await page.goto('/');
+  const root=page.locator('[data-observatory-root]');
+  await expect(root).toHaveAttribute('data-render-state','ready');
+  for(const offset of [0,.1,.2]) {
+    await page.locator('#observe').evaluate((el, offset)=>{
+      const r=el.getBoundingClientRect();scrollTo({top:r.top+scrollY+r.height*offset,behavior:'instant'});
+    },offset);
+    const frame=page.locator('.home-writing');
+    await expect(frame).toHaveAttribute('data-reading-pose','settled');
+    await expect(frame).toHaveCSS('transform','none');
+    await expect.poll(()=>root.evaluate(el=>Number(el.style.getPropertyValue('--journey-progress'))*5)).toBeCloseTo(1+offset,2);
+    const transforms=await frame.locator('.home-entries li').evaluateAll(els=>els.map(el=>getComputedStyle(el).transform));
+    expect(transforms).toEqual(['none','none']);
+  }
+});
+
+test('every wheel input advances the journey immediately instead of accumulating at a threshold', async ({ page }) => {
+  await page.goto('/');
+  const root=page.locator('[data-observatory-root]');
+  await expect(root).toHaveAttribute('data-render-state','ready');
+  const progress=()=>root.evaluate(el=>Number(el.style.getPropertyValue('--journey-progress'))*5);
+  for(const chapter of ['signal-gate','observe','structure','orchestrate','embodiment']) {
+    await page.locator('#'+chapter).evaluate(el=>scrollTo({top:el.getBoundingClientRect().top+scrollY,behavior:'instant'}));
+    await page.waitForTimeout(1400);
+    for(let tick=0;tick<3;tick++) {
+      const before=await progress();
+      await page.mouse.wheel(0,100); await page.waitForTimeout(250);
+      const after=await progress();
+      expect(after-before).toBeGreaterThan(.025);
+      expect(after-before).toBeLessThan(.2);
+    }
+  }
 });

@@ -1,9 +1,9 @@
 import { installAmbientAudio } from "./ambient-audio";
 import type { AmbientAudioController } from "./ambient-audio";
-import { installObservatoryChapterGuide } from "./chapter-guide";
 import { decideObservatoryQuality } from "./quality-tier";
 import { getResolvedObservatoryTheme } from "./theme";
 import type { ObservatoryController } from "./controller";
+import { resolveRouteScene } from './route-scene';
 
 const ROOT_SELECTOR = "[data-observatory-root]";
 
@@ -101,6 +101,8 @@ async function waitForRendererOpportunity(signal: AbortSignal): Promise<void> {
 
 function syncPoster(root: HTMLElement) {
   const theme = getResolvedObservatoryTheme();
+  // JS resolves explicit preferences; these sources serve OS-light no-JS pages.
+  root.querySelectorAll<HTMLSourceElement>("[data-os-light-source]").forEach(source => { source.media = "not all"; });
   const connection = Reflect.get(navigator, "connection") as { saveData?: boolean } | undefined;
   const prefersCompact =
     connection?.saveData === true ||
@@ -126,7 +128,7 @@ function syncThemeControl(root: HTMLElement) {
   const button = root.querySelector<HTMLButtonElement>("[data-observatory-theme-toggle]");
   if (!button) return;
   const theme = getResolvedObservatoryTheme();
-  const currentLabel = theme === "dark" ? "深空" : "月纸";
+  const currentLabel = theme === "dark" ? "夜色" : "晨光";
   const nextLabel = theme === "dark" ? "浅色" : "深色";
   button.setAttribute("aria-label", `当前为${currentLabel}主题，切换至${nextLabel}主题`);
   button.setAttribute("aria-pressed", String(theme === "light"));
@@ -236,15 +238,37 @@ export async function mountObservatory() {
   }
   if (state.mount?.root === root) return;
 
+  const scene = resolveRouteScene(location.pathname, location.search);
+  if (scene) root.dataset.sceneChapter = scene;
+  const current = state.mount;
+  if (current?.controller && root.querySelector('[data-observatory-canvas]') === current.controller.canvas) {
+    current.abortController.abort();
+    current.themeObserver.disconnect();
+    current.audio?.dispose();
+    const abortController = new AbortController();
+    current.controller.rebindRoot(root);
+    state.mount = {
+      root, abortController, controller: current.controller,
+      audio: installAmbientAudio(root),
+      themeObserver: installThemeBridge(root, abortController.signal)
+    };
+    installChapterBridge(root, abortController.signal);
+    return;
+  }
+
   unmountObservatory();
   const generation = ++state.generation;
   const abortController = new AbortController();
   const audio = installAmbientAudio(root);
   const themeObserver = installThemeBridge(root, abortController.signal);
   installChapterBridge(root, abortController.signal);
-  installObservatoryChapterGuide(root, abortController.signal);
+
   const mounted: MountedObservatory = { root, abortController, audio, controller: null, themeObserver };
   state.mount = mounted;
+
+  // A direct article visit must not import Three.js or allocate a GPU context.
+  // A retained scene uses the rebind branch above and sleeps until a scene route returns.
+  if (root.dataset.sceneDormant) return;
 
   const canvas = root.querySelector<HTMLCanvasElement>("[data-observatory-canvas]");
   if (!canvas) {
@@ -303,7 +327,27 @@ export function installObservatoryBootstrap() {
   state.installed = true;
 
   document.addEventListener("astro:page-load", () => void mountObservatory());
-  document.addEventListener("astro:before-swap", unmountObservatory);
+  document.addEventListener("astro:before-swap", event => {
+    const next = (event as Event & { newDocument: Document }).newDocument;
+    const current = runtimeState().mount;
+    const nextRoot = next.querySelector<HTMLElement>(ROOT_SELECTOR);
+    const connection = Reflect.get(navigator, 'connection') as { saveData?: boolean } | undefined;
+    if (nextRoot?.querySelector('[data-observatory-chapter]') && !matchMedia('(prefers-reduced-motion: reduce)').matches && !connection?.saveData) {
+      // Astro restores history scroll before after-swap. The reading layout must
+      // already have its live height, otherwise later scenes are clamped away.
+      nextRoot.dataset.domMotion = 'active';
+      nextRoot.querySelectorAll<HTMLElement>('.observatory-chapter-frame').forEach(frame => { frame.style.visibility = 'hidden'; });
+    }
+    if (nextRoot && current?.controller && ['ready', 'suspended', 'degraded'].includes(current.root.dataset.renderState ?? '')) {
+      current.controller.pause();
+    } else {
+      // An initializing/failed/static renderer cannot be transferred. In particular,
+      // never persist a canvas whose context teardown is about to invalidate it.
+      current?.root.querySelector('[data-observatory-visual]')?.removeAttribute('data-astro-transition-persist');
+      unmountObservatory();
+    }
+  });
+  document.addEventListener('astro:after-swap', () => void mountObservatory());
   window.addEventListener("pagehide", unmountObservatory);
   window.addEventListener("pageshow", () => void mountObservatory());
   window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", remountForMotionPreference);

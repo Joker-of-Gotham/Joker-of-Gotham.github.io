@@ -1,81 +1,64 @@
 ---
 import "@/styles/observatory.css";
-import type {
-  ObservatoryEntry,
-  ObservatoryHeroCopy,
-  ObservatoryMetric,
-  ObservatorySignalWindow,
-  ObservatoryTrack
-} from "@/lib/observatory/types";
+import type { ObservatoryEntry, ObservatoryHeroCopy } from "@/lib/observatory/types";
 import ObservatoryCanvas from "./ObservatoryCanvas.astro";
 import ObservatoryNav from "./ObservatoryNav.astro";
-import SignalGate from "./chapters/SignalGate.astro";
-import Observe from "./chapters/Observe.astro";
-import Structure from "./chapters/Structure.astro";
-import Orchestrate from "./chapters/Orchestrate.astro";
-import Embodiment from "./chapters/Embodiment.astro";
-import ArchiveAfterlight from "./chapters/ArchiveAfterlight.astro";
-
-interface Props {
-  hero?: ObservatoryHeroCopy;
-  metrics?: ObservatoryMetric[];
-  tracks?: ObservatoryTrack[];
-  artifacts?: ObservatoryEntry[];
-  posts?: ObservatoryEntry[];
-  signals?: ObservatorySignalWindow[];
-  posterDark?: string;
-  posterLight?: string;
-}
-
-const {
-  hero = {
-    eyebrow: "Implicit Signal Mining for Personalized Decision Systems",
-    title: "Chika Komari",
-    subtitle: "在结构、语义与心理信号之间，构造一条可验证的个性化决策路径。",
-    description: "研究复杂信息网络中的隐式信号，也记录工程、阅读与长期思考如何彼此照亮。",
-    primaryAction: { label: "进入研究档案", href: "/artifacts/" },
-    secondaryAction: { label: "阅读最新文章", href: "/blog/" }
-  },
-  metrics = [],
-  tracks = [],
-  artifacts = [],
-  posts = [],
-  signals = [
-    { src: "/assets/img/observatory/signal-bocchi.webp", alt: "乐队演奏中的粉发少女", eyebrow: "Band signal", caption: "Afterlight / Bocchi" },
-    { src: "/assets/img/observatory/signal-april.webp", alt: "夕光中的少年与金发少女", eyebrow: "Memory signal", caption: "April resonance" },
-    { src: "/assets/img/observatory/signal-gbc.webp", alt: "舞台灯光下的少女乐队成员", eyebrow: "Band signal", caption: "Girls Band Cry" },
-    { src: "/assets/img/observatory/signal-komari.webp", alt: "教室窗边的黑发少女", eyebrow: "Daily signal", caption: "Chika Komari" },
-    { src: "/assets/img/observatory/signal-kaguya.webp", alt: "暖色光线中的两位少女", eyebrow: "Afterlight", caption: "Lunar memory" }
-  ],
-  posterDark = "/assets/img/observatory/signal-guide-dark-poster.webp",
-  posterLight = "/assets/img/observatory/signal-guide-light-poster.webp"
-} = Astro.props;
+import HomeEntries from "./HomeEntries.astro";
+interface Props { hero: ObservatoryHeroCopy; posts: ObservatoryEntry[]; artifacts: ObservatoryEntry[]; }
+const { hero, posts, artifacts } = Astro.props;
 ---
-
-<div
-  class="observatory"
-  data-observatory-root
-  data-render-state="static"
-  data-quality-tier="poster"
-  data-avatar-state="poster"
-  data-avatar-representation="chapter-pose-raster"
-  data-world-version="6"
->
+<div class="observatory" data-observatory-root data-render-state="static" data-quality-tier="poster" data-world-version="12">
   <a class="observatory-skip-link" href="#signal-gate-title">跳到首页主要内容</a>
-  <ObservatoryCanvas posterDark={posterDark} posterLight={posterLight} />
+  <ObservatoryCanvas />
   <ObservatoryNav />
-
   <div class="observatory-chapters">
-    <SignalGate hero={hero} />
-    <Observe metrics={metrics} />
-    <Structure tracks={tracks} />
-    <Orchestrate artifacts={artifacts} />
-    <Embodiment />
-    <ArchiveAfterlight posts={posts} signals={signals} />
+    <section id="signal-gate" data-observatory-chapter="signal-gate" aria-labelledby="signal-gate-title">
+      <div class="observatory-chapter-frame home-intro">
+        <h1 id="signal-gate-title">{hero.title}</h1>
+        <p>研究、编程，以及日常。</p>
+        <div class="home-links"><a href="/blog/?scene=signal-gate">阅读文章 <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+    <section id="observe" data-observatory-chapter="observe" aria-labelledby="observe-title">
+      <div class="observatory-chapter-frame home-writing">
+        <h2 id="observe-title">文章</h2>
+        <HomeEntries entries={posts} />
+        <a class="home-more" href="/blog/?scene=observe">全部文章 <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+    <section id="structure" data-observatory-chapter="structure" aria-labelledby="structure-title">
+      <div class="observatory-chapter-frame home-research home-bridge">
+        <h2 id="structure-title">研究计划</h2>
+        <div class="home-links"><a href="/roadmap/?scene=structure">方向与进展 <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+    <section id="orchestrate" data-observatory-chapter="orchestrate" aria-labelledby="orchestrate-title">
+      <div class="observatory-chapter-frame home-work">
+        <h2 id="orchestrate-title">作品</h2>
+        <HomeEntries entries={artifacts} />
+        <a class="home-more" href="/artifacts/?scene=orchestrate">全部作品 <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+    <section id="embodiment" data-observatory-chapter="embodiment" aria-labelledby="embodiment-title">
+      <div class="observatory-chapter-frame home-about home-bridge">
+        <h2 id="embodiment-title">关于我</h2>
+        <div class="home-links"><a href="/about/?scene=embodiment">阅读简介 <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+    <section id="archive-afterlight" data-observatory-chapter="archive-afterlight" aria-labelledby="archive-afterlight-title">
+      <div class="observatory-chapter-frame home-farewell">
+        <h2 id="archive-afterlight-title">继续探索</h2>
+        <div class="home-links home-project-links">
+          <a class="home-profile-link" href="https://github.com/Joker-of-Gotham">GitHub 主页 <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/Moonweave-AI/virea">VIREA · 动作生成 <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/Joker-of-Gotham/Zanao-LLM-Analyzer">Zanao · 集市分析 <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/Moonweave-AI/governance">Governance · 工程治理 <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/Moonweave-AI/Ontotect">Ontotect · 本体工程 <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
   </div>
-  <slot name="supplement" />
 </div>
-
 <script>
   import { installObservatoryBootstrap } from "@/lib/observatory/bootstrap";
   installObservatoryBootstrap();

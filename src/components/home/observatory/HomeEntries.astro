@@ -1,0 +1,14 @@
+---
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
+import type { ObservatoryEntry } from "@/lib/observatory/types";
+interface Props { entries: ObservatoryEntry[]; }
+const { entries } = Astro.props;
+---
+<ul class="home-entries">
+  {entries.slice(0, 2).map(entry => <li>
+    <a href={entry.href} class:list={["home-entry", { "home-entry--image": entry.cover }]}>
+      {entry.cover && <ResponsiveCover src={entry.cover} alt="" class="home-entry-image" sizes="(max-width: 720px) 42vw, 260px" />}
+      <span class="home-entry-caption">{entry.title}</span>
+    </a>
+  </li>)}
+</ul>

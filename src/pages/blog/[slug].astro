@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/ui/Card.astro";
 import Comments from "@/components/ui/Comments.astro";
@@ -16,7 +16,8 @@ export async function getStaticPaths() {
 const { entry } = Astro.props as { entry: CollectionEntry<"blog"> };
 const { Content, headings } = await entry.render();
 type RenderHeading = (typeof headings)[number];
-const tocHeadings = headings.filter((heading: RenderHeading) => heading.depth <= 3);
+const documentHeadingDepth = Math.min(...headings.map((heading: RenderHeading) => heading.depth), 2);
+const tocHeadings = headings.filter((heading: RenderHeading) => heading.depth <= 6);
 const [posts, nodes, artifacts] = await Promise.all([getPublishedBlogPosts(), getRoadmapNodes(), getArtifacts()]);
 
 const currentSlug = normalizeSlug(entry);
@@ -127,49 +128,25 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
     </header>
 
     {tocHeadings.length > 0 && (
-      <aside class="toc-dock" data-toc-dock aria-label="Table of contents">
-        <div class="toc-dock-head">
-          <span class="toc-dock-label">Outline</span>
-          <span class="toc-dock-progress"><strong data-toc-progress>0%</strong></span>
-        </div>
-        <ul class="toc-outline">
-          {tocHeadings.some((h: (typeof tocHeadings)[number]) => h.depth === 1) && <li class="toc-spine" aria-hidden="true"></li>}
-          {
-            tocHeadings.map((heading: (typeof tocHeadings)[number], index: number) => {
-              const depth = heading.depth;
-              const prevDepth = index > 0 ? tocHeadings[index - 1].depth : 0;
-              const nextDepth = index < tocHeadings.length - 1 ? tocHeadings[index + 1].depth : 0;
-              // H2 连续段: 仅当上下邻接同为 H2 才画虚线穿过
-              const inH2Chain = depth === 2 && (prevDepth === 2 || nextDepth === 2);
-              const chainPos =
-                inH2Chain
-                  ? prevDepth === 2 && nextDepth === 2
-                    ? "mid"
-                    : prevDepth === 2
-                      ? "tail"
-                      : "head"
-                  : "solo";
-              // 纵虚线: 仅 H2 连续段; H1 由贯穿脊柱线承担, H3 无线
-              const showDashedVline = inH2Chain;
-              const dotSize = depth === 1 ? "lg" : depth === 2 ? "md" : "sm";
-              return (
-                <li
-                  class={`toc-outline-item depth-${depth}${inH2Chain ? ` h2-chain chain-${chainPos} vline vline-dashed vpos-${chainPos}` : ""}`}
-                  data-toc-depth={depth}
-                >
-                  {showDashedVline && <span class={`toc-vline vline-dashed vpos-${chainPos}`} aria-hidden="true" />}
-                  <a href={`#${heading.slug}`} data-toc-link>
-                    <span class="toc-node" aria-hidden="true">
-                      <span class={`toc-dot dot-${dotSize}`} aria-hidden="true" />
-                    </span>
-                    <span class="toc-outline-text">{heading.text}</span>
-                  </a>
-                </li>
-              );
-            })
-          }
-        </ul>
-      </aside>
+      <details class="reading-outline" data-toc-dock style={`--outline-count:${tocHeadings.length}`}>
+        <summary aria-label="展开或收起文章目录">
+          <span class="outline-summary-label">目录 <span class="outline-chevron" aria-hidden="true">⌄</span></span>
+          <strong data-toc-progress>0%</strong>
+          <span class="outline-minimap" aria-hidden="true">
+            {tocHeadings.map((heading: { depth: number; slug: string; text: string }) => <span data-outline-mark style={`--depth:${heading.depth - documentHeadingDepth + 1}`}></span>)}
+          </span>
+        </summary>
+        <nav class="outline-scroll" aria-label="文章目录" tabindex="0">
+          <ul class="toc-outline">
+            {tocHeadings.map((heading: { depth: number; slug: string; text: string }) => {
+              const depth = heading.depth - documentHeadingDepth + 1;
+              return <li class={`toc-outline-item depth-${depth}`} data-toc-depth={depth} style={`--depth:${depth}`}>
+                <a href={`#${heading.slug}`} data-toc-link>{heading.text}</a>
+              </li>;
+            })}
+          </ul>
+        </nav>
+      </details>
     )}
 
     <div class="archive-reading-shell">
@@ -240,59 +217,11 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
     </footer>
   </article>
 
+  <script>
+    import { installReadingOutline } from '@/lib/reading-outline';
+    installReadingOutline();
+  </script>
   <script is:inline>
-    const tocDock = document.querySelector("[data-toc-dock]");
-    if (tocDock) {
-      const progressLabel = tocDock.querySelector("[data-toc-progress]");
-      const tocLinks = Array.from(tocDock.querySelectorAll("[data-toc-link]"));
-      const headingTargets = tocLinks
-        .map((link) => {
-          const href = link.getAttribute("href");
-          if (!href || !href.startsWith("#")) return null;
-          const target = document.querySelector(href);
-          if (!(target instanceof HTMLElement)) return null;
-          return { link, target };
-        })
-        .filter(Boolean);
-
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
-          tocDock.classList.remove("is-open");
-        }
-      });
-
-      const updateProgress = () => {
-        const doc = document.documentElement;
-        const scrollable = Math.max(doc.scrollHeight - window.innerHeight, 1);
-        const progress = Math.min(100, Math.max(0, (window.scrollY / scrollable) * 100));
-        if (progressLabel) {
-          progressLabel.textContent = `${Math.round(progress)}%`;
-        }
-      };
-
-      const updateActiveHeading = () => {
-        let activeIndex = -1;
-        headingTargets.forEach((entry, index) => {
-          if (entry.target.getBoundingClientRect().top <= 120) {
-            activeIndex = index;
-          }
-        });
-
-        headingTargets.forEach((entry, index) => {
-          entry.link.classList.toggle("active", index === activeIndex);
-        });
-      };
-
-      const handleScroll = () => {
-        updateProgress();
-        updateActiveHeading();
-      };
-
-      window.addEventListener("scroll", handleScroll, { passive: true });
-      window.addEventListener("resize", handleScroll);
-      handleScroll();
-    }
-
     const legacyMarkerOnlyPattern = /^\{\:\s*(?:\.[A-Za-z0-9_-]+\s*)+\}$/;
     document.querySelectorAll(".content p, .content blockquote p").forEach((node) => {
       const text = node.textContent?.trim();

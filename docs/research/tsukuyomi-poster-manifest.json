@@ -1,38 +1,38 @@
 [
   {
-    "file": "/assets/img/observatory/tsukuyomi-world-dark.webp",
-    "bytes": 136944,
-    "sha256": "3c69fce20cfdb432998b52b423db4e9575fdda47a4d79920657b9cfdc322b206",
+    "file": "/assets/img/observatory/tsukuyomi-world-v14-dark.webp",
+    "bytes": 126960,
+    "sha256": "2d31c989105b484796707a0032e39a2f645f1122c32fafee78a2571a72a37ec0",
     "source": "desktop-world.png"
   },
   {
-    "file": "/assets/img/observatory/tsukuyomi-world-dark-compact.webp",
-    "bytes": 76324,
-    "sha256": "19dce82414197a0abbb2017105481d83da5274ab2ddb58039daec60960eb561c",
+    "file": "/assets/img/observatory/tsukuyomi-world-v14-dark-compact.webp",
+    "bytes": 70316,
+    "sha256": "8ee7729cdcbf2c45829a1b48719897adcf6df2da0c932037c34151facf3a55d6",
     "source": "desktop-world.png"
   },
   {
-    "file": "/assets/img/observatory/tsukuyomi-world-dark-portrait.webp",
-    "bytes": 37520,
-    "sha256": "ad601fdb13f9635cb8366c829b77de11fa70c87ac486ff887c7373788ad6756c",
+    "file": "/assets/img/observatory/tsukuyomi-world-v14-dark-portrait.webp",
+    "bytes": 35568,
+    "sha256": "3d2c7b34be947076a4df37f466e05785c61c3cd15993832939cff42d01d6fed6",
     "source": "phone-world.png"
   },
   {
-    "file": "/assets/img/observatory/tsukuyomi-world-light.webp",
-    "bytes": 120562,
-    "sha256": "f27536d695d392cff47cff906b16c30755edbe7f9c4750a491c64b403d6f917e",
+    "file": "/assets/img/observatory/tsukuyomi-world-v14-light.webp",
+    "bytes": 128894,
+    "sha256": "f518d1770249e5418369e469c119e230046356432d172e68670503a567bc1755",
     "source": "day-world.png"
   },
   {
-    "file": "/assets/img/observatory/tsukuyomi-world-light-compact.webp",
-    "bytes": 67046,
-    "sha256": "21ef5c0b173195806cae2f0801fdbff9282261ddebc8d9d79a4a8afb3af755ef",
+    "file": "/assets/img/observatory/tsukuyomi-world-v14-light-compact.webp",
+    "bytes": 69320,
+    "sha256": "e4e7c9dfc124ca1d19c10d5262caf1269ca721c457f8a8624e0bf394a1786454",
     "source": "day-world.png"
   },
   {
-    "file": "/assets/img/observatory/tsukuyomi-world-light-portrait.webp",
-    "bytes": 31858,
-    "sha256": "98254924e472b3d04e14bf7eaace6d12a498d64d22b58b079b878dfb9f8735d8",
+    "file": "/assets/img/observatory/tsukuyomi-world-v14-light-portrait.webp",
+    "bytes": 29784,
+    "sha256": "44aae6810279d60ab7a229fd09cd4e262e5bde77df9f87efdf6a72a72b20ebef",
     "source": "phone-day-world.png"
   }
 ]

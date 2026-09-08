@@ -1,149 +1,61 @@
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-const ROOT_SELECTOR = "[data-observatory-root]";
-const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-
+import { sampleReadingPose } from "./composition";
 let installed = false;
-let activeRoot: HTMLElement | null = null;
-let disposeActiveMotion: (() => void) | null = null;
-let pluginRegistered = false;
+let cleanup: ((restore?: boolean) => void) | undefined;
 
-function registerPlugin(): void {
-  if (pluginRegistered) return;
-  gsap.registerPlugin(ScrollTrigger);
-  pluginRegistered = true;
-}
-
-function clearMotionStyles(root: HTMLElement): void {
-  const targets = root.querySelectorAll<HTMLElement>(
-    ".observatory-nav-shell, .observatory-chapter-frame",
-  );
-  gsap.set(targets, { clearProps: "opacity,visibility,transform" });
-}
-
-function mountMotion(): void {
-  const root = document.querySelector<HTMLElement>(ROOT_SELECTOR);
-  if (root === activeRoot) return;
-
-  disposeActiveMotion?.();
-  disposeActiveMotion = null;
-  activeRoot = root;
-  if (!root) return;
-
-  registerPlugin();
-  const abortController = new AbortController();
-  const reduceMotion = window.matchMedia(MOTION_QUERY);
-  const triggerIds: string[] = [];
-  const refresh = () => ScrollTrigger.refresh();
-  const remountForMotionPreference = () => {
-    if (activeRoot !== root) return;
-    unmountMotion();
-    queueMicrotask(mountMotion);
-  };
-
-  const context = gsap.context(() => {
-    const nav = root.querySelector<HTMLElement>(".observatory-nav-shell");
-    const sections = Array.from(root.querySelectorAll<HTMLElement>("[data-observatory-chapter]"));
-    const frames = sections
-      .map((section) => section.querySelector<HTMLElement>(".observatory-chapter-frame"))
-      .filter((frame): frame is HTMLElement => frame !== null);
-
-    if (reduceMotion.matches) {
-      root.dataset.domMotion = "reduced";
-      clearMotionStyles(root);
-      return;
-    }
-
-    root.dataset.domMotion = "active";
-    if (nav) {
-      gsap.fromTo(
-        nav,
-        { opacity: 0.72, y: -8 },
-        { opacity: 1, y: 0, duration: 0.72, ease: "power3.out", clearProps: "opacity,transform" },
-      );
-    }
-
-    frames.forEach((frame, index) => {
-      if (index === 0) {
-        gsap.fromTo(
-          frame,
-          { autoAlpha: 0.82, y: 18 },
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.88,
-            delay: 0.08,
-            ease: "power3.out",
-            clearProps: "opacity,visibility,transform",
-          },
-        );
-        return;
-      }
-
-      const id = `observatory-dom-chapter-${index}`;
-      triggerIds.push(id);
-      gsap.fromTo(
-        frame,
-        { autoAlpha: 0.74, y: 26 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.94,
-          ease: "power3.out",
-          clearProps: "opacity,visibility,transform",
-          scrollTrigger: {
-            id,
-            trigger: frame.closest("[data-observatory-chapter]") ?? frame,
-            start: "top 76%",
-            once: true,
-          },
-        },
-      );
-    });
-  }, root);
-
-  window.addEventListener("load", refresh, { once: true, signal: abortController.signal });
-  reduceMotion.addEventListener("change", remountForMotionPreference, { signal: abortController.signal });
-  void document.fonts?.ready.then(() => {
-    if (!abortController.signal.aborted && root.isConnected) refresh();
-  });
-
-  disposeActiveMotion = () => {
-    abortController.abort();
-    triggerIds.forEach((id) => ScrollTrigger.getById(id)?.kill());
-    context.revert();
-    clearMotionStyles(root);
-    delete root.dataset.domMotion;
-    if (activeRoot === root) activeRoot = null;
-  };
-}
-
-function unmountMotion(): void {
-  disposeActiveMotion?.();
-  disposeActiveMotion = null;
-  activeRoot = null;
-}
-
-/**
- * Installs DOM-only chapter choreography. Native document scroll remains the
- * source of truth; Three.js camera/world state is intentionally untouched.
- */
+/** The rendered camera director is the sole clock for the text composition. */
 export function installObservatoryDomMotion(): void {
-  if (installed) {
-    mountMotion();
-    return;
-  }
-
+  if (installed) return;
   installed = true;
-  document.addEventListener("astro:page-load", mountMotion);
-  document.addEventListener("astro:before-swap", unmountMotion);
-  window.addEventListener("pagehide", unmountMotion);
-  window.addEventListener("pageshow", mountMotion);
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mountMotion, { once: true });
-  } else {
-    queueMicrotask(mountMotion);
-  }
+  const mount = () => {
+    cleanup?.();
+    const root = document.querySelector<HTMLElement>("[data-observatory-root]");
+    if (!root) return;
+    const sections = [...root.querySelectorAll<HTMLElement>("[data-observatory-chapter]")];
+    if (sections.length === 0) return;
+    const frames = sections.map(section => section.querySelector<HTMLElement>(".observatory-chapter-frame"));
+    const abort = new AbortController();
+    const motion = matchMedia("(prefers-reduced-motion: reduce)");
+    const reset = () => {
+      frames.forEach(frame => { if (frame) { frame.removeAttribute("style"); frame.querySelectorAll(".home-entries li").forEach(card => card.removeAttribute("style")); frame.inert = false; } });
+      delete root.dataset.domMotion;
+    };
+    const observer = new MutationObserver(() => {
+      if (["static", "failed"].includes(root.dataset.renderState ?? "")) reset();
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ["data-render-state"] });
+    motion.addEventListener("change", () => { if (motion.matches) reset(); }, { signal: abort.signal });
+    const sync = (event: Event) => {
+      if (motion.matches) return;
+      const progress = (event as CustomEvent<number>).detail;
+      root.dataset.domMotion = "active";
+      frames.forEach((frame, index) => {
+        if (!frame) return;
+        const distance = progress - index;
+        const { opacity: alpha, offset } = sampleReadingPose(distance);
+        frame.style.opacity = String(alpha);
+        const side = index === 3 ? -1 : 1;
+        frame.style.transform = offset === 0 ? 'none' : `perspective(1400px) translate3d(${offset * side * 3}rem, ${-offset * 1.8}rem, ${-Math.abs(offset) * 90}px) rotateY(${offset * side * 4}deg)`;
+        frame.dataset.readingPose = offset === 0 ? 'settled' : 'transit';
+        frame.querySelectorAll<HTMLElement>('.home-entries li').forEach((card, order) => {
+          card.style.transform = offset === 0 ? 'none' : `translate3d(0, ${-offset * (order + 1) * .6}rem, ${-Math.abs(offset) * (order + 1) * 14}px)`;
+        });
+        frame.style.visibility = alpha > 0.02 ? "visible" : "hidden";
+        frame.inert = alpha < 0.5;
+      });
+      root.style.setProperty("--journey-progress", String(progress / 5));
+    };
+    root.addEventListener("observatory:direct", sync, { signal: abort.signal });
+    cleanup = (restore = true) => {
+      abort.abort();
+      observer.disconnect();
+      if (restore) reset();
+    };
+  };
+  document.addEventListener("astro:page-load", mount);
+  // Keep the outgoing composition and its height stable for the transition snapshot.
+  document.addEventListener("astro:before-swap", () => cleanup?.(false));
+  window.addEventListener("pagehide", () => cleanup?.());
+  window.addEventListener("pageshow", mount);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
+  else queueMicrotask(mount);
 }

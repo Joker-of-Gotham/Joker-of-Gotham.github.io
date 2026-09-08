@@ -39,6 +39,9 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
       <input id="blog-query" class="unstyled-input" placeholder="搜索文章" data-blog-control="query" />
     </div>
 
+    <details class="blog-filter-options">
+    <summary>筛选</summary>
+    <div class="blog-filter-grid">
     <div class="custom-select" data-custom-select="tag">
       <button class="custom-select-trigger" type="button">全部标签</button>
       <div class="custom-select-dropdown">
@@ -92,14 +95,15 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
       <option value="latest">最新</option>
       <option value="oldest">最早</option>
     </select>
+    </div>
+    </details>
   </header>
 
-  <div class="editorial-grid-wide" data-blog-grid>
+  <div class="journal-grid" data-blog-grid>
     {
       items.map((item, idx) => (
         <a
-          class={`card blog-entry ${idx === 0 ? "card--hero card--overlay" : ""}`}
-          data-animate
+          class={`journal-entry ${idx < 3 ? "journal-featured" : ""} ${idx === 0 ? "journal-lead" : ""}`}
           href={`/blog/${item.slug}/`}
           data-blog-item
           data-slug={item.slug}
@@ -110,7 +114,7 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
           data-year={item.year}
           data-date={item.dateISO}
         >
-          {
+          <div class="journal-media">{
             item.cover ? (
               <ResponsiveCover
                 class="card-cover"
@@ -125,24 +129,13 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
             ) : (
               <div class="card-cover placeholder-cover" data-variant={((idx % 6) + 1).toString()}><Icon name="blog" size={idx === 0 ? 32 : 20} /></div>
             )
-          }
+          }</div>
           <div class="card-body">
             <h3>{item.title}</h3>
             <div class="blog-summary content" set:html={item.summaryHtml || item.summaryText}></div>
             <div class="meta-row">
               <span>{item.dateLabel}</span>
               <span>{item.readingTime} 分钟</span>
-            </div>
-            <div class="meta-row blog-chip-row">
-              <span class="tag-chip chip-collection">{item.collection}</span>
-            </div>
-            {item.categories.length > 0 && (
-              <div class="meta-row blog-chip-row">
-                {item.categories.slice(0, 3).map((category) => <span class="tag-chip chip-category">{category}</span>)}
-              </div>
-            )}
-            <div class="meta-row">
-              {item.tags.slice(0, 3).map((tagName) => <span class="tag-chip">{tagName}</span>)}
             </div>
           </div>
         </a>
@@ -226,9 +219,14 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
           item.hidden = !visible.has(item.dataset.slug || "");
         });
 
-        filtered.forEach((item) => {
+        filtered.forEach((item, index) => {
           const node = itemBySlug.get(item.slug);
-          if (node) grid.appendChild(node);
+          if (node) {
+            const featured = keyword.length === 0 && state.sort === "latest" && index < 3;
+            node.classList.toggle("journal-featured", featured);
+            node.classList.toggle("journal-lead", featured && index === 0);
+            grid.appendChild(node);
+          }
         });
 
         emptyHint.hidden = filtered.length > 0;

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Komari — moonlight</title>
+  <rect width="64" height="64" rx="14" fill="#100d16"/>
+  <path d="M42 10a23 23 0 1 0 12 33A23 23 0 0 1 42 10Z" fill="#f7e8cc"/>
+  <path d="m47 13 2.5 7.5L57 23l-7.5 2.5L47 33l-2.5-7.5L37 23l7.5-2.5Z" fill="#d4b5d5"/>
+</svg>

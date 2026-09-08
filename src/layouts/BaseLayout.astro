@@ -3,6 +3,8 @@ import "@/styles/main.css";
 import { ClientRouter } from "astro:transitions";
 import Sidebar from "@/components/layout/Sidebar.astro";
 import Topbar from "@/components/layout/Topbar.astro";
+import StationaryScene from '@/components/home/observatory/StationaryScene.astro';
+import { sceneForRoute } from '@/lib/observatory/route-scene';
 import CommandPalette from "@/components/search/CommandPalette.astro";
 import PagefindFilters from "@/components/search/PagefindFilters.astro";
 import { getSiteConfig } from "@/lib/content/queries";
@@ -28,6 +30,7 @@ const {
   variant = "standard"
 } = Astro.props;
 const { home, taxonomy } = await getSiteConfig();
+const routeScene = variant === 'standard' ? sceneForRoute(Astro.url.pathname) : undefined;
 
 const quickLinks = home?.quick_links?.length
   ? home.quick_links
@@ -43,7 +46,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon-moon.svg" />
     <script is:inline>
       (() => {
         try {
@@ -67,8 +70,9 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
     <ClientRouter />
     <slot name="head" />
   </head>
-  <body data-shell-variant={variant}>
+  <body data-shell-variant={variant} data-scene-page={routeScene}>
     <a class="skip-link" href="#main-content">跳转至主要内容</a>
+    {variant === 'standard' && <StationaryScene chapter={routeScene} />}
 
     {
       variant === "observatory" ? (
@@ -76,7 +80,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
 
           <div class="main-area main-area--observatory">
-            <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body>
+            <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body transition:name="page-content">
               <PagefindFilters filters={pagefindFilters} />
               <slot name="full-bleed" />
               <slot />
@@ -90,7 +94,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           <div class="main-area">
             <Topbar title={title} crumbs={crumbs} />
             <slot name="full-bleed" />
-            <main id="main-content" class="main-container page-main" tabindex="-1" data-pagefind-body>
+            <main id="main-content" class="main-container page-main" tabindex="-1" data-pagefind-body transition:name="page-content">
               <PagefindFilters filters={pagefindFilters} />
               <slot />
             </main>
@@ -248,7 +252,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
 
         const updateThemeControls = (theme, preference) => {
           const nextTheme = theme === "dark" ? "light" : "dark";
-          const currentLabel = theme === "dark" ? "深空" : "月纸";
+          const currentLabel = theme === "dark" ? "夜色" : "晨光";
           const nextLabel = nextTheme === "dark" ? "深色" : "浅色";
 
           document.querySelectorAll("[data-theme-toggle]").forEach((control) => {
@@ -257,6 +261,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
             control.dataset.themePreference = preference ?? "system";
             control.setAttribute("aria-label", `当前为${currentLabel}主题，切换至${nextLabel}主题`);
             control.setAttribute("title", `切换至${nextLabel}主题`);
+            control.setAttribute("aria-pressed", String(theme === 'light'));
             const label = control.querySelector("[data-theme-label]");
             if (label) label.textContent = currentLabel;
           });
@@ -422,7 +427,6 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
 
       if (!rootWindow["__jokerEnhancers"]) {
         rootWindow["__jokerEnhancers"] = {
-          mermaidPromise: null,
           bound: false
         };
       }
@@ -479,10 +483,9 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           if (!(table instanceof HTMLTableElement) || table.closest(".table-wrap")) return;
           const wrapper = document.createElement("div");
           wrapper.className = "table-wrap";
-          wrapper.tabIndex = 0;
           wrapper.setAttribute("role", "region");
           const caption = table.querySelector("caption")?.textContent?.trim();
-          wrapper.setAttribute("aria-label", caption ? `${caption}，可横向滚动` : `数据表 ${index + 1}，可横向滚动`);
+          wrapper.setAttribute("aria-label", caption || `数据表 ${index + 1}`);
           table.before(wrapper);
           wrapper.appendChild(table);
         });
@@ -551,96 +554,6 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
         });
       };
 
-      const isMermaidPre = (node) => {
-        if (!(node instanceof HTMLElement)) return false;
-        const preLanguage = node.dataset.language?.toLowerCase();
-        if (preLanguage === "mermaid") return true;
-        const code = node.querySelector("code");
-        if (!(code instanceof HTMLElement)) return false;
-        return Array.from(code.classList).some((item) => item.toLowerCase() === "language-mermaid");
-      };
-
-      const loadMermaid = async () => {
-        if (!rootWindow["__jokerEnhancers"].mermaidPromise) {
-          rootWindow["__jokerEnhancers"].mermaidPromise = import("mermaid")
-            .then((module) => {
-              const mermaid = module.default ?? module;
-              mermaid.initialize({
-                startOnLoad: false,
-                securityLevel: "strict",
-                theme: "base",
-                themeVariables: {
-                  darkMode: true,
-                  background: "#0a0f18",
-                  primaryColor: "#172033",
-                  primaryTextColor: "#ffffff",
-                  primaryBorderColor: "#9bb8d8",
-                  secondaryColor: "#211c35",
-                  secondaryTextColor: "#ffffff",
-                  tertiaryColor: "#102c2a",
-                  tertiaryTextColor: "#ffffff",
-                  lineColor: "#c7d6e8",
-                  textColor: "#ffffff",
-                  edgeLabelBackground: "#0a0f18",
-                  clusterBkg: "#111827",
-                  clusterBorder: "#9bb8d8",
-                  titleColor: "#ffffff"
-                },
-                flowchart: {
-                  htmlLabels: false,
-                  useMaxWidth: true
-                }
-              });
-              return mermaid;
-            })
-            .catch(() => null);
-        }
-
-        return rootWindow["__jokerEnhancers"].mermaidPromise;
-      };
-
-      const renderMermaidBlocks = async (scope = document) => {
-        const codeBlocks = Array.from(scope.querySelectorAll("pre")).filter((node) => isMermaidPre(node));
-        if (codeBlocks.length === 0) return;
-
-        const mermaid = await loadMermaid();
-        if (!mermaid) return;
-
-        codeBlocks.forEach((preBlock, index) => {
-          if (!(preBlock instanceof HTMLElement)) return;
-          if (preBlock.dataset.mermaidRendered === "1") return;
-
-          const codeBlock = preBlock.querySelector("code");
-          if (!(codeBlock instanceof HTMLElement)) return;
-          const source = (codeBlock.textContent ?? "").trim();
-          if (!source) return;
-
-          const wrapper = document.createElement("div");
-          wrapper.className = "mermaid-block card";
-
-          const body = document.createElement("div");
-          body.className = "card-body";
-
-          const mermaidNode = document.createElement("div");
-          mermaidNode.className = "mermaid";
-          mermaidNode.dataset.key = `${Date.now()}-${index}`;
-          mermaidNode.textContent = source;
-
-          body.appendChild(mermaidNode);
-          wrapper.appendChild(body);
-          preBlock.dataset.mermaidRendered = "1";
-          preBlock.replaceWith(wrapper);
-        });
-
-        try {
-          await mermaid.run({
-            querySelector: ".mermaid-block .mermaid"
-          });
-        } catch (_error) {
-          return;
-        }
-      };
-
       const schedule = (fn: () => void) => {
         if ("requestIdleCallback" in window) {
           (window as any).requestIdleCallback(fn, { timeout: 2000 });
@@ -654,17 +567,24 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           decorateCodeBlocks(document);
           prepareResponsiveContent(document);
           cleanupLegacyMarkers(document);
+          document.dispatchEvent(new Event("reading:media-ready"));
         });
-        schedule(() => void renderMermaidBlocks(document));
+
       };
 
       if (!rootWindow["__jokerEnhancers"].bound) {
         rootWindow["__jokerEnhancers"].bound = true;
         document.addEventListener("astro:page-load", applyEnhancements);
-        document.addEventListener("astro:after-swap", applyEnhancements);
+
       }
 
       applyEnhancements();
+    </script>
+    <script>
+      import { installReadingDiagrams } from "@/lib/reading-diagrams";
+      import { installMediaViewer } from "@/lib/media-viewer";
+      installReadingDiagrams();
+      installMediaViewer();
     </script>
   </body>
 </html>

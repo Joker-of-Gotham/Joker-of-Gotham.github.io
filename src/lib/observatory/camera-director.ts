@@ -10,21 +10,21 @@ export const OBSERVATORY_WORLD_SPAN = 459;
  * dolly along the meridian deck.
  */
 export const OBSERVATORY_CAMERA_CONTROL_POINTS: readonly Vec3Tuple[] = [
-  [-17, 10.5, 38],
-  [14, 16, -39],
-  [-8, 14, -118],
-  [31, 16, -188],
-  [-20, 11, -262],
-  [-8, 21, -352]
+  [0, 12, 46],
+  [-3, 8.5, -36],
+  [2, 10, -115],
+  [3, 8.5, -204],
+  [0, 10, -290],
+  [0, 12, -354]
 ] as const;
 
 export const OBSERVATORY_LOOK_CONTROL_POINTS: readonly Vec3Tuple[] = [
-  [-2, 8, -18],
-  [-13, 5.5, -75],
-  [2, 4, -163],
-  [12, 12, -243],
-  [-24, 3.5, -307],
-  [20, 7, -402]
+  [0, 9, -14],
+  [17, 6, -78],
+  [-3, 7, -167.5],
+  [-17, 6, -246],
+  [0, 7, -343],
+  [0, 9, -408]
 ] as const;
 
 export interface ObservatoryCameraRouteSample {

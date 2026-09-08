@@ -5,8 +5,6 @@ import { getArtifacts, normalizeSlug, formatDate } from "@/lib/content/queries";
 import "@/styles/archive.css";
 
 const artifacts = await getArtifacts();
-const artifactTypes = new Set(artifacts.map((entry) => entry.data.type));
-const latestArtifact = artifacts[0];
 ---
 
 <BaseLayout
@@ -19,26 +17,10 @@ const latestArtifact = artifacts[0];
       <div class="archive-masthead-copy">
         <p class="archive-kicker"><span aria-hidden="true">B—02</span> Materialized signals</p>
         <h1 id="artifact-archive-title">Artifacts</h1>
-        <p class="archive-lead">将研究从抽象轨迹压缩为可检验的物证：论文、系统、数据与公开实现。</p>
-        <p class="archive-note">每个条目保留类型、发布时间、主题信号与关联研究路径。</p>
       </div>
-
-      <dl class="archive-signal-summary" aria-label="Artifact archive summary">
-        <div><dt>Objects</dt><dd>{artifacts.length.toString().padStart(2, "0")}</dd></div>
-        <div><dt>Formats</dt><dd>{artifactTypes.size.toString().padStart(2, "0")}</dd></div>
-        <div><dt>Latest</dt><dd>{latestArtifact ? formatDate(latestArtifact.data.date) : "—"}</dd></div>
-        <div><dt>State</dt><dd>OPEN</dd></div>
-      </dl>
     </header>
 
-    <section class="archive-catalogue" aria-labelledby="artifact-catalogue-title">
-      <div class="archive-section-heading">
-        <div>
-          <p class="archive-kicker">Observation vault</p>
-          <h2 id="artifact-catalogue-title">成果编目</h2>
-        </div>
-        <span class="archive-coordinate" aria-hidden="true">OBJECT / EVIDENCE / LINK</span>
-      </div>
+    <section class="archive-catalogue">
 
       <ol class="archive-record-list">
       {

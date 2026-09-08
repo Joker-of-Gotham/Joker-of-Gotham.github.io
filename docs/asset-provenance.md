@@ -16,6 +16,12 @@ Release decision: **Conditional Go for the current `main` push**. The Owner acce
 
 ## Tsukuyomi background — local implementation, 2026-09-07
 
+### Local revision, 2026-09-08
+
+- The owner supplied `151602028.jpg` and explicitly requested it as the navigation avatar. It is copied byte-for-byte to `public/assets/img/observatory/komari-avatar-151602028.jpg` (SHA-256 `bd04885281e57f9a0bf2911de32c5fc25f45fbe3c05a1cb101a985362bea1efa`). This records user-supplied provenance and local use, not a new redistribution license.
+- `public/favicon-moon.svg` is a locally authored geometric moon/star icon.
+- Version 14 fallback plates are scene-only captures with all text descendants explicitly hidden. README images are uncomposited local browser screenshots; their sources and hashes are in `docs/screenshots/manifest.json`.
+
 The owner requested a background inspired by the Tsukuyomi world in *Cosmic Princess Kaguya!* on 2026-09-07. The city geometry, material textures, Japanese sign layouts, flower sprites, fish and lighting are authored locally in `src/lib/observatory/tsukuyomi-world.ts` and `tsukuyomi-geometry.ts`. No downloaded film image, third-party model, HDR or texture is used in the running scene.
 
 Six `public/assets/img/observatory/tsukuyomi-world-*.webp` fallback plates are exports of this rendered scene, made with `scripts/prepare-tsukuyomi-posters.mjs`. Their exact filenames, source captures, sizes and SHA-256 hashes are recorded in `docs/research/tsukuyomi-poster-manifest.json`. The existing character assets keep their earlier provenance records.

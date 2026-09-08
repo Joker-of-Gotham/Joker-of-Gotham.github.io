@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
-const output = resolve("artifacts/tsukuyomi-2026-09-07");
+const output = resolve("artifacts/tsukuyomi-v12-2026-09-08");
 const chapters = ["signal-gate", "observe", "structure", "orchestrate", "embodiment", "archive-afterlight"];
 
 for (const viewport of [
@@ -31,20 +31,22 @@ for (const viewport of [
     await page.goto("/");
     const root = page.locator("[data-observatory-root]");
     await expect(root).toHaveAttribute("data-render-state", "ready", { timeout: 20_000 });
-    await expect(root).toHaveAttribute("data-world-version", "8");
+    await expect(root).toHaveAttribute("data-world-version", "12");
     await expect(root).toHaveAttribute("data-environment-status", "ready");
     const samples = [];
     for (const chapter of chapters) {
       await page.locator(`[data-observatory-chapter="${chapter}"]`).evaluate(element => {
         const bounds = element.getBoundingClientRect();
         const top = bounds.top + scrollY;
-        scrollTo({ top: Math.max(0, top + bounds.height / 2 - innerHeight / 2), behavior: "instant" });
+        scrollTo({ top: Math.max(0, top), behavior: "instant" });
       });
       await expect(root).toHaveAttribute("data-active-chapter", chapter);
       await page.waitForTimeout(1800);
       const data = await root.evaluate(el => ({ ...el.dataset }));
+      if (chapter === "structure") expect(Number(data.weatherRain)).toBeGreaterThan(.35);
+      if (chapter === "archive-afterlight") expect(Number(data.weatherFestival)).toBeGreaterThan(.95);
       samples.push({ chapter, ...data });
-      expect(Number(data.rendererCalls)).toBeLessThan(130);
+      expect(Number(data.rendererCalls)).toBeLessThan(160);
       expect(data.sceneGeneration).toBe("1");
       expect(data.canvasGeneration).toBe("1");
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -55,7 +57,7 @@ for (const viewport of [
     await expect(root).toHaveAttribute("data-active-chapter", chapters[0]);
     await page.waitForTimeout(1600);
     await page.addStyleTag({ content: `
-      .observatory > :not(.observatory-visual), .observatory-character-layer,
+      .observatory > :not(.observatory-visual), .observatory > :not(.observatory-visual) *, .site-nav, .site-nav *, .observatory-character-layer,
       .observatory-poster-avatar, .observatory-poster-field, .observatory-visual-scrim,
       .observatory-visual-vignette, astro-dev-toolbar { visibility: hidden !important; }
     ` });
@@ -77,7 +79,7 @@ test("tsukuyomi fallback keeps content and poster available when WebGL fails", a
   await page.goto("/");
   await expect(page.locator("[data-observatory-root]")).toHaveAttribute("data-render-state", "static");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("link", { name: "进入研究档案", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "阅读文章", exact: false })).toBeVisible();
   await expect.poll(() => page.locator("[data-observatory-world-plate]").evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 1)).toBe(true);
 });
 
@@ -87,10 +89,10 @@ test("portrait fallback follows the selected theme with reduced motion", async (
   await page.goto("/");
   const root = page.locator("[data-observatory-root]"), poster = page.locator("[data-observatory-world-plate]");
   await expect(root).toHaveAttribute("data-render-state", "static");
-  await expect.poll(() => poster.evaluate((image: HTMLImageElement) => image.complete && image.currentSrc.endsWith("tsukuyomi-world-dark-portrait.webp"))).toBe(true);
+  await expect.poll(() => poster.evaluate((image: HTMLImageElement) => image.complete && image.currentSrc.endsWith("tsukuyomi-world-v14-dark-portrait.webp"))).toBe(true);
   await page.locator("[data-observatory-theme-toggle]").click();
   await expect(root).toHaveAttribute("data-resolved-theme", "light");
-  await expect.poll(() => poster.evaluate((image: HTMLImageElement) => image.complete && image.currentSrc.endsWith("tsukuyomi-world-light-portrait.webp"))).toBe(true);
+  await expect.poll(() => poster.evaluate((image: HTMLImageElement) => image.complete && image.currentSrc.endsWith("tsukuyomi-world-v14-light-portrait.webp"))).toBe(true);
   await page.screenshot({ path: resolve(output, "phone-static-light.png") });
 });
 

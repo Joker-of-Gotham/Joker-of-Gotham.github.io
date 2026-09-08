@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import remarkNormalizeDocumentHeadings from "../../src/lib/markdown/remarkNormalizeDocumentHeadings";
 
 describe("remarkNormalizeDocumentHeadings", () => {
-  it("demotes authored H1 nodes without changing lower-level headings", () => {
+  it("demotes the whole authored outline while preserving parent-child levels", () => {
     const tree = {
       type: "root",
       children: [
@@ -13,6 +13,6 @@ describe("remarkNormalizeDocumentHeadings", () => {
 
     remarkNormalizeDocumentHeadings()(tree);
 
-    expect(tree.children.map((node) => node.depth)).toEqual([2, 2]);
+    expect(tree.children.map((node) => node.depth)).toEqual([2, 3]);
   });
 });

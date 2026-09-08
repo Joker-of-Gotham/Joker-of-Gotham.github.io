@@ -253,8 +253,8 @@
 }
 
 .archive-blog-index .roadmap-toolbar {
-  position: sticky;
-  inset-block-start: var(--space-20);
+  position: relative;
+  inset-block-start: auto;
   z-index: 20;
   display: grid;
   grid-template-columns: minmax(0, 2fr) repeat(4, minmax(0, 1fr));
@@ -263,7 +263,7 @@
   border: var(--line-hairline) solid var(--component-nav-border);
   border-radius: var(--radius-md);
   background: var(--component-nav-bg);
-  backdrop-filter: var(--glass-blur-regular);
+  backdrop-filter: none;
   box-shadow: var(--component-card-shadow);
 }
 
@@ -1398,9 +1398,7 @@
 }
 
 .archive-about-hero::after {
-  background:
-    linear-gradient(to right, color-mix(in oklch, var(--color-background-deep) 94%, transparent), color-mix(in oklch, var(--color-background-deep) 42%, transparent)),
-    linear-gradient(to top, color-mix(in oklch, var(--color-background-deep) 86%, transparent), transparent);
+  background: linear-gradient(90deg, #09070fba 0%, #09070f73 55%, #09070f30 100%);
 }
 
 .about-hero-poster {
@@ -1422,24 +1420,22 @@
   max-inline-size: var(--layout-reading-width);
   padding: var(--space-6);
   border: 0;
-  border-block-start: var(--line-hairline) solid var(--component-card-border);
-  border-inline-start: var(--line-hairline) solid var(--component-card-border);
   border-radius: 0;
-  color: var(--color-foreground-soft);
-  background: color-mix(in oklch, var(--color-background) 82%, transparent);
-  backdrop-filter: var(--glass-blur-regular);
+  color: #f4f0ed;
+  background: transparent;
+  backdrop-filter: none;
   box-shadow: none;
   text-shadow: none;
 }
 
 .archive-about-hero .about-hero-name {
-  color: var(--color-foreground);
+  color: #fff9f1;
   font-size: var(--text-5xl);
   line-height: var(--leading-tight);
 }
 
 .archive-about-hero .about-hero-tagline {
-  color: var(--color-foreground);
+  color: #fff9f1;
   font-family: var(--font-display);
   font-size: var(--text-xl);
 }

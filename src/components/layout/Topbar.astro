@@ -1,81 +1,20 @@
 ---
-import Icon from "@/components/ui/Icon.astro";
-
-interface Crumb {
-  label: string;
-  href?: string;
-}
-
-interface Props {
-  title: string;
-  crumbs?: Crumb[];
-}
-
-const { title, crumbs = [] } = Astro.props;
-const lastCrumbLabel = crumbs.length > 0 ? crumbs[crumbs.length - 1].label : null;
-const showTitle = title !== lastCrumbLabel;
+interface Props { title?: string; crumbs?: { label: string; href?: string }[]; home?: boolean; }
+const { home = false } = Astro.props;
+const pathname = Astro.url.pathname;
 ---
-
-<header class="topbar">
-  <div class="topbar-primary">
-    <button
-      class="button drawer-toggle"
-      id="drawer-toggle"
-      type="button"
-      aria-label="打开主导航"
-      aria-controls="site-sidebar"
-      aria-expanded="false"
-    >
-      <Icon name="menu" size={16} />
-      <span class="drawer-toggle-label">导航</span>
-    </button>
-
-    <a class="topbar-brand" href="/" aria-label="Lunar Signal Observatory 首页">
-      <span class="topbar-brand-mark" aria-hidden="true"><Icon name="spark" size={16} /></span>
-      <span class="topbar-brand-copy">
-        <strong>Lunar Signal Observatory</strong>
-        <span>Nocturne Research Archive</span>
-      </span>
-    </a>
-
-    <div class="topbar-title-wrap">
-      {
-        crumbs.length > 0 && (
-          <nav class="breadcrumb" aria-label="面包屑导航">
-            {crumbs.map((crumb, index) => (
-              <span>
-                {crumb.href ? (
-                  <a href={crumb.href}>{crumb.label}</a>
-                ) : (
-                  <strong aria-current={index === crumbs.length - 1 ? "page" : undefined}>{crumb.label}</strong>
-                )}
-              </span>
-            ))}
-          </nav>
-        )
-      }
-      {showTitle && <strong class="topbar-page-title">{title}</strong>}
-    </div>
-  </div>
-
-  <div class="topbar-actions">
-    <a
-      class="top-search"
-      href="/search/"
-      data-command-palette-trigger
-      aria-label="搜索档案"
-      aria-haspopup="dialog"
-      aria-controls="command-root"
-      aria-expanded="false"
-    >
-      <Icon name="search" size={16} />
-      <span class="top-search-label">搜索档案</span>
-      <kbd class="top-search-shortcut">Ctrl K</kbd>
-    </a>
-
-    <button class="button theme-toggle" type="button" data-theme-toggle>
-      <span class="theme-toggle-orbit" aria-hidden="true"><Icon name="spark" size={16} /></span>
-      <span class="theme-toggle-label" data-theme-label>主题</span>
-    </button>
+<header class="site-nav observatory-nav-shell" transition:name="site-navigation">
+  <button class="site-menu" id="drawer-toggle" type="button" aria-label="打开主导航" aria-controls="site-sidebar" aria-expanded="false">
+    <span aria-hidden="true">≡</span><span class="site-menu-label">导航</span>
+  </button>
+  <a class="observatory-brand" href={home ? '#signal-gate' : '/'}>Komari</a>
+  <nav class="home-site-nav" aria-label="主导航">
+    <a href="/blog/" aria-current={pathname.startsWith('/blog/') ? 'page' : undefined}>文章</a>
+    <a href="/artifacts/" aria-current={pathname.startsWith('/artifacts/') ? 'page' : undefined}>作品</a>
+    <a href="/about/" aria-current={pathname.startsWith('/about/') ? 'page' : undefined}>关于</a>
+  </nav>
+  <div class="observatory-nav-actions">
+    <a class="observatory-control" href="/search/" data-command-palette-trigger aria-label="搜索文章" aria-haspopup="dialog" aria-controls="command-root" aria-expanded="false">搜索</a>
+    <button class="observatory-control" type="button" data-theme-toggle data-observatory-theme-toggle aria-label="切换主题" aria-pressed="false"><span data-theme-label>主题</span></button>
   </div>
 </header>

@@ -1,0 +1,16 @@
+---
+import '@/styles/observatory.css';
+import '@/styles/route-scene.css';
+import ObservatoryCanvas from './ObservatoryCanvas.astro';
+import type { ObservatoryChapterId } from '@/lib/observatory/types';
+interface Props { chapter?: ObservatoryChapterId; }
+const { chapter } = Astro.props;
+---
+<div class="observatory observatory-stationary" data-observatory-root data-scene-chapter={chapter} data-scene-dormant={!chapter ? 'true' : undefined} data-render-state="static" data-quality-tier="poster" data-world-version="12" aria-hidden="true">
+  <ObservatoryCanvas />
+</div>
+{chapter && <div class="site-scene-shade" aria-hidden="true" transition:name="scene-shade"></div>}
+<script>
+  import { installObservatoryBootstrap } from '@/lib/observatory/bootstrap';
+  installObservatoryBootstrap();
+</script>

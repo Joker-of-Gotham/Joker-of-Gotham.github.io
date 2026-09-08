@@ -1,9 +1,7 @@
 ---
-import { OBSERVATORY_DEFAULT_GUIDE_POSE } from "@/lib/observatory/chapter-guide-poses";
+
 
 interface Props {
-  posterDark?: string;
-  posterLight?: string;
   worldPlateDark?: string;
   worldPlateLight?: string;
   worldPlateDarkCompact?: string;
@@ -13,19 +11,19 @@ interface Props {
 }
 
 const {
-  posterDark = "/assets/img/observatory/signal-guide-dark-poster.webp",
-  posterLight = "/assets/img/observatory/signal-guide-light-poster.webp",
-  worldPlateDark = "/assets/img/observatory/tsukuyomi-world-dark.webp",
-  worldPlateLight = "/assets/img/observatory/tsukuyomi-world-light.webp",
-  worldPlateDarkCompact = "/assets/img/observatory/tsukuyomi-world-dark-compact.webp",
-  worldPlateLightCompact = "/assets/img/observatory/tsukuyomi-world-light-compact.webp",
-  worldPlateDarkPortrait = "/assets/img/observatory/tsukuyomi-world-dark-portrait.webp",
-  worldPlateLightPortrait = "/assets/img/observatory/tsukuyomi-world-light-portrait.webp"
+  worldPlateDark = "/assets/img/observatory/tsukuyomi-world-v14-dark.webp",
+  worldPlateLight = "/assets/img/observatory/tsukuyomi-world-v14-light.webp",
+  worldPlateDarkCompact = "/assets/img/observatory/tsukuyomi-world-v14-dark-compact.webp",
+  worldPlateLightCompact = "/assets/img/observatory/tsukuyomi-world-v14-light-compact.webp",
+  worldPlateDarkPortrait = "/assets/img/observatory/tsukuyomi-world-v14-dark-portrait.webp",
+  worldPlateLightPortrait = "/assets/img/observatory/tsukuyomi-world-v14-light-portrait.webp"
 } = Astro.props;
 ---
 
-<div class="observatory-visual" data-observatory-visual aria-hidden="true">
+<div class="observatory-visual" data-observatory-visual aria-hidden="true" transition:persist="tsukuyomi-world" transition:name="tsukuyomi-world">
   <picture>
+  <source data-os-light-source media="(prefers-color-scheme: light) and (max-width: 720px)" srcset={worldPlateLightPortrait} />
+  <source data-os-light-source media="(prefers-color-scheme: light)" srcset={worldPlateLight} />
   <source
     media="(max-width: 720px)"
     srcset={worldPlateDarkPortrait}
@@ -49,48 +47,7 @@ const {
     fetchpriority="high"
   />
   </picture>
-  <div class="observatory-character-layer" data-observatory-character-layer>
-    <img
-      class="observatory-character-pose is-active"
-      data-character-slot="active"
-      data-pose-state="settled"
-      data-guide-pose={OBSERVATORY_DEFAULT_GUIDE_POSE.pose}
-      src={OBSERVATORY_DEFAULT_GUIDE_POSE.dark}
-      alt=""
-      width={OBSERVATORY_DEFAULT_GUIDE_POSE.width}
-      height={OBSERVATORY_DEFAULT_GUIDE_POSE.height}
-      decoding="async"
-      fetchpriority="high"
-    />
-    <img
-      class="observatory-character-pose"
-      data-character-slot="standby"
-      data-pose-state="idle"
-      data-guide-pose={OBSERVATORY_DEFAULT_GUIDE_POSE.pose}
-      src={OBSERVATORY_DEFAULT_GUIDE_POSE.dark}
-      alt=""
-      width={OBSERVATORY_DEFAULT_GUIDE_POSE.width}
-      height={OBSERVATORY_DEFAULT_GUIDE_POSE.height}
-      decoding="async"
-    />
-  </div>
-  <img
-    class="observatory-poster-avatar"
-    data-observatory-themed-visual
-    data-observatory-poster
-    data-dark-source={posterDark}
-    data-light-source={posterLight}
-    src={posterDark}
-    alt=""
-    width="1024"
-    height="1536"
-    decoding="async"
-    fetchpriority="high"
-  />
   <canvas class="observatory-canvas" data-observatory-canvas aria-hidden="true"></canvas>
-  <div class="observatory-visual-scrim" data-observatory-visual-scrim></div>
-  <div class="observatory-visual-vignette"></div>
-  <div class="observatory-visual-grid"></div>
 </div>
 
 <script>

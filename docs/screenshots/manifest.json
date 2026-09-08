@@ -1,0 +1,61 @@
+{
+  "captured": "2026-09-08",
+  "baseURL": "http://127.0.0.1:4321",
+  "method": "Unmodified viewport screenshots from Playwright, encoded as WebP. No compositing or generated UI.",
+  "images": [
+    {
+      "file": "home-dark.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/home-dark.png",
+      "bytes": 129994,
+      "sha256": "2abbe547908b959eabda1092ca1c6c55a9e5a943b3c5ad818f07cea6d9f476ff"
+    },
+    {
+      "file": "home-light.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/home-light.png",
+      "bytes": 131312,
+      "sha256": "f5d65443f36ae0ecf750665640d71d3c9d7275978bf8bba1e1b8e7596b8dc8e3"
+    },
+    {
+      "file": "blog-light.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/blog-light.png",
+      "bytes": 75880,
+      "sha256": "f3439d213dea3d6a571a2c59d74e0b725c5e2fa82319e4bbdfc38ce750b8f84f"
+    },
+    {
+      "file": "roadmap-dark.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/roadmap-dark.png",
+      "bytes": 57114,
+      "sha256": "ddc601ae34d8a5d7470069db4fbd30820199a352665290a45d34b26ada28fc52"
+    },
+    {
+      "file": "artifacts-light.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/artifacts-light.png",
+      "bytes": 97236,
+      "sha256": "ad0880ddca301ea3d7d0eef4760e28f390689987b28eba254b118555b4097eb2"
+    },
+    {
+      "file": "about-dark.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/about-dark.png",
+      "bytes": 68118,
+      "sha256": "3c5b9988f74409f42d3fa6591d6505371f0eb3595fc6718555f53f1a9a0c3b9a"
+    },
+    {
+      "file": "diagram-viewer-dark.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/diagram-viewer-dark.png",
+      "bytes": 20032,
+      "sha256": "ef3280cad81e77a55ea8f33b3d2b11d4f6f5229b83d8d1f0dbeda7c5a60cbe9b"
+    },
+    {
+      "file": "diagram-viewer-light.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/diagram-viewer-light.png",
+      "bytes": 20472,
+      "sha256": "8875a3587aef5506840790fb502b35c0cd62f263a498b1e5d07b1cf6cbd947a4"
+    },
+    {
+      "file": "home-phone-dark.webp",
+      "source": "artifacts/tsukuyomi-v14-2026-09-08/home-phone-dark.png",
+      "bytes": 39490,
+      "sha256": "53490d6955e296f90981e509b0c15395a31859b3a2e28ce19effb0c1cb3cb013"
+    }
+  ]
+}
