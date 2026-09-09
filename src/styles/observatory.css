@@ -33,6 +33,10 @@
 .observatory[data-dom-motion="active"] .home-landscape { display: block; }
 .observatory:not([data-dom-motion="active"]) .home-landscape { display: none; }
 .observatory:not([data-dom-motion="active"]) [data-observatory-chapter] { min-height: 75svh; }
+/* The first composition belongs to CSS, not the renderer's first frame.
+   Reserve a full viewport and anchor the intro identically before hydration. */
+.observatory:not([data-dom-motion="active"]) #signal-gate { min-height: 100vh; }
+.observatory .home-intro { position: absolute; }
 .observatory[data-resolved-theme="light"] { color: #253f46; }
 html[data-theme="light"] .observatory { color: #253f46; }
 @media (prefers-color-scheme: light) { html:not([data-theme="dark"]) .observatory { color: #253f46; } }
@@ -85,9 +89,10 @@ html[data-theme="light"] .observatory { color: #253f46; }
 .home-bridge .home-links { justify-content: center; margin-top: 1.2rem; }
 
 /* User-authored six-shot composition: distinct vertical positions, always a flat reading plane. */
-.observatory[data-dom-motion="active"] :is(.home-intro,.home-bridge,.home-farewell) { left: 7vw; right: auto; width: 86vw; max-width: none; text-align: center; }
+.observatory .observatory-chapter-frame.home-intro,
+.observatory[data-dom-motion="active"] :is(.home-bridge,.home-farewell) { left: 7vw; right: auto; width: 86vw; max-width: none; text-align: center; }
 .home-intro .home-links { justify-content: center; }
-.observatory[data-dom-motion="active"] .home-intro { top: 68vh; }
+.observatory .observatory-chapter-frame.home-intro { top: 68vh; }
 .observatory[data-dom-motion="active"] .home-research { top: 36vh; }
 .observatory[data-dom-motion="active"] .home-about { top: 61vh; }
 .observatory[data-dom-motion="active"] .home-farewell { top: auto; bottom: max(4vh, env(safe-area-inset-bottom)); }
@@ -95,7 +100,7 @@ html[data-theme="light"] .observatory { color: #253f46; }
 .home-project-links .home-profile-link { flex-basis: 100%; }
 .home-project-links a { white-space: nowrap; }
 @media(max-width:720px) {
-  .observatory[data-dom-motion="active"] .home-intro { top: 63vh; }
+  .observatory .observatory-chapter-frame.home-intro { top: 63vh; }
   .observatory[data-dom-motion="active"] .home-research { top: 35vh; }
   .observatory[data-dom-motion="active"] .home-about { top: 73vh; }
   .home-intro p { margin-block: .9rem 1rem; }
@@ -106,7 +111,7 @@ html[data-theme="light"] .observatory { color: #253f46; }
   .home-project-links span { margin-left: .2rem; }
 }
 @media(max-height:700px) {
-  .observatory[data-dom-motion="active"] .home-intro { top: auto; bottom: 5vh; }
+  .observatory .observatory-chapter-frame.home-intro { top: auto; bottom: 5vh; }
   .home-intro h1 { font-size: clamp(2.7rem, 5.6vw, 3.5rem); }
   .home-intro p { margin-block: .6rem 1rem; }
   .home-intro .home-links { margin-top: 1rem; }
@@ -116,6 +121,9 @@ html[data-theme="light"] .observatory { color: #253f46; }
 .home-topic-links a { min-height: 44px; display: inline-flex; align-items: center; color: inherit; text-decoration: none; }
 .home-topic-links a:hover { text-decoration: underline; text-underline-offset: .4em; }
 body .observatory[data-dom-motion="active"] .home-reading { top: 61vh; }
+@media(prefers-reduced-motion:reduce) {
+  .observatory .observatory-chapter-frame.home-intro { position: relative; top: auto; bottom: auto; left: auto; width: min(32rem, 90vw); text-align: left; }
+}
 @media(max-width:720px) {
   body .observatory[data-dom-motion="active"] .home-reading { top: 68vh; }
   .home-topic-links { gap: .5rem 1.2rem; }

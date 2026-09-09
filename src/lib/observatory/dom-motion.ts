@@ -1,14 +1,20 @@
 import { sampleReadingPose } from "./composition";
 let installed = false;
 let cleanup: ((restore?: boolean) => void) | undefined;
+let mountedRoot: HTMLElement | null = null;
 
 /** The rendered camera director is the sole clock for the text composition. */
 export function installObservatoryDomMotion(): void {
   if (installed) return;
   installed = true;
   const mount = () => {
-    cleanup?.();
     const root = document.querySelector<HTMLElement>("[data-observatory-root]");
+    // DOMContentLoaded, pageshow and astro:page-load can describe the same DOM.
+    // Reinitializing it would briefly reset the live composition to document flow.
+    if (root && root === mountedRoot) return;
+    cleanup?.();
+    cleanup = undefined;
+    mountedRoot = root;
     if (!root) return;
     const sections = [...root.querySelectorAll<HTMLElement>("[data-observatory-chapter]")];
     if (sections.length === 0) return;
@@ -53,8 +59,8 @@ export function installObservatoryDomMotion(): void {
   };
   document.addEventListener("astro:page-load", mount);
   // Keep the outgoing composition and its height stable for the transition snapshot.
-  document.addEventListener("astro:before-swap", () => cleanup?.(false));
-  window.addEventListener("pagehide", () => cleanup?.());
+  document.addEventListener("astro:before-swap", () => { cleanup?.(false); cleanup = undefined; mountedRoot = null; });
+  window.addEventListener("pagehide", () => { cleanup?.(false); cleanup = undefined; mountedRoot = null; });
   window.addEventListener("pageshow", mount);
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
   else queueMicrotask(mount);
