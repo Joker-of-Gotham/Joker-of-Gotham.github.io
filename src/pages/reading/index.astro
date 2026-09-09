@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import BookGrid from '@/components/library/BookGrid.astro';
+import DirectoryIntroduction from '@/components/library/DirectoryIntroduction.astro';
 import CatalogueFilter from '@/components/library/CatalogueFilter.astro';
 import { getLibrary } from '@/lib/content/library';
 import '@/styles/library.css';
@@ -10,6 +11,7 @@ const categories = [...new Set(books.flatMap(b => b.categories))];
 <BaseLayout title="阅读" description="一本书，一个可以不断返回的地方。书架、书评与阅读札记。">
   <div class="folio-page" data-catalogue><header class="folio-masthead"><div><p class="folio-eyebrow">The bookshelf</p><h1>阅读</h1><p class="folio-intro">书页之间，也有生活。</p></div><span class="folio-meta">{books.length} 本书</span></header>
     <CatalogueFilter placeholder="搜索书名、作者或题材" statuses={['在读','已读','重读中','暂搁','想读']} categories={categories} />
+    <DirectoryIntroduction section="reading" />
     <BookGrid books={books} />
     {!books.length && <p class="folio-empty">书架正在整理，下一次阅读会从这里开始。</p>}
   </div>

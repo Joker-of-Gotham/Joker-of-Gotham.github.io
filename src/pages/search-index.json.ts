@@ -128,7 +128,11 @@ export const GET: APIRoute = async () => {
     title: p.title, url: `/research/library/#${paperAnchor(p.url)}`, kind: 'literature',
     summary: p.abstract ?? '', tags: [...p.topics, ...(p.authors ?? [])], year: p.year,
   }));
-  const payload = [...pages, ...roadmapItems, ...blogItems, ...artifactItems, ...writingItems, ...topicItems, ...bookItems, ...paperItems];
+  const {getDirectories}=await import('@/lib/content/directory-queries');
+  const directories=(await Promise.all([getDirectories('blog'),getDirectories('reading'),getDirectories('musings')])).flat();
+  const known=new Set([...pages,...bookItems].map(e=>e.url));
+  const directoryItems=directories.filter(d=>d.path && !known.has(d.href)).map(d=>({title:d.namedPath.split('/').join(' / '),url:d.href,kind:'directory',summary:d.intro?.data.summary ?? '',tags:[]}));
+  const payload = [...pages, ...roadmapItems, ...blogItems, ...artifactItems, ...writingItems, ...topicItems, ...bookItems, ...paperItems,...directoryItems];
 
   return new Response(JSON.stringify(payload), {
     headers: {

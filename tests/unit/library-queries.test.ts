@@ -14,7 +14,7 @@ describe('public content graph', () => {
     rows.reading = [writing('reading','two',{books:['同一本书','隐藏书目']}),writing('reading','private',{draft:true,books:['不公开']})];
     rows.research = [writing('research','guide',{kind:'overview',research:['方向/问题']}),writing('research','private-topic',{published:false,research:['隐藏方向']})];
     rows.musings = [writing('musings','essay')];
-    rows.books = [{collection:'books',id:'hidden',data:{title:'隐藏书目',draft:true}}];
+    rows.reading.push(writing('reading','hidden/index.md',{title:'隐藏书目',kind:'book',draft:true}));
     const lib = await getLibrary();
     expect(lib.entries.map(e=>e.href)).toEqual(['/blog/one/','/reading/reviews/two/','/musings/essay/']);
     expect(lib.books.map(b=>b.title)).toEqual(['同一本书']);
@@ -24,11 +24,11 @@ describe('public content graph', () => {
     expect(lib.entries.find(e=>e.title==='two')?.books).toEqual(['同一本书']);
   });
   it('creates standalone paper topics and keeps hidden collected papers out of the public index', async () => {
-    rows.papers = [
-      {data:{title:'Collected',url:'https://example.org/paper',abstract:'An abstract',research:['新方向/子问题']}},
-      {data:{title:'Hidden',url:'https://example.org/hidden',abstract:'Private abstract',research:['隐藏'],draft:true}},
+    rows.research = [
+      writing('research','新方向/子问题/paper.md',{kind:'reference',title:'Collected',url:'https://example.org/paper',abstract:'An abstract'}),
+      writing('research','隐藏/paper.md',{kind:'reference',title:'Hidden',url:'https://example.org/hidden',abstract:'Private abstract',draft:true}),
     ];
-    rows.research = [writing('research','note',{papers:[{title:'Hidden',url:'https://example.org/hidden/'}]})];
+    rows.research.push(writing('research','note',{papers:[{title:'Hidden',url:'https://example.org/hidden/'}]}));
     const lib = await getLibrary();
     expect(lib.papers.map(p=>p.title)).toEqual(['Collected']);
     expect(lib.papers[0].entries).toEqual([]);

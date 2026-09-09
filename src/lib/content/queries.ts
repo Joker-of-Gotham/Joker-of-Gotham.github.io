@@ -1,6 +1,7 @@
 ﻿import { getCollection, type CollectionEntry } from "astro:content";
 
-export type BlogEntry = CollectionEntry<"blog">;
+import { resolveDirectories, publishedArticles } from './directories';
+export type BlogEntry = CollectionEntry<"blog"> & {data: {date: Date}};
 export type RoadmapEntry = CollectionEntry<"roadmap">;
 export type ArtifactEntry = CollectionEntry<"artifacts">;
 export type CommandItemKind = "page" | "roadmap" | "blog" | "artifact" | "research" | "reading" | "musings" | "topic" | "book";
@@ -63,7 +64,6 @@ function matchesDataEntryId(entryId: string, baseName: string) {
   );
 }
 
-let blogCache: Promise<BlogEntry[]> | null = null;
 let roadmapCache: Promise<RoadmapEntry[]> | null = null;
 let artifactCache: Promise<ArtifactEntry[]> | null = null;
 let siteConfigCache: Promise<{ home?: SiteConfigData; taxonomy?: TaxonomyConfigData }> | null = null;
@@ -74,12 +74,7 @@ export function normalizeSlug(entry: { slug: string; data: { slug?: string } }) 
 }
 
 export async function getPublishedBlogPosts() {
-  if (!blogCache) {
-    blogCache = getCollection("blog", ({ data }) => data.published !== false && data.draft !== true).then((posts: BlogEntry[]) =>
-      posts.sort((a: BlogEntry, b: BlogEntry) => b.data.date.getTime() - a.data.date.getTime())
-    );
-  }
-  return blogCache;
+  return publishedArticles(resolveDirectories(await getCollection('blog'))).sort((a,b)=>b.data.date.getTime()-a.data.date.getTime());
 }
 
 export async function getRoadmapNodes() {

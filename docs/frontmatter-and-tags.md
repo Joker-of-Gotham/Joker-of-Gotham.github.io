@@ -4,13 +4,13 @@
 
 ---
 
-## 一、Blog 文章（`src/content/blog/<collection>/*.md`）
+## 一、Blog 文章（`src/content/blog/<topic>/<subtopic>/.../*.md`）
 
 ### 1.1 文件路径与命名
 
-- 目录 = `collection` 的值，例如 `llm_learning`、`graph_theory`、`logic`、`technical_talk`、`software_engineering`、`posts`。
+- 目录可以任意继续细分；每层 `index.md` 是导读与子树默认信息。完整规则见 [按目录写作](content-writing.md)。`collection` 可从祖先导读继承，不必逐篇填写；未指定时使用第一层目录名。
 - 文件名：`YYYY-MM-DD-<kebab 或中文短标题>.md`，日期与 frontmatter `date` 一致。
-- `slug` 不填则由文件名生成；跨语言/跨系列引用建议显式写 `slug`，便于 `related_posts` 稳定引用。
+- `slug` 不填则由完整相对路径生成；已发布或跨系列引用的文章建议显式写稳定 `slug`，移动文件时保留它。
 
 ### 1.2 Frontmatter 字段
 
@@ -21,11 +21,11 @@
 | `slug` | string | — | 显式 slug；跨引用场景建议填 |
 | `categories` | string[] | — | 学科/领域分类，**有序，从大到小**（见 §2.1） |
 | `tags` | string[] | — | 内容属性标签，自由组合（见 §2.2） |
-| `collection` | string | — | 系列/专栏名，默认 `blog`；需与所在目录一致 |
+| `collection` | string | — | 系列/专栏名，继承最近的目录设置，否则使用第一层目录名；无需逐篇重复 |
 | `related_nodes` | string[] | — | 关联的 roadmap 节点 slug（见 §3） |
 | `related_artifacts` | string[] | — | 关联的 artifact slug |
 | `related_posts` | string[] | — | 手动指定的相关博客 slug（不足 4 篇用相似度补全，≥4 篇不自动算；见 §3B） |
-| `summary` | string | — | 摘要；展示在列表与搜索结果，**不填则无摘要** |
+| `summary` | string | — | Markdown 摘要；展示在列表与搜索结果，不填时从正文提取 |
 | `cover` | string | — | 封面图，`/assets/img/covers/xxx.webp`（见 image-guide） |
 | `emoji` | string | — | 列表角标 emoji，可选 |
 | `reading_time` | int | — | 手动指定阅读时长（分钟），不填则自动估算 |

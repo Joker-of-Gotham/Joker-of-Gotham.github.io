@@ -1,30 +1,14 @@
-﻿---
+---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import BlogExplorer from "@/components/blog/BlogExplorer.astro";
-import { getPublishedBlogPosts, normalizeSlug, readingTimeFromBody, formatDate } from "@/lib/content/queries";
-import { renderPreview } from "@/lib/markdown/preview";
+import DirectoryIntroduction from '@/components/library/DirectoryIntroduction.astro';
+import { getPublishedBlogPosts } from "@/lib/content/queries";
+import { blogItems } from "@/lib/content/blog-items";
 import "@/styles/archive.css";
 
 const posts = await getPublishedBlogPosts();
 
-const items = await Promise.all(posts.map(async (entry) => {
-  const { html: summaryHtml, text: summaryText } = await renderPreview(entry.data.summary, entry.body);
-
-  return {
-    title: entry.data.title,
-    slug: normalizeSlug(entry),
-    summaryText,
-    summaryHtml,
-    dateLabel: formatDate(entry.data.date),
-    dateISO: entry.data.date.toISOString(),
-    year: String(entry.data.date.getFullYear()),
-    tags: entry.data.tags,
-    categories: entry.data.categories.length > 0 ? entry.data.categories : entry.data.category ? [entry.data.category] : [],
-    collection: entry.data.collection,
-    readingTime: entry.data.reading_time ?? readingTimeFromBody(entry.body),
-    cover: entry.data.cover
-  };
-}));
+const items = await blogItems(posts);
 ---
 
 <BaseLayout
@@ -41,6 +25,7 @@ const items = await Promise.all(posts.map(async (entry) => {
     </header>
 
     <section class="archive-catalogue">
+      <DirectoryIntroduction section="blog" />
       <BlogExplorer items={items} />
     </section>
   </div>

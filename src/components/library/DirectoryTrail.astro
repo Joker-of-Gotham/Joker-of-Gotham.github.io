@@ -1,0 +1,10 @@
+---
+import {getDirectories,type DirectorySection} from '@/lib/content/directory-queries';
+import {ancestors,parentPath} from '@/lib/content/directories';
+interface Props {section:DirectorySection; id:string;}
+const {section,id}=Astro.props;
+const path=parentPath(id);
+const dirs=await getDirectories(section);
+const trail=ancestors(path).filter(Boolean).map(p=>dirs.find(d=>d.path===p)).filter(Boolean);
+---
+{trail.length>0 && <nav class="folio-breadcrumb directory-trail" aria-label="所属目录" data-pagefind-ignore>{trail.map((d,i)=><>{i>0 && <span aria-hidden="true">/</span>}<a href={d.href}>{d.title}</a></>)}</nav>}

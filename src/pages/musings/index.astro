@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import EntryList from '@/components/library/EntryList.astro';
+import DirectoryIntroduction from '@/components/library/DirectoryIntroduction.astro';
 import CatalogueFilter from '@/components/library/CatalogueFilter.astro';
 import { getLibrary } from '@/lib/content/library';
 import '@/styles/library.css';
@@ -10,6 +11,7 @@ const years = [...new Set(entries.map(e => e.date.getFullYear()))];
 <BaseLayout title="杂谈" description="关于生活、教育与那些没有标准答案的问题。">
   <div class="folio-page musings-page" data-catalogue><header class="folio-masthead"><div><p class="folio-eyebrow">Between the lines</p><h1>杂谈</h1><p class="folio-intro">写下感受，也为未想明白的事留一点余地。</p></div></header>
     <CatalogueFilter placeholder="搜索杂谈" />
+    <DirectoryIntroduction section="musings" />
     {years.map(year => <section class="musings-year"><span class="musings-year-label">{year}</span><EntryList entries={entries.filter(e => e.date.getFullYear() === year)} /></section>)}
     {!entries.length && <p class="folio-empty">一些想法，正在慢慢成形。</p>}
   </div>

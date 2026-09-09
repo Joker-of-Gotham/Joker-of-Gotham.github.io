@@ -117,7 +117,11 @@ docs/                    Content guides, design notes, and asset provenance
 
 | Content | Location |
 | --- | --- |
-| Articles | `src/content/blog/<collection>/*.md` |
+| Articles | `src/content/blog/<topic>/<subtopic>/.../*.md` |
+| Research and paper cards | `src/content/research/<direction>/<question>/.../*.md` |
+| Books and reviews | `src/content/reading/<genre>/<book>/.../*.md` |
+| Musings | `src/content/musings/<topic>/.../*.md` |
+| Directory introductions | `index.md` at any level; see [writing guide](docs/content-writing.md) |
 | Research nodes | `src/content/roadmap/<node_level>/*.md` |
 | Artifacts | `src/content/artifacts/<type>/*.md` |
 | Homepage configuration | `src/content/site/home.yml` |

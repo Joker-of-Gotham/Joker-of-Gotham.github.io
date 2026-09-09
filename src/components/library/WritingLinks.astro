@@ -1,11 +1,10 @@
 ---
 import { bookHref, topicHref, cleanBook, cleanTopic } from '@/lib/content/library-model';
-import { getCollection } from 'astro:content';
-import { isPublic } from '@/lib/content/library';
+import { getLibrary } from '@/lib/content/library';
 interface Props { books?: string[]; research?: string[]; }
 const { books: rawBooks = [], research: rawTopics = [] } = Astro.props;
-const hidden = new Set((await getCollection('books', e => !isPublic(e))).map(e => cleanBook(e.data.title)));
-const books = [...new Set(rawBooks.map(cleanBook))].filter(name => name && !hidden.has(name));
+const library = await getLibrary();
+const books = [...new Set(rawBooks.map(cleanBook))].filter(name => name && library.books.some(b=>b.title===name));
 const research = [...new Set(rawTopics.map(cleanTopic))].filter(Boolean);
 ---
 {(books.length > 0 || research.length > 0) && <nav class="writing-links" aria-label="所属书籍与研究专题" data-pagefind-ignore>

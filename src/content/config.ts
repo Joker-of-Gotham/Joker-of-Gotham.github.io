@@ -10,53 +10,46 @@ const paperFields = {
   abstract_kind: z.enum(["original", "summary", "translation"]).default("summary"),
   authors: z.array(z.string()).default([]), venue: z.string().optional(), pdf: z.string().url().optional(),
 };
-const papers = defineCollection({ type: "content", schema: z.object({
-  ...paperFields, abstract: z.string().trim().min(1),
-  research: z.array(z.string().trim().min(1)).default([]),
-  draft: z.boolean().default(false), published: z.boolean().default(true),
-}) });
 
 const links = {
   research: z.array(z.string().trim().min(1)).default([]),
   books: z.array(z.string().trim().min(1)).default([]),
-  kind: z.enum(["note", "paper", "reflection", "review", "overview"]).default("note"),
+  kind: z.enum(["note", "paper", "reflection", "review", "overview", "book", "reference"]).default("note"),
   order: z.number().default(0),
   papers: z.array(z.object(paperFields)).default([]),
   sources: z.array(z.object({ title: z.string(), url: z.string().url() })).default([]),
 };
 
 const writingSchema = z.object({
-  title: z.string(), slug: z.string().optional(), date: z.coerce.date(),
+  title: z.string(), slug: z.string().optional(), date: z.coerce.date().optional(),
   summary: z.string().default(""), tags: z.array(z.string()).default([]),
   cover: z.string().optional(), updated_at: z.coerce.date().optional(),
   draft: z.boolean().default(false), published: z.boolean().default(true),
   ...links,
+  categories: z.array(z.string()).default([]),
+  author: z.string().default(''), status: z.enum(['在读','已读','重读中','暂搁','想读']).optional(),
+  recommended: z.boolean().default(false), edition: z.string().optional(),
+  url: z.string().url().optional(), abstract: z.string().trim().min(1).optional(),
+  abstract_kind: paperFields.abstract_kind, authors: paperFields.authors,
+  year: paperFields.year, venue: paperFields.venue, pdf: paperFields.pdf,
 });
 const research = defineCollection({ type: "content", schema: writingSchema });
 const musings = defineCollection({ type: "content", schema: writingSchema });
 const reading = defineCollection({ type: "content", schema: writingSchema });
-const books = defineCollection({ type: "content", schema: z.object({
-  title: z.string(), author: z.string().default(""),
-  categories: z.array(z.string()).default([]), summary: z.string().default(""),
-  status: z.enum(["在读", "已读", "重读中", "暂搁", "想读"]).optional(),
-  cover: z.string().optional(), recommended: z.boolean().default(false),
-  date: z.coerce.date().optional(), edition: z.string().optional(),
-  draft: z.boolean().default(false), published: z.boolean().default(true),
-}) });
 
 const blog = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
     slug: z.string().optional(),
-    date: z.coerce.date(),
+    date: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     categories: z.array(z.string()).default([]),
     category: z.string().optional(),
     summary: z.string().optional().default(""),
     cover: z.string().optional(),
     emoji: z.string().optional(),
-    collection: z.string().optional().default("blog"),
+    collection: z.string().optional(),
     related_nodes: z.array(z.string()).default([]),
     related_artifacts: z.array(z.string()).default([]),
     related_posts: z.array(z.string()).default([]),
@@ -177,7 +170,7 @@ const taxonomy = defineCollection({
 });
 
 export const collections = {
-  research, musings, reading, books, papers,
+  research, musings, reading,
   blog,
   roadmap,
   artifacts,

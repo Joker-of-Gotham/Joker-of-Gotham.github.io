@@ -1,0 +1,34 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import EntryList from '@/components/library/EntryList.astro';
+import CatalogueFilter from '@/components/library/CatalogueFilter.astro';
+import BlogExplorer from '@/components/blog/BlogExplorer.astro';
+import {getPublishedBlogPosts} from '@/lib/content/queries';
+import {blogItems} from '@/lib/content/blog-items';
+import {getDirectories,type DirectorySection} from '@/lib/content/directory-queries';
+import {ancestors,parentPath,isBook} from '@/lib/content/directories';
+import {getLibrary,sectionLabels} from '@/lib/content/library';
+import '@/styles/archive.css';
+import '@/styles/library.css';
+interface Props {section: DirectorySection; path: string;}
+const {section,path}=Astro.props;
+const dirs=await getDirectories(section);
+const current=dirs.find(d=>d.path===path)!;
+const children=dirs.filter(d=>d.parent===path);
+const breadcrumbs=ancestors(path).map(p=>dirs.find(d=>d.path===p)).filter(Boolean);
+const library=await getLibrary();
+const articles=library.entries.filter(e=>e.section===section && parentPath(e.id.slice(section.length+1))===path).sort((a,b)=>a.order-b.order||b.date.getTime()-a.date.getTime());
+const rendered=current.intro?.body?.trim() ? await current.intro.render() : undefined;
+const Content=rendered?.Content;
+const blog=section==='blog' ? await blogItems((await getPublishedBlogPosts()).filter(e=>parentPath(e.id)===path)) : [];
+---
+<BaseLayout title={current.title} description={current.intro?.data.summary || `${current.title}的文章与目录。`} pagefindFilters={{kind:'directory'}}>
+  <div class="folio-page">
+    <nav class="folio-breadcrumb" aria-label="当前位置">{breadcrumbs.map((d,i)=><>{i>0 && <span aria-hidden="true">/</span>}{d.path===path ? <span aria-current="page">{d.title}</span> : <a href={d.href}>{d.path?d.title:sectionLabels[section]}</a>}</>)}</nav>
+    <header class="folio-masthead"><div><p class="folio-eyebrow">{sectionLabels[section]}</p><h1>{current.title}</h1>{current.intro?.data.summary && <p class="folio-intro">{current.intro.data.summary}</p>}</div></header>
+    {Content && <div class="content topic-overview"><Content /></div>}
+    {children.length>0 && <section class="folio-section"><div class="topic-children">{children.map(d=><a href={d.href}><h2>{d.title}</h2>{d.intro?.data.summary && <p>{d.intro.data.summary}</p>}<span class="folio-meta">{d.intro && isBook(d.intro)?'书籍':'继续阅读'} ↗</span></a>)}</div></section>}
+    {blog.length>0 ? <section class="folio-section"><BlogExplorer items={blog} /></section> : articles.length>0 && <section class="folio-section" data-catalogue><CatalogueFilter placeholder="在本目录内查找" /><EntryList entries={articles} /></section>}
+    {!articles.length && !children.length && !Content && <p class="folio-empty">这个目录还在整理中。</p>}
+  </div>
+</BaseLayout>

@@ -1,0 +1,258 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import Card from "@/components/ui/Card.astro";
+import Comments from "@/components/ui/Comments.astro";
+import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
+import type { BlogEntry } from '@/lib/content/queries';
+import { getPublishedBlogPosts, getRoadmapNodes, getArtifacts, normalizeSlug, formatDate, readingTimeFromBody } from "@/lib/content/queries";
+import { computeSimilarPosts } from "@/lib/content/similarity";
+import "@/styles/archive.css";
+import "@/styles/library.css";
+import WritingLinks from "@/components/library/WritingLinks.astro";
+import DirectoryTrail from '@/components/library/DirectoryTrail.astro';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedBlogPosts();
+  return posts.map((entry) => ({ params: { slug: normalizeSlug(entry) }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: BlogEntry };
+const { Content, headings } = await entry.render();
+type RenderHeading = (typeof headings)[number];
+const documentHeadingDepth = Math.min(...headings.map((heading: RenderHeading) => heading.depth), 2);
+const tocHeadings = headings.filter((heading: RenderHeading) => heading.depth <= 6);
+const [posts, nodes, artifacts] = await Promise.all([getPublishedBlogPosts(), getRoadmapNodes(), getArtifacts()]);
+
+const currentSlug = normalizeSlug(entry);
+const currentNodeSlugSet = new Set<string>(entry.data.related_nodes as string[]);
+
+for (const node of nodes) {
+  if (node.data.related_posts.includes(currentSlug)) {
+    currentNodeSlugSet.add(normalizeSlug(node));
+  }
+}
+
+const relatedNodes = nodes.filter((node) => currentNodeSlugSet.has(normalizeSlug(node)));
+
+const relatedArtifacts = artifacts.filter((artifact) => {
+  const artifactSlug = normalizeSlug(artifact);
+  const explicit = entry.data.related_artifacts.includes(artifactSlug);
+  const viaNode = artifact.data.related_nodes.some((nodeSlug: string) => currentNodeSlugSet.has(nodeSlug));
+  return explicit || viaNode;
+});
+
+// Related posts: manual `related_posts` frontmatter wins; when fewer than 4 are
+// specified, fill the rest with TF-IDF cosine-similarity candidates; when 4+ are
+// specified, no auto-computation. Final list is sorted by date descending.
+const TARGET_RELATED = 4;
+const postBySlug = new Map(posts.map((post) => [normalizeSlug(post), post] as const));
+const manualSlugs: string[] = ((entry.data.related_posts ?? []) as string[]).filter(
+  (slug: string) => postBySlug.has(slug)
+);
+const manualSet = new Set<string>(manualSlugs);
+
+let relatedPosts: typeof posts;
+if (manualSlugs.length >= TARGET_RELATED) {
+  relatedPosts = manualSlugs
+    .map((slug) => postBySlug.get(slug)!)
+    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+} else {
+  const manualPosts = manualSlugs.map((slug) => postBySlug.get(slug)!);
+  const candidates = computeSimilarPosts(entry, posts, manualSet)
+    .slice(0, TARGET_RELATED - manualPosts.length)
+    .map((cand) => postBySlug.get(cand.slug)!)
+    .filter(Boolean);
+  relatedPosts = [...manualPosts, ...candidates].sort(
+    (a, b) => b.data.date.getTime() - a.data.date.getTime()
+  );
+}
+
+const currentIndex = posts.findIndex((post) => post.id === entry.id);
+const newerPost = currentIndex > 0 ? posts[currentIndex - 1] : null;
+const olderPost = currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+
+const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
+---
+
+<BaseLayout
+  title={entry.data.title}
+  crumbs={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog/" }, { label: entry.data.title }]}
+  pagefindFilters={{
+    kind: "blog",
+    collection: entry.data.collection,
+    year: entry.data.date.getFullYear(),
+    tags: entry.data.tags
+  }}
+>
+  <article class="archive-page archive-document archive-document--blog">
+    <header class="archive-document-header">
+      {entry.data.cover ? (
+        <div class="archive-document-cover archive-document-cover--image full-bleed">
+          <ResponsiveCover
+            src={entry.data.cover}
+            alt={entry.data.title}
+            loading="eager"
+            fetchpriority="high"
+            sizes="(max-width: 960px) 100vw, 1440px"
+          />
+          <div class="archive-document-cover-scrim" aria-hidden="true" />
+          <div class="archive-document-cover-copy">
+            <p class="archive-kicker"><span aria-hidden="true">A / BLOG</span> Indexed transmission</p>
+            <h1>{entry.data.title}</h1>
+            <dl class="archive-signal-meta" aria-label="Article metadata">
+              <div><dt>Received</dt><dd><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></dd></div>
+              <div><dt>Collection</dt><dd>{entry.data.collection}</dd></div>
+              <div><dt>Read</dt><dd>{readMinutes} 分钟</dd></div>
+            </dl>
+          </div>
+        </div>
+      ) : (
+        <div class="archive-document-cover archive-document-cover--placeholder full-bleed">
+          <div class="archive-document-cover-copy">
+            <p class="archive-kicker"><span aria-hidden="true">A / BLOG</span> Indexed transmission</p>
+            <h1>{entry.data.title}</h1>
+            <dl class="archive-signal-meta" aria-label="Article metadata">
+              <div><dt>Received</dt><dd><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></dd></div>
+              <div><dt>Collection</dt><dd>{entry.data.collection}</dd></div>
+              <div><dt>Read</dt><dd>{readMinutes} 分钟</dd></div>
+            </dl>
+          </div>
+        </div>
+      )}
+
+      {entry.data.emoji && (
+        <div class="archive-document-emoji" aria-hidden="true">{entry.data.emoji}</div>
+      )}
+
+      <div class="archive-document-tags" aria-label="Article tags">
+        <span class="archive-document-tags-label">Signal taxonomy</span>
+        {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
+      </div>
+      <WritingLinks books={entry.data.books} research={entry.data.research} />
+      <DirectoryTrail section="blog" id={entry.id} />
+    </header>
+
+    {tocHeadings.length > 0 && (
+      <details class="reading-outline" data-toc-dock style={`--outline-count:${tocHeadings.length}`}>
+        <summary aria-label="展开或收起文章目录">
+          <span class="outline-summary-label">目录 <span class="outline-chevron" aria-hidden="true">⌄</span></span>
+          <strong data-toc-progress>0%</strong>
+          <span class="outline-minimap" aria-hidden="true">
+            {tocHeadings.map((heading: { depth: number; slug: string; text: string }) => <span data-outline-mark style={`--depth:${heading.depth - documentHeadingDepth + 1}`}></span>)}
+          </span>
+        </summary>
+        <nav class="outline-scroll" aria-label="文章目录" tabindex="0">
+          <ul class="toc-outline">
+            {tocHeadings.map((heading: { depth: number; slug: string; text: string }) => {
+              const depth = heading.depth - documentHeadingDepth + 1;
+              return <li class={`toc-outline-item depth-${depth}`} data-toc-depth={depth} style={`--depth:${depth}`}>
+                <a href={`#${heading.slug}`} data-toc-link>{heading.text}</a>
+              </li>;
+            })}
+          </ul>
+        </nav>
+      </details>
+    )}
+
+    <div class="archive-reading-shell">
+      <div class="archive-reading-marker" aria-hidden="true">
+        <span>NOCTURNE</span>
+        <span>{currentSlug}</span>
+      </div>
+      <div class="article-content content archive-prose">
+        <Content />
+      </div>
+    </div>
+
+    <footer class="archive-document-footer">
+      <section class="archive-related-section" aria-labelledby="related-roadmap-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Linked trajectory</p><h2 id="related-roadmap-title">关联路线图节点</h2></div>
+          <span class="archive-coordinate">{relatedNodes.length.toString().padStart(2, "0")}</span>
+        </div>
+        {relatedNodes.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedNodes.map((node) => <Card href={`/roadmap/${normalizeSlug(node)}/`} title={node.data.title} subtitle={node.data.status.toUpperCase()} />)}
+          </div>
+        ) : (
+          <Card title="暂无关联路线图节点" />
+        )}
+      </section>
+
+      <section class="archive-related-section" aria-labelledby="related-artifacts-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Materialized signal</p><h2 id="related-artifacts-title">关联成果</h2></div>
+          <span class="archive-coordinate">{relatedArtifacts.length.toString().padStart(2, "0")}</span>
+        </div>
+        {relatedArtifacts.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedArtifacts.map((artifact) => <Card href={`/artifacts/${normalizeSlug(artifact)}/`} title={artifact.data.title} subtitle={artifact.data.type.toUpperCase()} />)}
+          </div>
+        ) : (
+          <Card title="暂无关联成果" />
+        )}
+      </section>
+
+      <section class="archive-related-section" aria-labelledby="related-posts-title" data-animate>
+        <div class="archive-section-heading archive-section-heading--compact">
+          <div><p class="archive-kicker">Adjacent records</p><h2 id="related-posts-title">相关文章</h2></div>
+          <span class="archive-coordinate">{relatedPosts.length.toString().padStart(2, "0")}</span>
+        </div>
+        {relatedPosts.length > 0 ? (
+          <div class="card-grid archive-related-grid">
+            {relatedPosts.map((post) => <Card href={`/blog/${normalizeSlug(post)}/`} title={post.data.title} subtitle={formatDate(post.data.date)} />)}
+          </div>
+        ) : (
+          <Card title="暂无相关文章" />
+        )}
+      </section>
+
+      <nav class="archive-pagination" aria-label="相邻文章">
+        <div>
+          <span class="archive-kicker">Previous signal</span>
+          {olderPost ? <a href={`/blog/${normalizeSlug(olderPost)}/`}>← {olderPost.data.title}</a> : <span class="archive-pagination-empty">没有更早文章</span>}
+        </div>
+        <div>
+          <span class="archive-kicker">Next signal</span>
+          {newerPost ? <a href={`/blog/${normalizeSlug(newerPost)}/`}>{newerPost.data.title} →</a> : <span class="archive-pagination-empty">没有更新文章</span>}
+        </div>
+      </nav>
+
+      <Comments term={entry.data.title} />
+    </footer>
+  </article>
+
+  <script>
+    import { installReadingOutline } from '@/lib/reading-outline';
+    installReadingOutline();
+  </script>
+  <script is:inline>
+    const legacyMarkerOnlyPattern = /^\{\:\s*(?:\.[A-Za-z0-9_-]+\s*)+\}$/;
+    document.querySelectorAll(".content p, .content blockquote p").forEach((node) => {
+      const text = node.textContent?.trim();
+      if (!text || !legacyMarkerOnlyPattern.test(text)) return;
+
+      const classes = text.match(/\.[A-Za-z0-9_-]+/g)?.map((item) => item.slice(1)) ?? [];
+      const previousElement = node.previousElementSibling;
+      const target = previousElement ?? node.parentElement?.closest("blockquote, li, div, section");
+
+      if (target && classes.length > 0) {
+        target.classList.add(...classes);
+      }
+
+      node.remove();
+    });
+
+    document.querySelectorAll(".content blockquote > p.callout, .content blockquote > p[class*='prompt-']").forEach((node) => {
+      const wrapper = node.parentElement;
+      if (!(wrapper instanceof HTMLElement) || wrapper.children.length !== 1) return;
+
+      node.classList.forEach((className) => wrapper.classList.add(className));
+      wrapper.style.padding = "0";
+      wrapper.style.border = "0";
+      wrapper.style.background = "transparent";
+      wrapper.style.boxShadow = "none";
+      wrapper.style.margin = "0";
+    });
+  </script>
+</BaseLayout>

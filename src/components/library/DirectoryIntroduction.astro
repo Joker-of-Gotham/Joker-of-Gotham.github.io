@@ -1,0 +1,9 @@
+---
+import { getDirectories, type DirectorySection } from '@/lib/content/directory-queries';
+interface Props { section: DirectorySection; path?: string; }
+const {section,path=''}=Astro.props;
+const entry=(await getDirectories(section)).find(d=>d.path===path)?.intro;
+const rendered=entry?.body?.trim() ? await entry.render() : undefined;
+const Content=rendered?.Content;
+---
+{Content && <div class="content topic-overview directory-introduction"><Content /></div>}

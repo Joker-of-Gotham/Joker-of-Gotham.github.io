@@ -1,0 +1,6 @@
+---
+import DirectoryLayout from '@/layouts/DirectoryLayout.astro';
+import {getDirectories} from '@/lib/content/directory-queries';
+export async function getStaticPaths(){return (await getDirectories('musings')).filter(d=>d.path).map(d=>({params:{path:d.path}}));}
+---
+<DirectoryLayout section="musings" path={Astro.params.path!} />

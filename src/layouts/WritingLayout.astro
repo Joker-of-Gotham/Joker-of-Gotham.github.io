@@ -2,6 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import WritingLinks from '@/components/library/WritingLinks.astro';
 import EntryList from '@/components/library/EntryList.astro';
+import DirectoryTrail from '@/components/library/DirectoryTrail.astro';
 import PaperCards from '@/components/library/PaperCards.astro';
 import ResponsiveCover from '@/components/media/ResponsiveCover.astro';
 import { getLibrary } from '@/lib/content/library';
@@ -36,6 +37,7 @@ const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.i
       {entry.data.summary && <p class="folio-deck">{entry.data.summary}</p>}
       <div class="folio-meta">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>
       <WritingLinks books={entry.data.books} research={entry.data.research} />
+      {entry.collection !== 'research' && <DirectoryTrail section={entry.collection} id={entry.id} />}
       </div>
     </header>
     {headings.length > 2 && <details class="reading-outline" data-toc-dock style={`--outline-count:${headings.length}`}>

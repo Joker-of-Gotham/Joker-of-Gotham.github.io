@@ -1,0 +1,7 @@
+---
+import DirectoryLayout from '@/layouts/DirectoryLayout.astro';
+import {getDirectories} from '@/lib/content/directory-queries';
+import {isBook} from '@/lib/content/directories';
+export async function getStaticPaths(){return (await getDirectories('reading')).filter(d=>d.path && !(d.intro && isBook(d.intro))).map(d=>({params:{path:d.path}}));}
+---
+<DirectoryLayout section="reading" path={Astro.params.path!} />

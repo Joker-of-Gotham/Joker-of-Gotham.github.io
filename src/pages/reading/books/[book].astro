@@ -2,6 +2,9 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import BookCover from '@/components/library/BookCover.astro';
 import EntryList from '@/components/library/EntryList.astro';
+import DirectoryTrail from '@/components/library/DirectoryTrail.astro';
+import {getDirectories} from '@/lib/content/directory-queries';
+import {parentPath} from '@/lib/content/directories';
 import { getLibrary } from '@/lib/content/library';
 import '@/styles/archive.css';
 import '@/styles/library.css';
@@ -10,11 +13,14 @@ const { book, index } = Astro.props;
 const rendered = book.entry ? await book.entry.render() : undefined;
 const Content = rendered?.Content;
 const ordered = [...book.articles].sort((a,b) => a.order - b.order || b.date.getTime() - a.date.getTime());
+const children=book.entry ? (await getDirectories('reading')).filter(d=>d.parent===parentPath(book.entry.id)) : [];
 ---
 <BaseLayout title={`《${book.title}》`} description={book.summary || `关于《${book.title}》的书评与笔记。`} pagefindFilters={{kind:'book', tags:book.categories}}>
   <div class="folio-page book-page"><a class="folio-back" href="/reading/">← 书架</a>
     <header class="book-header"><BookCover title={book.title} author={book.author} cover={book.cover} index={index} /><div class="book-header-copy"><p class="folio-eyebrow">Reading notes</p><h1>{book.title}</h1>{book.author && <p class="book-author">{book.author}</p>}<div class="folio-meta">{book.status && <span>{book.status}</span>}{book.categories.map(c => <span>{c}</span>)}</div>{book.entry?.data.edition && <p class="folio-meta">{book.entry.data.edition}</p>}{book.summary && <p class="folio-intro">{book.summary}</p>}{book.recommended && <p class="folio-recommendation">值得推荐</p>}</div></header>
     {Content && book.entry?.body?.trim() && <div class="content book-note"><Content /></div>}
+    {book.entry && <DirectoryTrail section="reading" id={book.entry.id} />}
+    {children.length>0 && <nav class="topic-children" aria-label="书内目录">{children.map(d=><a href={d.href}><h2>{d.title}</h2>{d.intro?.data.summary && <p>{d.intro.data.summary}</p>}<span aria-hidden="true">↗</span></a>)}</nav>}
     <section class="folio-section"><div class="folio-section-head"><h2>书评与笔记</h2>{ordered.length > 0 && <span class="folio-meta">{ordered.length} 篇文字</span>}</div>{ordered.length ? <EntryList entries={ordered} /> : <p class="folio-empty">尚未写下书评。这里留给下一次阅读与回望。</p>}</section>
   </div>
 </BaseLayout>
