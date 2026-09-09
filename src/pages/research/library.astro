@@ -1,0 +1,12 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getLibrary } from '@/lib/content/library';
+import CatalogueFilter from '@/components/library/CatalogueFilter.astro';
+import PaperCards from '@/components/library/PaperCards.astro';
+import '@/styles/library.css';
+const { papers } = await getLibrary();
+---
+<BaseLayout title="文献索引" description="按研究方向收录的论文、摘要与关联研读。">
+  <div class="folio-page" data-catalogue><a class="folio-back" href="/research/">← 研究</a><header class="folio-masthead"><div><p class="folio-eyebrow">Paper library · {papers.length}</p><h1>文献索引</h1><p class="folio-intro">论文，以及由它们展开的问题。</p></div></header><CatalogueFilter placeholder="搜索论文、作者、摘要或方向" />
+  <PaperCards papers={papers} headingLevel={2} filterable /></div>
+</BaseLayout>

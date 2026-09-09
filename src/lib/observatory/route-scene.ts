@@ -2,7 +2,8 @@ import { OBSERVATORY_CHAPTERS, type ObservatoryChapterId } from './types';
 
 const routeScenes: Record<string, ObservatoryChapterId> = {
   '/blog/': 'observe', '/roadmap/': 'structure', '/artifacts/': 'orchestrate',
-  '/about/': 'embodiment', '/search/': 'archive-afterlight'
+  '/about/': 'embodiment', '/search/': 'archive-afterlight',
+  '/research/': 'structure', '/reading/': 'embodiment', '/musings/': 'observe'
 };
 
 export function sceneForRoute(pathname: string): ObservatoryChapterId | undefined {

@@ -1305,10 +1305,6 @@
   min-inline-size: 0;
 }
 
-.archive-search-reset {
-  margin-inline-start: auto;
-}
-
 .archive-search-status {
   color: var(--color-muted);
   text-transform: uppercase;
@@ -1833,12 +1829,6 @@
   .archive-select-filters {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .archive-search-reset {
-    grid-column: 1 / -1;
-    inline-size: 100%;
-    margin-inline-start: 0;
   }
 
   .archive-search-result .search-result-item {

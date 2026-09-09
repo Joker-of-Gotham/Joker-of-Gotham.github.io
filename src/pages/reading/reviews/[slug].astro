@@ -1,0 +1,8 @@
+---
+import { getNewWriting } from '@/lib/content/library';
+import { normalizeSlug } from '@/lib/content/queries';
+import WritingLayout from '@/layouts/WritingLayout.astro';
+export async function getStaticPaths() { return (await getNewWriting()).filter(e => e.collection === 'reading' && e.data.kind !== 'overview').map(entry => ({ params: {slug: normalizeSlug(entry)}, props: {entry} })); }
+const { entry } = Astro.props;
+---
+<WritingLayout entry={entry} />

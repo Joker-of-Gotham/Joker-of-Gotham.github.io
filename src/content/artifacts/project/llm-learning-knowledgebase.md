@@ -13,7 +13,7 @@ tags:
 links:
   - label: Repo
     url: https://github.com/Joker-of-Gotham/Airi-GUI-Automation-Module
-  - label: Roadmap
+  - label: 计划
     url: /roadmap/engineering-writing-track/
 related_nodes:
   - engineering-writing-track

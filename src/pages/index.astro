@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import LunarObservatory from "@/components/home/observatory/LunarObservatory.astro";
 import { getArtifacts, getPublishedBlogPosts, getSiteConfig, normalizeSlug } from "@/lib/content/queries";
 import type { ObservatoryHeroCopy } from "@/lib/observatory/types";
+import { getLibrary, topicHref } from "@/lib/content/library";
 
 const [{ home }, posts, artifacts] = await Promise.all([getSiteConfig(), getPublishedBlogPosts(), getArtifacts()]);
 const hero: ObservatoryHeroCopy = {
@@ -13,7 +14,9 @@ const hero: ObservatoryHeroCopy = {
 };
 const entries = posts.map(entry => ({ title: entry.data.title, cover: entry.data.cover, href: `/blog/${normalizeSlug(entry)}/` }));
 const works = artifacts.map(entry => ({ title: entry.data.title, cover: entry.data.cover, href: `/artifacts/${normalizeSlug(entry)}/` }));
+const library = await getLibrary();
+const topics = library.topics.filter(topic => topic.depth === 1).map(topic => ({ title: topic.title, href: topicHref(topic.path) }));
 ---
 <BaseLayout title="Home" description="研究、编程，以及日常。" variant="observatory">
-  <LunarObservatory slot="full-bleed" hero={hero} posts={entries} artifacts={works} />
+  <LunarObservatory slot="full-bleed" hero={hero} posts={entries} artifacts={works} topics={topics} />
 </BaseLayout>

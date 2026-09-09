@@ -9,7 +9,10 @@ const pathname = Astro.url.pathname;
   </button>
   <a class="observatory-brand" href={home ? '#signal-gate' : '/'}>Komari</a>
   <nav class="home-site-nav" aria-label="主导航">
-    <a href="/blog/" aria-current={pathname.startsWith('/blog/') ? 'page' : undefined}>文章</a>
+    <a href="/blog/" aria-current={pathname.startsWith('/blog/') ? 'page' : undefined}>博客</a>
+    <a href="/research/" aria-current={pathname.startsWith('/research/') ? 'page' : undefined}>研究</a>
+    <a href="/reading/" aria-current={pathname.startsWith('/reading/') ? 'page' : undefined}>阅读</a>
+    <a href="/musings/" aria-current={pathname.startsWith('/musings/') ? 'page' : undefined}>杂谈</a>
     <a href="/artifacts/" aria-current={pathname.startsWith('/artifacts/') ? 'page' : undefined}>作品</a>
     <a href="/about/" aria-current={pathname.startsWith('/about/') ? 'page' : undefined}>关于</a>
   </nav>
@@ -18,3 +21,14 @@ const pathname = Astro.url.pathname;
     <button class="observatory-control" type="button" data-theme-toggle data-observatory-theme-toggle aria-label="切换主题" aria-pressed="false"><span data-theme-label>主题</span></button>
   </div>
 </header>
+<noscript>
+  <style is:inline>
+    body .site-nav .site-menu, body .site-nav [data-theme-toggle] { display: none; }
+    @media(max-width:960px) {
+      body .site-nav { position: relative; flex-wrap: wrap; }
+      body .site-nav .home-site-nav { display: flex; flex-wrap: wrap; order: 4; width: 100%; justify-content: space-between; gap: .5rem; }
+      body .site-nav .home-site-nav a:last-child { display: flex; }
+      body[data-shell-variant="standard"] .main-area { padding-top: 0; }
+    }
+  </style>
+</noscript>

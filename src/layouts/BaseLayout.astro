@@ -1,5 +1,6 @@
 ﻿---
 import "@/styles/main.css";
+import "@/styles/markdown-preview.css";
 import { ClientRouter } from "astro:transitions";
 import Sidebar from "@/components/layout/Sidebar.astro";
 import Topbar from "@/components/layout/Topbar.astro";
@@ -63,6 +64,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
     </script>
     <title>{title} | Chika Komari</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
@@ -73,12 +75,12 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
   <body data-shell-variant={variant} data-scene-page={routeScene}>
     <a class="skip-link" href="#main-content">跳转至主要内容</a>
     {variant === 'standard' && <StationaryScene chapter={routeScene} />}
+    <!-- Keep the drawer beside the backdrop, outside the scene shell's stacking context. -->
+    <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
 
     {
       variant === "observatory" ? (
         <div class="site-shell site-shell--observatory" data-variant="observatory">
-          <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
-
           <div class="main-area main-area--observatory">
             <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body transition:name="page-content">
               <PagefindFilters filters={pagefindFilters} />
@@ -89,8 +91,6 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
         </div>
       ) : (
         <div class="site-shell" data-variant="standard">
-          <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
-
           <div class="main-area">
             <Topbar title={title} crumbs={crumbs} />
             <slot name="full-bleed" />
@@ -161,6 +161,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           restoreTarget = document.activeElement instanceof HTMLElement ? document.activeElement : toggle;
           sidebar!.classList.add("open");
           setExpanded(true);
+          sidebar!.scrollTop = 0;
 
           if (!document.querySelector(".mobile-mask")) {
             const mask = document.createElement("button");
@@ -184,9 +185,13 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
 
         sidebar.addEventListener("click", (event) => {
           const target = event.target;
-          if (target instanceof Element && target.closest("a[href]")) {
+          if (target instanceof Element && target.closest("a[href]") && !target.closest("[data-command-palette-trigger]")) {
             closeSidebar(false);
           }
+        }, { signal: sig });
+
+        document.addEventListener("site:before-command-open", () => {
+          if (sidebar.classList.contains("open")) closeSidebar();
         }, { signal: sig });
 
         document.addEventListener("keydown", (e) => {
@@ -497,7 +502,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
         });
 
         scope.querySelectorAll(".katex-display").forEach((formula) => {
-          if (!(formula instanceof HTMLElement) || formula.dataset.scrollRegion === "1") return;
+          if (!(formula instanceof HTMLElement) || formula.closest(".markdown-preview") || formula.dataset.scrollRegion === "1") return;
           formula.dataset.scrollRegion = "1";
           formula.tabIndex = 0;
           formula.setAttribute("role", "region");

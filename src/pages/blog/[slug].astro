@@ -7,6 +7,8 @@ import type { CollectionEntry } from "astro:content";
 import { getPublishedBlogPosts, getRoadmapNodes, getArtifacts, normalizeSlug, formatDate, readingTimeFromBody } from "@/lib/content/queries";
 import { computeSimilarPosts } from "@/lib/content/similarity";
 import "@/styles/archive.css";
+import "@/styles/library.css";
+import WritingLinks from "@/components/library/WritingLinks.astro";
 
 export async function getStaticPaths() {
   const posts = await getPublishedBlogPosts();
@@ -125,6 +127,7 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
         <span class="archive-document-tags-label">Signal taxonomy</span>
         {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
       </div>
+      <WritingLinks books={entry.data.books} research={entry.data.research} />
     </header>
 
     {tocHeadings.length > 0 && (

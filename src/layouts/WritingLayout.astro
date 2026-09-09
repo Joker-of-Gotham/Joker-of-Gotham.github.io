@@ -1,0 +1,54 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import WritingLinks from '@/components/library/WritingLinks.astro';
+import EntryList from '@/components/library/EntryList.astro';
+import PaperCards from '@/components/library/PaperCards.astro';
+import ResponsiveCover from '@/components/media/ResponsiveCover.astro';
+import { getLibrary } from '@/lib/content/library';
+import { sectionLabels, type WritingEntry } from '@/lib/content/library';
+import { formatDate } from '@/lib/content/queries';
+import '@/styles/archive.css';
+import '@/styles/library.css';
+interface Props { entry: WritingEntry; }
+const { entry } = Astro.props;
+const { Content, headings } = await entry.render();
+const library = await getLibrary();
+const me = library.entries.find(e => e.id === `${entry.collection}:${entry.id}`)!;
+const related = library.entries.filter(e => e.id !== me.id && (me.books.length ? e.books.some(b => me.books.includes(b)) : e.topics.some(t => me.topics.includes(t))));
+if (me.books.length) related.sort((a,b) => a.order - b.order || a.date.getTime() - b.date.getTime());
+const home = `/${entry.collection}/`;
+const section = sectionLabels[entry.collection];
+const depth = Math.min(...headings.map(h => h.depth), 2);
+const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.id));
+---
+<BaseLayout title={entry.data.title} description={entry.data.summary} pagefindFilters={{ kind: entry.collection, tags: entry.data.tags }}>
+  <article class="archive-page archive-document folio-document">
+    <header class="archive-document-header folio-illustrated-header">
+      <div class="archive-document-cover archive-document-cover--image full-bleed">
+        <ResponsiveCover src={me.cover!} alt="" loading="eager" fetchpriority="high" sizes="(max-width: 960px) 100vw, 1440px" />
+        <div class="archive-document-cover-scrim" aria-hidden="true" />
+        <div class="archive-document-cover-copy">
+          <h1>{entry.data.title}</h1>
+          <dl class="archive-signal-meta"><div><dt>发布于</dt><dd><time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time></dd></div></dl>
+        </div>
+      </div>
+      <div class="folio-document-header folio-document-context">
+      {entry.data.summary && <p class="folio-deck">{entry.data.summary}</p>}
+      <div class="folio-meta">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>
+      <WritingLinks books={entry.data.books} research={entry.data.research} />
+      </div>
+    </header>
+    {headings.length > 2 && <details class="reading-outline" data-toc-dock style={`--outline-count:${headings.length}`}>
+      <summary aria-label="展开或收起文章目录"><span class="outline-summary-label">目录 <span class="outline-chevron" aria-hidden="true">⌄</span></span><strong data-toc-progress>0%</strong><span class="outline-minimap" aria-hidden="true">{headings.map(h => <span data-outline-mark style={`--depth:${h.depth - depth + 1}`}></span>)}</span></summary>
+      <nav class="outline-scroll" aria-label="文章目录" tabindex="0"><ul class="toc-outline">{headings.map(h => <li class={`toc-outline-item depth-${h.depth - depth + 1}`} data-toc-depth={h.depth - depth + 1} style={`--depth:${h.depth - depth + 1}`}><a href={`#${h.slug}`} data-toc-link>{h.text}</a></li>)}</ul></nav>
+    </details>}
+    <div class="archive-reading-shell"><div class="article-content content archive-prose"><Content /></div></div>
+    <footer class="folio-document-footer">
+      {citedPapers.length > 0 && <section class="folio-section"><h2>文中论文</h2><PaperCards papers={citedPapers} excludeEntry={me.id} /></section>}
+      {entry.data.sources.length > 0 && <details class="folio-sources"><summary>资料来源与整理说明</summary><ul>{entry.data.sources.map(s => <li><a href={s.url} target="_blank" rel="noreferrer">{s.title} ↗</a></li>)}</ul></details>}
+      {related.length > 0 && <section class="folio-section" data-pagefind-ignore><h2>{me.books.length ? '继续阅读这本书' : '沿着这个问题继续'}</h2><EntryList entries={related.slice(0, 6)} compact /></section>}
+      <a class="folio-back" href={home}>← 返回{section}</a>
+    </footer>
+  </article>
+</BaseLayout>
+<script>import { installReadingOutline } from '@/lib/reading-outline'; installReadingOutline();</script>

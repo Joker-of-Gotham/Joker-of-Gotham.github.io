@@ -132,7 +132,7 @@ const normalizedCategories = (item: BlogItem) => item.categories.map((category) 
           }</div>
           <div class="card-body">
             <h3>{item.title}</h3>
-            <div class="blog-summary content" set:html={item.summaryHtml || item.summaryText}></div>
+            <div class="blog-summary markdown-preview" set:html={item.summaryHtml}></div>
             <div class="meta-row">
               <span>{item.dateLabel}</span>
               <span>{item.readingTime} 分钟</span>

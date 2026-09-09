@@ -1,0 +1,20 @@
+---
+import { formatDate } from '@/lib/content/queries';
+import { kindLabels, sectionLabels, type LinkedWriting } from '@/lib/content/library';
+import ResponsiveCover from '@/components/media/ResponsiveCover.astro';
+interface Props { entries: LinkedWriting[]; compact?: boolean; }
+const { entries, compact = false } = Astro.props;
+---
+<ul class:list={['folio-entries', { 'folio-entries--compact': compact }]}>
+  {entries.map(entry => <li data-catalogue-item data-search={`${entry.title} ${entry.summary} ${entry.tags.join(' ')} ${entry.topics.join(' ')}`} data-kind={entry.kind}>
+    <a class="folio-entry" href={entry.href}>
+      {entry.cover && <div class="folio-entry-visual"><ResponsiveCover src={entry.cover} alt="" class="folio-entry-cover" sizes="(max-width: 520px) 100vw, 200px" /></div>}
+      <div class="folio-entry-copy">
+        <span class="folio-meta">{kindLabels[entry.kind] || sectionLabels[entry.section]}</span>
+        <h3>{entry.title}</h3>
+        {!compact && entry.summary && <div class="folio-entry-summary markdown-preview" set:html={entry.summaryHtml} />}
+      </div>
+      <span class="folio-entry-end"><time datetime={entry.date.toISOString()}>{formatDate(entry.date)}</time><span aria-hidden="true">↗</span></span>
+    </a>
+  </li>)}
+</ul>

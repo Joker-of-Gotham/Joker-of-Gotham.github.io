@@ -1,0 +1,17 @@
+/* Build-time Markdown previews share typography without article-only UI controls. */
+.markdown-preview { color: var(--color-foreground-soft); font-size: .95rem; line-height: 1.85; min-width: 0; max-height: 9.25em; overflow: hidden; overflow-wrap: anywhere; }
+.markdown-preview :is(p,ul,ol,blockquote,pre,table) { margin: 0 0 .45em; }
+.markdown-preview :is(ul,ol) { padding-left: 1.3em; }
+.markdown-preview li { margin: 0; }
+.markdown-preview strong { font-weight: 700; color: inherit; }
+.markdown-preview em { font-style: italic; }
+.markdown-preview :not(pre) > code { font: .88em var(--font-mono); padding: .12em .35em; border-radius: var(--radius-xs); background: var(--color-surface-strong); color: var(--color-foreground); }
+.markdown-preview pre { max-width: 100%; padding: .6em .8em; border-radius: var(--radius-sm); overflow: hidden; font: .8rem/1.7 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.markdown-preview blockquote { padding-left: .8em; border-left: 2px solid var(--color-border-strong); }
+.markdown-preview table { max-width: 100%; font-size: .85em; border-collapse: collapse; }
+.markdown-preview :is(td,th) { padding: .2em .5em; border: 1px solid var(--color-border); }
+.markdown-preview .katex { font-size: 1em; }
+.markdown-preview .katex-display { margin: .5em 0; max-width: 100%; overflow: hidden; }
+.markdown-preview pre.astro-code, .markdown-preview pre.astro-code span { color: var(--shiki-dark); background-color: var(--shiki-dark-bg); }
+[data-theme="light"] .markdown-preview pre.astro-code, [data-theme="light"] .markdown-preview pre.astro-code span { color: var(--shiki-light); background-color: var(--shiki-light-bg); }
+@media(prefers-color-scheme:light) { :root:not([data-theme="dark"]) .markdown-preview pre.astro-code, :root:not([data-theme="dark"]) .markdown-preview pre.astro-code span { color: var(--shiki-light); background-color: var(--shiki-light-bg); } }

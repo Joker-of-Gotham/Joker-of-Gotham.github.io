@@ -1,0 +1,10 @@
+---
+interface Props { title: string; author?: string; cover?: string; index?: number; }
+const { title, author = '', cover, index = 0 } = Astro.props;
+---
+<div class:list={['book-cover', `book-cover--${index % 4}`, { 'book-cover--image': Boolean(cover) }]} aria-hidden="true">
+  {cover ? <img src={cover} alt="" loading="lazy" decoding="async" width="320" height="440" /> : <>
+    <span class="book-cover-rule"></span><span class="book-cover-title">{title.split(/\s+/).map((word, index) => <>{index > 0 && ' '}<span class="book-cover-word">{word}</span></>)}</span>
+    <span class="book-cover-author">{author}</span><span class="book-cover-imprint">阅读札记</span>
+  </>}
+</div>

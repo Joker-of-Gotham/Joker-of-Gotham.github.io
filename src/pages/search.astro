@@ -5,7 +5,13 @@ import "@/styles/archive.css";
 
 const quickKindTabs = [
   { label: "All", kind: "all" },
-  { label: "Roadmap", kind: "roadmap" },
+  { label: "研究", kind: "research" },
+  { label: "文献", kind: "literature" },
+  { label: "专题", kind: "topic" },
+  { label: "书籍", kind: "book" },
+  { label: "书评", kind: "reading" },
+  { label: "杂谈", kind: "musings" },
+  { label: "计划", kind: "roadmap" },
   { label: "Blog", kind: "blog" },
   { label: "Projects", kind: "project" },
   { label: "Papers", kind: "paper" },
@@ -15,7 +21,7 @@ const quickKindTabs = [
 
 <BaseLayout
   title="Search"
-  description="Search the Nocturne Research Archive across roadmap nodes, blog records, projects, papers, and artifacts."
+  description="搜索博客、研究专题、书籍、独立书评、杂谈与作品。"
   crumbs={[{ label: "Home", href: "/" }, { label: "Search" }]}
 >
   <section class="archive-page archive-search-page" id="search-page" aria-labelledby="search-page-title">
@@ -65,7 +71,6 @@ const quickKindTabs = [
             <option value="next">Planned</option>
             <option value="later">Pending</option>
           </select>
-          <button class="button archive-search-reset" type="button" id="search-reset">Reset</button>
         </div>
       </div>
     </form>
@@ -82,7 +87,7 @@ const quickKindTabs = [
       <div class="archive-empty-state" id="search-empty" hidden>
         <span aria-hidden="true">∅</span>
         <p>No matching signals.</p>
-        <p>Try a broader keyword or reset one of the filters.</p>
+        <p>尝试其他关键词，或选择更宽的筛选范围。</p>
       </div>
     </section>
   </section>
@@ -97,7 +102,6 @@ const quickKindTabs = [
       const yearSelect = document.getElementById("search-year");
       const trackSelect = document.getElementById("search-track");
       const statusSelect = document.getElementById("search-status");
-      const resetButton = document.getElementById("search-reset");
       const list = document.getElementById("search-result-list");
       const empty = document.getElementById("search-empty");
       const resultStatus = document.getElementById("search-result-status");
@@ -135,7 +139,7 @@ const quickKindTabs = [
         if (state.track !== "all") params.set("track", state.track);
         if (state.status !== "all") params.set("status", state.status);
         const next = params.toString();
-        window.history.replaceState({}, "", next ? `/search/?${next}` : "/search/");
+        window.history.replaceState(window.history.state, "", next ? `/search/?${next}` : "/search/");
       };
 
       const syncFromUrl = () => {
@@ -173,10 +177,10 @@ const quickKindTabs = [
 
       const matches = (item) => {
         const q = state.q.trim().toLowerCase();
-        const haystack = `${item.title} ${item.summary} ${(item.tags || []).join(" ")} ${item.track || ""} ${item.type || ""}`.toLowerCase();
+        const haystack = `${item.title} ${item.summary} ${(item.tags || []).join(" ")} ${(item.books || []).join(" ")} ${item.track || ""} ${item.type || ""}`.toLowerCase();
 
         const queryMatched = q.length === 0 || haystack.includes(q);
-        const kindMatched = state.kind === "all" || item.kind === state.kind;
+        const kindMatched = state.kind === "all" || item.kind === state.kind || (state.kind === "reading" && item.books?.length > 0);
         const yearMatched = state.year === "all" || String(item.year || "") === state.year;
         const trackMatched = state.track === "all" || item.track === state.track;
         const statusMatched = state.status === "all" || item.status === state.status;
@@ -211,7 +215,7 @@ const quickKindTabs = [
                     <h3>${escapeHtml(item.title)}</h3>
                     <span class="tag-chip">${escapeHtml(item.kind)}</span>
                   </div>
-                  ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
+                  ${item.summaryHtml ? `<div class="markdown-preview">${item.summaryHtml}</div>` : item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
                   ${meta ? `<p class="meta-row">${escapeHtml(meta)}</p>` : ""}
                   ${tags.length > 0 ? `<div class="meta-row">${tags.map((tag) => `<span class=\"tag-chip\">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
                   </div>
@@ -279,17 +283,6 @@ const quickKindTabs = [
 
         form?.addEventListener("submit", (event) => event.preventDefault());
 
-        resetButton?.addEventListener("click", () => {
-          state.q = "";
-          state.kind = "all";
-          state.year = "all";
-          state.track = "all";
-          state.status = "all";
-          applyControls();
-          updateUrl();
-          render();
-          if (queryInput instanceof HTMLInputElement) queryInput.focus();
-        });
       };
 
       const applyControls = () => {

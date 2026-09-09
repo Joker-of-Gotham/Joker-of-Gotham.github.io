@@ -6,7 +6,7 @@ test("homepage exposes concise real navigation and six scene stops", async({page
   await expect(page.locator("[data-observatory-chapter]")).toHaveCount(6);
   await expect(page.locator("h1")).toHaveText("Chika Komari");
   await expect(page.locator(".observatory-chapter-frame")).toHaveCount(6);
-  await expect(page.locator(".observatory-nav-shell").getByRole("link",{name:"文章",exact:true})).toHaveAttribute("href","/blog/");
+  await expect(page.locator(".observatory-nav-shell").getByRole("link",{name:"博客",exact:true})).toHaveAttribute("href","/blog/");
   await expect(page.locator(".observatory-character-layer, .observatory-supplement")).toHaveCount(0);
 });
 
@@ -15,7 +15,7 @@ test("theme persists across homepage and article navigation",async({page})=>{
   await page.goto("/");
   await page.locator("[data-theme-toggle]").click();
   await expect(page.locator("html")).toHaveAttribute("data-theme","light");
-  await page.locator(".home-site-nav").getByRole("link",{name:"文章",exact:true}).click();
+  await page.locator(".home-site-nav").getByRole("link",{name:"博客",exact:true}).click();
   await expect(page).toHaveURL(/\/blog\//);
   await expect(page.locator("html")).toHaveAttribute("data-theme","light");
   await page.reload();

@@ -76,8 +76,9 @@ test('each home section opens its own retained scene and keeps that context thro
   await expect(root).toHaveAttribute('data-render-state','ready');
   await root.locator('canvas').evaluate(canvas=>Reflect.set(window,'journeyCanvas',canvas));
   for(const [chapter,label,path,index] of [
-    ['observe','全部文章','blog',1], ['structure','方向与进展','roadmap',2],
-    ['orchestrate','全部作品','artifacts',3], ['embodiment','阅读简介','about',4]
+    ['observe','全部博客','blog',1], ['structure','问题、研读与思考','research',2],
+    ['orchestrate','全部作品','artifacts',3], ['embodiment','书架与阅读札记','reading',4],
+    ['archive-afterlight','阅读简介','about',5]
   ] as const) {
     await page.locator(`#${chapter}`).evaluate(el=>scrollTo({top:el.getBoundingClientRect().top+scrollY,behavior:'instant'}));
     await expect(root).toHaveAttribute('data-active-chapter',chapter);

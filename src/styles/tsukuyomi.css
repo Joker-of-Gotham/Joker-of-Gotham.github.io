@@ -206,7 +206,7 @@ body .archive-about-hero .button:not(.primary) { background: #08060d40; color: #
 .reading-outline summary::-webkit-details-marker { display: none; }
 .outline-summary-label { display: flex; align-items: center; gap: .5rem; font-size: .75rem; white-space: nowrap; }
 .outline-chevron { display: none; transition: transform .35s; }
-.reading-outline summary strong { position: absolute; top: 1.9rem; font-size: .6rem; font-weight: 400; opacity: .65; }
+.reading-outline summary strong { position: absolute; top: 1.9rem; font-size: .65rem; font-weight: 400; color: var(--color-muted); }
 .outline-minimap { position: absolute; top: 3.2rem; bottom: .5rem; left: .6rem; right: .5rem; display: flex; flex-direction: column; min-height: 0; overflow: hidden; transition: opacity .25s, transform .35s; }
 .outline-minimap > span { position: relative; display: block; flex: 0 0 var(--mark-size, 16px); min-height: 8px; max-height: 22px; width: calc(100% - (var(--depth) - 1) * 12%); transition: width .35s; }
 .outline-minimap > span::before { content: ''; position: absolute; height: 1px; max-height: 100%; left: 0; top: 50%; width: 100%; background: currentColor; opacity: .4; transition: opacity .3s, background .3s; }

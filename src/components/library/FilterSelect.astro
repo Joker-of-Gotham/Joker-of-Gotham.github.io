@@ -1,0 +1,12 @@
+---
+interface Props { name: string; label: string; options: {value:string; label:string}[]; }
+const { name, label, options } = Astro.props;
+const id = `catalogue-${name}-options`;
+---
+<div class="custom-select" data-catalogue-select data-label={label}>
+  <button class="custom-select-trigger" type="button" aria-label={`${label}：${options[0].label}`} aria-haspopup="listbox" aria-controls={id} aria-expanded="false">{options[0].label}</button>
+  <div class="custom-select-dropdown" id={id} role="listbox" aria-label={label}>
+    {options.map((option,index) => <button class:list={['custom-select-option',{'is-selected':index === 0}]} type="button" role="option" aria-selected={index === 0 ? 'true' : 'false'} data-value={option.value}>{option.label}</button>)}
+  </div>
+  <select data-filter={name} hidden aria-hidden="true" tabindex="-1">{options.map(option => <option value={option.value}>{option.label}</option>)}</select>
+</div>

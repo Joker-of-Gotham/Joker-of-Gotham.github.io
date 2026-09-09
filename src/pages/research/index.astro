@@ -1,0 +1,37 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import EntryList from '@/components/library/EntryList.astro';
+import CatalogueFilter from '@/components/library/CatalogueFilter.astro';
+import PaperCards from '@/components/library/PaperCards.astro';
+import { getLibrary, topicHref, inTopic } from '@/lib/content/library';
+import '@/styles/library.css';
+const { topics, entries, overviews, papers } = await getLibrary();
+const roots = topics.filter(t => !t.parent);
+const featured = [...new Set(roots.map(t => papers.find(p => p.topics.some(path => inTopic(path, t.path)))).filter(Boolean))];
+const latest = entries.filter(e => e.topics.length).sort((a,b) => b.updated.getTime() - a.updated.getTime()).slice(0,4);
+---
+<BaseLayout title="研究" description="围绕问题展开的研究札记、论文研读与持续思考。">
+  <div class="folio-page">
+    <header class="folio-masthead"><div><p class="folio-eyebrow">Research</p><h1>研究</h1><p class="folio-intro">从一个问题出发，沿着阅读与思考继续。</p></div><a class="folio-text-link" href="/research/library/">文献索引 ↗</a></header>
+    <section class="folio-section" data-catalogue aria-label="研究方向">
+      <div class="folio-section-head"><h2>研究方向</h2></div>
+      <CatalogueFilter placeholder="搜索方向、问题或研究记录" />
+      <div class="research-directions">
+        {roots.map((root,index) => {
+          const overview = overviews.find(e => e.data.research[0] === root.path);
+          const children = topics.filter(t => t.parent === root.path);
+          return <section class="research-direction" data-catalogue-item data-search={`${root.path} ${root.entries.map(e => `${e.title} ${e.summary} ${e.topics.join(' ')}`).join(' ')}`}>
+            <span class="direction-number" aria-hidden="true">{String(index + 1).padStart(2,'0')}</span>
+            <div class="direction-content"><a class="direction-title" href={topicHref(root.path)}><h2>{root.title}</h2><span aria-hidden="true">↗</span></a>
+              {overview?.data.summary && <p>{overview.data.summary}</p>}
+              <div class="direction-children">{children.map(t => <a href={topicHref(t.path)}>{t.title}<span aria-hidden="true">↗</span></a>)}</div>
+              <a class="direction-latest" href={root.entries[0]?.href ?? topicHref(root.path)}><span class="folio-meta">沿着线索</span>{root.entries[0]?.title ?? '阅读专题导读'}</a>
+            </div>
+          </section>;
+        })}
+      </div>
+    </section>
+    <section class="folio-section"><div class="folio-section-head"><h2>研读札记</h2><a href="/roadmap/" class="folio-text-link">计划 ↗</a></div><EntryList entries={latest} /></section>
+    {featured.length > 0 && <section class="folio-section research-papers" aria-label="论文收藏"><div class="folio-section-head"><h2>论文收藏</h2><a class="folio-text-link" href="/research/library/">全部 {papers.length} 篇 ↗</a></div><PaperCards papers={featured} /></section>}
+  </div>
+</BaseLayout>

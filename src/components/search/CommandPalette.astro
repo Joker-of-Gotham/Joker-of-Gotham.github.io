@@ -13,12 +13,12 @@
     </header>
 
     <div class="command-search-row">
-      <label class="sr-only" for="command-input">搜索文章、成果与路线图</label>
+      <label class="sr-only" for="command-input">搜索文章、研究、书籍与作品</label>
       <input
         id="command-input"
         class="input command-input"
         type="search"
-        placeholder="搜索文章、成果与路线图……"
+        placeholder="搜索文章、研究、书籍与作品……"
         autocomplete="off"
         aria-controls="command-results"
         aria-describedby="command-status"
@@ -159,6 +159,8 @@
     };
 
     const open = async (initialQuery = "") => {
+      // Close the drawer before capturing focus or locking the background for search.
+      document.dispatchEvent(new Event("site:before-command-open"));
       const wasHidden = root.hidden;
       if (wasHidden) {
         restoreTarget = document.activeElement instanceof HTMLElement ? document.activeElement : null;

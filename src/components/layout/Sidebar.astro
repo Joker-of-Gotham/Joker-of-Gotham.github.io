@@ -16,11 +16,14 @@ interface Props {
 const { pathname, quickLinks, pinnedTracks } = Astro.props;
 
 const navItems = [
-  { label: "Home", href: "/", icon: "home" as const },
-  { label: "Roadmap", href: "/roadmap/", icon: "roadmap" as const },
-  { label: "Blog", href: "/blog/", icon: "blog" as const },
-  { label: "Artifacts", href: "/artifacts/", icon: "artifact" as const },
-  { label: "About", href: "/about/", icon: "about" as const }
+  { label: "首页", href: "/", icon: "home" as const },
+  { label: "博客", href: "/blog/", icon: "blog" as const },
+  { label: "研究", href: "/research/", icon: "roadmap" as const },
+  { label: "阅读", href: "/reading/", icon: "blog" as const },
+  { label: "杂谈", href: "/musings/", icon: "blog" as const },
+  { label: "作品", href: "/artifacts/", icon: "artifact" as const },
+  { label: "计划", href: "/roadmap/", icon: "roadmap" as const },
+  { label: "关于", href: "/about/", icon: "about" as const }
 ];
 
 const activePath = pathname.endsWith("/") ? pathname : `${pathname}/`;

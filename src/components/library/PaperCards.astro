@@ -1,0 +1,23 @@
+---
+import { topicHref, paperAnchor, type CollectedPaper } from '@/lib/content/library-model';
+interface Props { papers: CollectedPaper[]; headingLevel?: 2 | 3; filterable?: boolean; excludeEntry?: string; }
+const { papers, headingLevel = 3, filterable = false, excludeEntry } = Astro.props;
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
+const abstractLabels = { original: '原文', summary: '中文整理', translation: '中文翻译' };
+---
+<ul class="paper-library">
+  {papers.map(p => {
+    const discussions = p.entries.filter(e => e.id !== excludeEntry);
+    return <li class="paper-card" id={paperAnchor(p.url)} data-catalogue-item={filterable ? '' : undefined} data-search={`${p.title} ${p.abstract ?? ''} ${p.authors?.join(' ') ?? ''} ${p.topics.join(' ')}`}>
+      <article>
+        <div class="paper-card-meta"><span>{p.venue || 'Paper'}</span>{p.year && <span>{p.year}</span>}</div>
+        <Heading class="paper-card-title"><a href={p.url} target="_blank" rel="noreferrer">{p.title}<span aria-hidden="true"> ↗</span></a></Heading>
+        {p.authors?.length > 0 && <p class="paper-authors">{p.authors.join(' · ')}</p>}
+        <div class="paper-abstract"><p class="paper-abstract-label">Abstract <span>· {abstractLabels[p.abstract_kind || 'summary']}</span></p><p>{p.abstract || '摘要待补充。可先访问论文原文。'}</p></div>
+        <div class="paper-card-links"><a href={p.url} target="_blank" rel="noreferrer" aria-label={`论文原文：${p.title}`}>论文原文 <span aria-hidden="true">↗</span></a>{p.pdf && <a href={p.pdf} target="_blank" rel="noreferrer" aria-label={`PDF：${p.title}`}>PDF <span aria-hidden="true">↗</span></a>}</div>
+        {p.topics.length > 0 && <div class="paper-topics">{p.topics.map(t => <a href={topicHref(t)}>{t.split('/').join(' / ')} <span aria-hidden="true">→</span></a>)}</div>}
+        {discussions.length > 0 && <div class="paper-discussions"><span class="folio-meta">关联研读与思考 · {discussions.length}</span>{discussions.map(e => <a href={e.href}>{e.title} <span aria-hidden="true">→</span></a>)}</div>}
+      </article>
+    </li>;
+  })}
+</ul>

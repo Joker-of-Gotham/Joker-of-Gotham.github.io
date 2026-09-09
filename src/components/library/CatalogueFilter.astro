@@ -1,0 +1,22 @@
+---
+import Icon from '@/components/ui/Icon.astro';
+import FilterSelect from './FilterSelect.astro';
+interface Props { placeholder: string; statuses?: string[]; categories?: string[]; kinds?: { value: string; label: string }[]; }
+const { placeholder, statuses = [], categories = [], kinds = [] } = Astro.props;
+---
+<div class="roadmap-toolbar catalogue-toolbar" data-catalogue-controls hidden>
+  <label class="input icon-input-wrap"><Icon name="search" size={15} /><span class="sr-only">{placeholder}</span><input class="unstyled-input" type="search" name="q" placeholder={placeholder} autocomplete="off" data-filter="q" /></label>
+  {(statuses.length + categories.length + kinds.length) > 0 && <details class="blog-filter-options">
+    <summary>筛选<span class="catalogue-filter-count" data-filter-count></span></summary>
+    <div class="blog-filter-grid">
+      {statuses.length > 0 && <FilterSelect name="status" label="阅读状态" options={[{value:'',label:'全部状态'}, ...statuses.map(s=>({value:s,label:s}))]} />}
+      {categories.length > 0 && <FilterSelect name="category" label="书籍题材" options={[{value:'',label:'全部题材'}, ...categories.map(s=>({value:s,label:s}))]} />}
+      {kinds.length > 0 && <FilterSelect name="kind" label="内容类型" options={[{value:'',label:'全部内容'}, ...kinds]} />}
+    </div>
+  </details>}
+</div>
+<p class="folio-filter-status" role="status" aria-live="polite" data-catalogue-status hidden></p>
+<script>
+  import { installCatalogueFilters } from '@/lib/catalogue-filter';
+  installCatalogueFilters();
+</script>

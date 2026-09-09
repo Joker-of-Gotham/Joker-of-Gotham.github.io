@@ -1,0 +1,16 @@
+---
+import BookCover from './BookCover.astro';
+import { bookHref, type Library } from '@/lib/content/library';
+interface Props { books: Library['books']; compact?: boolean; }
+const { books, compact = false } = Astro.props;
+---
+<ul class:list={['book-grid', { 'book-grid--compact': compact }]}>
+  {books.map((book, index) => <li data-catalogue-item data-search={`${book.title} ${book.author} ${book.summary} ${book.categories.join(' ')}`} data-status={book.status ?? ''} data-category={book.categories.join('|')}>
+    <a class="book-card" href={bookHref(book.title)}>
+      <BookCover title={book.title} author={book.author} cover={book.cover} index={index} />
+      <div class="book-card-copy"><h2>{book.title}</h2><p>{book.author || book.categories.join(' · ') || '读书笔记'}</p>
+        <span class="folio-meta">{book.recommended && <span>推荐</span>}{book.status && <span>{book.status}</span>}{book.articles.length > 0 ? <span>{book.articles.length} 篇文字</span> : <span>尚未写下书评</span>}</span>
+      </div>
+    </a>
+  </li>)}
+</ul>

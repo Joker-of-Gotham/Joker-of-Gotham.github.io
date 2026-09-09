@@ -3,7 +3,7 @@
 export type BlogEntry = CollectionEntry<"blog">;
 export type RoadmapEntry = CollectionEntry<"roadmap">;
 export type ArtifactEntry = CollectionEntry<"artifacts">;
-export type CommandItemKind = "page" | "roadmap" | "blog" | "artifact";
+export type CommandItemKind = "page" | "roadmap" | "blog" | "artifact" | "research" | "reading" | "musings" | "topic" | "book";
 
 export interface SiteConfigData {
   hero: {
@@ -117,9 +117,15 @@ export async function getSiteConfig() {
 
 export async function getCommandPaletteItems() {
   if (!commandItemsCache) {
-    commandItemsCache = Promise.all([getRoadmapNodes(), getPublishedBlogPosts(), getArtifacts()]).then(([nodes, posts, artifacts]) => [
+    commandItemsCache = Promise.all([getRoadmapNodes(), getPublishedBlogPosts(), getArtifacts(), import('./library').then(m => m.getLibrary())]).then(([nodes, posts, artifacts, library]) => [
+      { title: "研究", url: "/research/", kind: "page" as const },
+      { title: "阅读", url: "/reading/", kind: "page" as const },
+      { title: "杂谈", url: "/musings/", kind: "page" as const },
+      ...library.entries.filter(e => e.section !== 'blog').map(e => ({ title: e.title, url: e.href, kind: e.section as CommandItemKind })),
+      ...library.books.map(b => ({ title: b.title, url: `/reading/books/${encodeURIComponent(b.title)}/`, kind: 'book' as const })),
+      ...library.topics.map(t => ({ title: t.path.split('/').join(' / '), url: `/research/topics/${t.path.split('/').map(encodeURIComponent).join('/')}/`, kind: 'topic' as const })),
       { title: "Home", url: "/", kind: "page" as const },
-      { title: "Roadmap", url: "/roadmap/", kind: "page" as const },
+      { title: "计划", url: "/roadmap/", kind: "page" as const },
       { title: "Blog", url: "/blog/", kind: "page" as const },
       { title: "Artifacts", url: "/artifacts/", kind: "page" as const },
       { title: "About", url: "/about/", kind: "page" as const },

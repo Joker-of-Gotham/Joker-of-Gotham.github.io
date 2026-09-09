@@ -140,7 +140,7 @@ const executionRows = subtreeRows.map((row: { node: CollectionEntry<"roadmap">; 
 
 const crumbs = [
   { label: "Home", href: "/" },
-  { label: "Roadmap", href: "/roadmap/" },
+  { label: "计划", href: "/roadmap/" },
   ...parentChain.map((node) => ({ label: node.data.title, href: `/roadmap/${normalizeSlug(node)}/` })),
   { label: entry.data.title }
 ];
@@ -186,7 +186,7 @@ const crumbs = [
           </div>
           <p class="archive-node-summary">{entry.data.summary}</p>
         </div>
-        <a class="button archive-back-link" href="/roadmap/"><span aria-hidden="true">←</span> Back to Roadmap</a>
+        <a class="button archive-back-link" href="/roadmap/"><span aria-hidden="true">←</span> 返回计划</a>
       </div>
 
       <div class="archive-node-progress">
@@ -273,7 +273,7 @@ const crumbs = [
       </div>
     </section>
 
-    <article class="archive-reading-shell archive-roadmap-reading" aria-label="Roadmap node notes">
+    <article class="archive-reading-shell archive-roadmap-reading" aria-label="计划说明">
       <div class="archive-reading-marker" aria-hidden="true">
         <span>TRAJECTORY NOTE</span>
         <span>{currentSlug}</span>

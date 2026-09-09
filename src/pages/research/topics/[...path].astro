@@ -1,0 +1,37 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import EntryList from '@/components/library/EntryList.astro';
+import CatalogueFilter from '@/components/library/CatalogueFilter.astro';
+import PaperCards from '@/components/library/PaperCards.astro';
+import { getLibrary, topicHref, cleanTopic, kindLabels, inTopic } from '@/lib/content/library';
+import '@/styles/archive.css';
+import '@/styles/library.css';
+export async function getStaticPaths() { const lib = await getLibrary(); return lib.topics.map(topic => ({ params: { path: topic.path }, props: { topic } })); }
+const { topic } = Astro.props;
+const { topics, overviews, papers: allPapers } = await getLibrary();
+const children = topics.filter(t => t.parent === topic.path);
+const overview = overviews.find(e => cleanTopic(e.data.research[0] ?? '') === topic.path);
+const rendered = overview ? await overview.render() : undefined;
+const Content = rendered?.Content;
+const direct = topic.entries.filter(e => e.topics.includes(topic.path));
+const parts = topic.path.split('/');
+const siblings = topics.filter(t => t.depth === 1 || t.parent === topic.parent || t.parent === topic.path || parts.slice(0,-1).some((_,i) => t.path === parts.slice(0,i+1).join('/')));
+const papers = allPapers.filter(p => p.topics.some(t => inTopic(t, topic.path)));
+---
+<BaseLayout title={topic.title} description={overview?.data.summary || `${topic.title}的研究记录与论文研读。`} pagefindFilters={{kind:'topic'}}>
+  <div class="folio-page folio-page--topic">
+    <nav class="folio-breadcrumb" aria-label="当前位置"><a href="/research/">研究</a>{parts.map((p,i) => <><span aria-hidden="true">/</span>{i < parts.length - 1 ? <a href={topicHref(parts.slice(0,i+1).join('/'))}>{p}</a> : <span aria-current="page">{p}</span>}</>)}</nav>
+    <header class="folio-masthead"><div><p class="folio-eyebrow">Research notebook</p><h1>{topic.title}</h1>{overview?.data.summary && <p class="folio-intro">{overview.data.summary}</p>}</div></header>
+    <div class="research-workspace">
+      <aside class="topic-navigation" data-pagefind-ignore><details open><summary>专题目录</summary><nav aria-label="研究专题">{siblings.map(t => <a href={topicHref(t.path)} aria-current={t.path === topic.path ? 'page' : undefined} style={`--topic-depth:${Math.min(t.depth - 1,3)}`}>{t.title}</a>)}</nav></details></aside>
+      <div class="topic-body">
+        {Content && <div class="content topic-overview"><Content /></div>}
+        {papers.length > 0 && <section class="folio-section" aria-label="专题论文"><div class="folio-section-head"><h2>相关论文 <span class="paper-count">{papers.length}</span></h2><a class="folio-text-link" href="/research/library/">文献索引 ↗</a></div><PaperCards papers={papers} /></section>}
+        {children.length > 0 && <section class="folio-section"><h2>继续探索</h2><div class="topic-children">{children.map(t => <a href={topicHref(t.path)}><h3>{t.title}</h3><p>{overviews.find(e => cleanTopic(e.data.research[0] ?? '') === t.path)?.data.summary || t.entries[0]?.summary}</p><span class="folio-meta">{t.entries.length} 篇记录 <span aria-hidden="true">↗</span></span></a>)}</div></section>}
+        {direct.length > 0 && <section class="folio-section" data-catalogue><h2>阅读与思考</h2><CatalogueFilter placeholder="在本专题内查找" kinds={Object.entries(kindLabels).map(([value,label]) => ({value,label}))} /><EntryList entries={[...direct].sort((a,b) => a.order - b.order || b.date.getTime() - a.date.getTime())} /></section>}
+        {children.length > 0 && <section class="folio-section"><h2>专题近况</h2><EntryList entries={topic.entries.slice(0,3)} compact /></section>}
+        {!direct.length && !children.length && !Content && !papers.length && <p class="folio-empty">这个专题还在整理中。</p>}
+      </div>
+    </div>
+  </div>
+</BaseLayout>

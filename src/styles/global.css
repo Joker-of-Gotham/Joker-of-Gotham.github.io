@@ -147,6 +147,7 @@ body[data-command-open] { overflow: hidden; }
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-gutter: stable;
+  overscroll-behavior-y: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--color-muted) transparent;
   border-inline-end: var(--line-hairline) solid var(--component-nav-border);

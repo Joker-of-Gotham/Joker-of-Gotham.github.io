@@ -111,3 +111,12 @@ html[data-theme="light"] .observatory { color: #253f46; }
   .home-intro p { margin-block: .6rem 1rem; }
   .home-intro .home-links { margin-top: 1rem; }
 }
+/* Content stays in the established six scenes; new sections use quiet text links. */
+.home-topic-links { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin: 1.8rem 0; }
+.home-topic-links a { min-height: 44px; display: inline-flex; align-items: center; color: inherit; text-decoration: none; }
+.home-topic-links a:hover { text-decoration: underline; text-underline-offset: .4em; }
+body .observatory[data-dom-motion="active"] .home-reading { top: 61vh; }
+@media(max-width:720px) {
+  body .observatory[data-dom-motion="active"] .home-reading { top: 68vh; }
+  .home-topic-links { gap: .5rem 1.2rem; }
+}

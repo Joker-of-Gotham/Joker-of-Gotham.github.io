@@ -70,7 +70,7 @@ const normalizedLinks: Array<{ label: string; url: string; isInternal: boolean }
   const url = normalizeContentLink(link.url);
   const isInternal = url.startsWith("/");
   return {
-    ...link,
+    label: link.label,
     url,
     isInternal
   };
