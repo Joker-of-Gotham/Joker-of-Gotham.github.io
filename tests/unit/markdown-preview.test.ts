@@ -12,11 +12,14 @@ describe('shared Markdown previews', () => {
     expect(html).toContain('katex-display');
     expect(html).not.toContain('katex-error');
   });
-  it('recovers truncated legacy summaries from the complete body before taking an excerpt', async () => {
-    const {html} = await renderPreview('定义\r **图**\r $$ E_1(G) \\leftrightarrow E', '## 定义\n\n**图**\n\n$$ E_1(G) \\leftrightarrow E_2(G) $$');
+  it('uses only the authored summary even with bare CRs or unfinished Markdown', async () => {
+    const {html} = await Reflect.apply(renderPreview, null, ['简介\r\r**图**\r\r未完成的 **强调', '正文内容\n\n```bash\necho wrong\n```']);
     expect(html).toContain('<strong>图</strong>');
-    expect(html).toContain('katex');
-    expect(html).not.toMatch(/<h\d|katex-error|\$\$/);
+    expect(html).toContain('简介');
+    expect(html).not.toMatch(/正文内容|echo wrong|astro-code/);
+  });
+  it('leaves a missing summary empty even when a legacy caller supplies the body', async () => {
+    expect(await Reflect.apply(renderPreview, null, ['', '正文不应作为简介'])).toEqual({html:'',text:''});
   });
   it('does not cut atomic formula or inline code at the excerpt boundary', async () => {
     const {html} = await renderPreview('a'.repeat(350)+' $\\frac{x^2 + y^2}{z^2}$ and more');

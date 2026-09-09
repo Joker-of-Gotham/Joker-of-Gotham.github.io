@@ -9,6 +9,21 @@ import { getLibrary } from '../../src/lib/content/library';
 const writing = (collection:string, id:string, extra = {}) => ({collection,id,slug:id,data:{title:id,date:new Date('2026-09-09'),summary:'',tags:[],books:[],research:[],kind:'note',order:0,papers:[],...extra}});
 describe('public content graph', () => {
   beforeEach(() => { for (const key of Object.keys(rows)) delete rows[key]; });
+  it('uses frontmatter summaries across every writing section without body fallback', async () => {
+    for (const section of ['blog','research','reading','musings']) {
+      rows[section] = [
+        {...writing(section,'intro',{summary:'作者简介\r\r**重点** 与未闭合的 **标记'}),body:'正文泄漏\n\n```bash\necho wrong\n```'},
+        {...writing(section,'empty'),body:'正文泄漏'},
+      ];
+    }
+    const lib = await getLibrary();
+    expect(lib.entries).toHaveLength(8);
+    for (const entry of lib.entries) {
+      expect(entry.summaryHtml).not.toMatch(/正文泄漏|echo wrong|astro-code/);
+      if (entry.title === 'intro') expect(entry.summaryHtml).toContain('<strong>重点</strong>');
+      else expect(entry.summaryHtml).toBe('');
+    }
+  });
   it('aggregates independent and blog writings without cloning, and excludes draft content and book links', async () => {
     rows.blog = [writing('blog','one',{books:['《同一本书》'],research:['方向/问题']})];
     rows.reading = [writing('reading','two',{books:['同一本书','隐藏书目']}),writing('reading','private',{draft:true,books:['不公开']})];

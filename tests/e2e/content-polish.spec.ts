@@ -17,16 +17,16 @@ test('research sequence and plan navigation use the requested labels', async ({p
 
 test('the same real article renders Markdown consistently in book, blog and search lists', async ({page}) => {
   await page.goto('/reading/books/'+encodeURIComponent('图论导论')+'/');
-  const entry = page.locator('.folio-entry').filter({hasText:'定义与案例'});
+  const entry = page.locator('.folio-entry').filter({hasText:'路径和环'});
   await expect(entry.locator('strong')).not.toHaveCount(0);
   await expect(entry.locator('.katex')).not.toHaveCount(0);
   await expect(entry.locator('.katex-error')).toHaveCount(0);
   await expect(entry.locator('.markdown-preview :is(a,button,input,[tabindex])')).toHaveCount(0);
   const html = await entry.locator('.markdown-preview').innerHTML();
   await page.goto('/blog/');
-  const blog = page.locator('[data-blog-item]').filter({hasText:'定义与案例'});
+  const blog = page.locator('[data-blog-item]').filter({hasText:'路径和环'});
   expect(await blog.locator('.markdown-preview').innerHTML()).toBe(html);
-  await page.goto('/search/?q='+encodeURIComponent('定义与案例'));
+  await page.goto('/search/?q='+encodeURIComponent('路径和环'));
   await expect(page.locator('.archive-search-result')).toHaveCount(1);
   expect(await page.locator('.archive-search-result .markdown-preview').innerHTML()).toBe(html);
 });

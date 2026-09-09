@@ -1,6 +1,7 @@
 ﻿---
 import "@/styles/main.css";
 import "@/styles/markdown-preview.css";
+import "@/styles/route-transitions.css";
 import { ClientRouter } from "astro:transitions";
 import Sidebar from "@/components/layout/Sidebar.astro";
 import Topbar from "@/components/layout/Topbar.astro";
@@ -82,7 +83,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
       variant === "observatory" ? (
         <div class="site-shell site-shell--observatory" data-variant="observatory">
           <div class="main-area main-area--observatory">
-            <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body transition:name="page-content">
+            <main id="main-content" class="observatory-main page-main" tabindex="-1" data-pagefind-body>
               <PagefindFilters filters={pagefindFilters} />
               <slot name="full-bleed" />
               <slot />
@@ -94,7 +95,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
           <div class="main-area">
             <Topbar title={title} crumbs={crumbs} />
             <slot name="full-bleed" />
-            <main id="main-content" class="main-container page-main" tabindex="-1" data-pagefind-body transition:name="page-content">
+            <main id="main-content" class="main-container page-main" tabindex="-1" data-pagefind-body>
               <PagefindFilters filters={pagefindFilters} />
               <slot />
             </main>
@@ -442,7 +443,7 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
       };
 
       const decorateCodeBlocks = (scope = document) => {
-        scope.querySelectorAll("pre").forEach((pre) => {
+        scope.querySelectorAll(".content pre").forEach((pre) => {
           if (!(pre instanceof HTMLElement)) return;
           if (pre.dataset.codeDecorated === "1") return;
 

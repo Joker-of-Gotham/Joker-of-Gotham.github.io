@@ -39,8 +39,7 @@ export async function getLibrary() {
     papers: entry.data.papers.map(p => ({ ...p, title: p.title, url: p.url })),
   })).sort((a, b) => b.date.getTime() - a.date.getTime());
   await Promise.all(entries.map(async item => {
-    const source = [...blog, ...newer].find(e => `${e.collection}:${e.id}` === item.id)!;
-    const preview = await renderPreview(item.summary, source.body);
+    const preview = await renderPreview(item.summary);
     item.summaryHtml = preview.html;
     item.summary = preview.text;
   }));

@@ -20,7 +20,7 @@ const {
 } = Astro.props;
 ---
 
-<div class="observatory-visual" data-observatory-visual aria-hidden="true" transition:persist="tsukuyomi-world" transition:name="tsukuyomi-world">
+<div class="observatory-visual" data-observatory-visual aria-hidden="true" transition:persist="tsukuyomi-world">
   <picture>
   <source data-os-light-source media="(prefers-color-scheme: light) and (max-width: 720px)" srcset={worldPlateLightPortrait} />
   <source data-os-light-source media="(prefers-color-scheme: light)" srcset={worldPlateLight} />

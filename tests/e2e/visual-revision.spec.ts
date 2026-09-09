@@ -58,11 +58,15 @@ test("relative outline includes third-level sections and code really changes the
   const third=page.locator(".archive-prose h4").first();
   const id=await third.getAttribute("id");
   await expect(page.locator(`.toc-outline-item.depth-3 a[href="#${id}"]`)).toHaveCount(1);
+  // Mermaid source is asynchronously replaced by SVG; inspect an actual code
+  // block so both theme samples refer to the same stable element.
+  const code=page.locator('.archive-prose pre.astro-code:not([data-language="mermaid"])').first();
+  await expect(code).toHaveAttribute('data-language', /^(?!mermaid$).+/);
   const colors=[];
   for(const theme of ["dark","light"]){
     await page.evaluate(t=>document.documentElement.dataset.theme=t,theme);
-    colors.push(await page.locator("pre.astro-code").first().evaluate(el=>({background:getComputedStyle(el).backgroundColor,token:getComputedStyle(el.querySelector("span[style]")!).color})));
-    await page.locator("pre.astro-code").first().scrollIntoViewIfNeeded();
+    colors.push(await code.evaluate(el=>({background:getComputedStyle(el).backgroundColor,token:getComputedStyle(el.querySelector("span[style]")!).color})));
+    await code.scrollIntoViewIfNeeded();
     await page.screenshot({path:`${output}/code-${theme}.png`});
   }
   expect(colors[0].background).not.toBe(colors[1].background);

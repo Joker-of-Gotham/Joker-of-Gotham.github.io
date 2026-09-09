@@ -52,15 +52,10 @@ const processor = createMarkdownProcessor({
 });
 const cache = new Map<string, Promise<{html:string; text:string}>>();
 
-function sourceForPreview(summary: string, body: string) {
-  // Legacy generated summaries contain bare CRs and/or unfinished delimiters.
-  const delimiters = summary.match(/(?<!\\)\$\$|(?<!\\)\$|`{3,}|\*\*/g) ?? [];
-  const unbalanced = [...new Set(delimiters)].some(token => delimiters.filter(t=>t===token).length % 2);
-  return ((body && (/\r(?!\n)/.test(summary) || unbalanced)) || !summary.trim() ? body : summary)
-    .replace(/\r\n?/g,'\n').replace(/\{:\s*(?:\.[\w-]+\s*)+\}/g,'').trim();
-}
-export function renderPreview(summary = '', body = '') {
-  const source = sourceForPreview(summary,body);
+// Frontmatter is the sole source of a preview. Formatting problems or an empty
+// summary must never silently substitute the article's opening (or its code).
+export function renderPreview(summary = '') {
+  const source = summary.replace(/\r\n?/g,'\n').replace(/\{:\s*(?:\.[\w-]+\s*)+\}/g,'').trim();
   if (!cache.has(source)) cache.set(source, (async () => {
     const { code: html } = await (await processor).render(source);
     const text = html.replace(/<[^>]*>/g,' ').replace(/&#(x[\da-f]+|\d+);/gi,(_,value)=>{

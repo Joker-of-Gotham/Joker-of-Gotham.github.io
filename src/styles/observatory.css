@@ -1,7 +1,7 @@
 .observatory { position: relative; isolation: isolate; color: #fff2e5; background: transparent; font-family: var(--font-sans); }
 .observatory * { box-sizing: border-box; }
 .observatory a { color: inherit; }
-.observatory-visual { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; background: #142d3b; }
+.observatory-visual { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: -1; background: var(--color-background); }
 .observatory-canvas, .observatory-world-plate { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; }
 .observatory-canvas { opacity: 0; transition: opacity .6s; }
 .observatory:is([data-render-state="ready"], [data-render-state="degraded"], [data-render-state="suspended"]) .observatory-canvas { opacity: 1; }

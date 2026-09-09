@@ -8,14 +8,3 @@ body[data-scene-page] .archive-page { background: transparent; }
 @media(prefers-color-scheme:light) {
   :root:not([data-theme="dark"]) body[data-scene-page] { --color-muted: var(--color-foreground-soft); }
 }
-::view-transition-old(page-content) { animation: 140ms ease-out both page-depart; }
-::view-transition-new(page-content) { animation: 280ms cubic-bezier(.22,1,.36,1) both page-arrive; }
-::view-transition-group(site-navigation) { animation-duration: 240ms; }
-::view-transition-old(root), ::view-transition-new(root) { animation: none; }
-::view-transition-old(tsukuyomi-world) { display: none; }
-::view-transition-new(tsukuyomi-world) { animation: none; mix-blend-mode: normal; }
-@keyframes page-depart { to { opacity: 0; transform: translateY(-10px) scale(.995); } }
-@keyframes page-arrive { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-@media(prefers-reduced-motion:reduce) {
-  ::view-transition-old(page-content), ::view-transition-new(page-content) { animation: none; }
-}

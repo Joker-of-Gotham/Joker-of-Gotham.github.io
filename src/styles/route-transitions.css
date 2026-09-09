@@ -1,0 +1,22 @@
+/* One composition per page: never lift the fixed world above article surfaces
+   as an independent snapshot. DOM persistence still retains the GPU context. */
+html { background: var(--color-background); }
+[data-observatory-visual] { view-transition-name: none !important; }
+::view-transition-group(root) { animation: none; }
+::view-transition-old(root) {
+  animation: 240ms linear both route-hold;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  animation: 240ms cubic-bezier(.2, .7, .3, 1) both route-reveal;
+  mix-blend-mode: normal;
+}
+::view-transition-group(site-navigation) { animation-duration: 240ms; }
+@keyframes route-hold { from, to { opacity: 1; } }
+@keyframes route-reveal { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+html[data-motion="reduced"]::view-transition-group(*),
+html[data-motion="reduced"]::view-transition-old(*),
+html[data-motion="reduced"]::view-transition-new(*) { animation: none !important; }

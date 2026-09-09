@@ -13,6 +13,17 @@ body .site-nav :is(a, button):focus-visible { outline: 2px solid currentColor; o
 body .site-nav :is(.site-menu, .observatory-control) { appearance: none; display: inline-flex; align-items: center; gap: .5rem; border: 0; border-radius: 0; box-shadow: none; padding: .4rem 0; color: inherit; background: none; font: inherit; cursor: pointer; }
 body .site-nav :is(.home-site-nav, .observatory-nav-actions) { display: flex; align-items: center; gap: 1.8rem; }
 body .site-nav .observatory-nav-actions { margin-left: auto; }
+body .site-nav .theme-icon-toggle { position: relative; border-radius: 50%; }
+.theme-icon { position: absolute; transition: opacity 180ms ease, transform 220ms ease; }
+.theme-icon-sun { opacity: 1; transform: rotate(0) scale(1); }
+.theme-icon-moon { opacity: 0; transform: rotate(-25deg) scale(.7); }
+:root[data-theme="light"] .theme-icon-sun { opacity: 0; transform: rotate(25deg) scale(.7); }
+:root[data-theme="light"] .theme-icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) .theme-icon-sun { opacity: 0; transform: rotate(25deg) scale(.7); }
+  :root:not([data-theme="dark"]) .theme-icon-moon { opacity: 1; transform: rotate(0) scale(1); }
+}
+body .site-nav .theme-icon-toggle:hover { background: color-mix(in srgb, currentColor 8%, transparent); }
 body .site-nav .home-site-nav a { display: flex; align-items: center; min-height: 44px; }
 body .site-nav :is(.site-menu, .observatory-control) { min-height: 44px; min-width: 44px; justify-content: center; }
 body[data-shell-variant="standard"] .main-area { padding-top: 5.6rem; }
