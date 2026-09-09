@@ -25,7 +25,7 @@
 | `related_nodes` | string[] | — | 关联的 roadmap 节点 slug（见 §3） |
 | `related_artifacts` | string[] | — | 关联的 artifact slug |
 | `related_posts` | string[] | — | 手动指定的相关博客 slug（不足 4 篇用相似度补全，≥4 篇不自动算；见 §3B） |
-| `summary` | string | — | 列表与搜索简介的唯一来源，支持 Markdown；不填则不显示简介，不从正文提取 |
+| `summary` | string | — | 列表与搜索简介的唯一来源，支持行内 Markdown；跳过表格、图片、HTML、代码块及行间公式，清理截断语法；不填则不显示，不从正文提取 |
 | `cover` | string | — | 封面图，`/assets/img/covers/xxx.webp`（见 image-guide） |
 | `emoji` | string | — | 列表角标 emoji，可选 |
 | `reading_time` | int | — | 手动指定阅读时长（分钟），不填则自动估算 |
