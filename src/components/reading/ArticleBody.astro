@@ -1,0 +1,14 @@
+---
+import ReadingOutline from './ReadingOutline.astro';
+import '@/styles/archive.css';
+interface Props {
+  headings?: { depth: number; slug: string; text: string }[];
+  class?: string;
+  outline?: boolean;
+}
+const { headings = [], class: className, outline = true } = Astro.props;
+---
+{outline && <ReadingOutline headings={headings} />}
+<div class="archive-reading-shell article-reading">
+  <div class:list={['article-content content archive-prose', className]}><slot /></div>
+</div>

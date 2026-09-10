@@ -59,8 +59,8 @@ body .tree-toggle { border: 0; background: none; border-radius: 0; width: 1.5rem
 body .tree-node-title { font-size: 1rem; line-height: 1.6; }
 body .tree-progress { font-size: .75rem; }
 body .archive-reading-shell { --archive-wide-content: 100%; }
-body .page-main .archive-page .archive-prose > :is(figure, .image-grid, .mermaid-block, .katex-display, .table-wrap, table, pre),
-body .page-main .archive-page .archive-prose > p:has(> img:only-child) {
+body .page-main :is(.archive-page, .article-reading) .archive-prose > :is(figure, .image-grid, .mermaid-block, .katex-display, .table-wrap, table, pre),
+body .page-main :is(.archive-page, .article-reading) .archive-prose > p:has(> img:only-child) {
   width: 100%; inline-size: 100%; max-inline-size: 100%; margin-inline: 0;
 }
 body .content :is(img, video, iframe, figure, pre, .mermaid-block, .table-wrap) { max-width: 100%; border-radius: .2rem; }
@@ -70,13 +70,13 @@ body .content :is(th, td) { white-space: normal; overflow-wrap: anywhere; word-b
 body .content :is(th, td) :is(code, a, p) { white-space: normal; overflow-wrap: anywhere; }
 body .content :is(pre, pre.astro-code) { width: 100%; padding: 2.8rem 1.2rem 1.2rem; white-space: pre-wrap; overflow-wrap: anywhere; }
 body .content pre code { white-space: inherit; overflow-wrap: inherit; }
-body .archive-page .archive-prose h1 { font-size: 2.2rem; margin-top: 3.5rem; }
-body .archive-page .archive-prose h2 { font-size: 1.85rem; margin: 3.2rem 0 1.3rem; padding-bottom: .7rem; border-bottom: 1px solid var(--color-border-strong); }
-body .archive-page .archive-prose h2::after { display: none; }
-body .archive-page .archive-prose h3 { font-size: 1.4rem; margin: 2.4rem 0 1rem; padding-left: .8rem; border-left: 3px solid var(--color-primary); }
-body .archive-page .archive-prose h4 { font-size: 1.15rem; font-weight: 700; margin: 1.8rem 0 .8rem; color: var(--color-primary); }
-body .archive-page .archive-prose h5 { font-size: 1rem; font-weight: 700; margin: 1.6rem 0 .7rem; }
-body .archive-page .archive-prose h6 { font-size: .9rem; font-weight: 600; color: var(--color-muted); margin: 1.5rem 0 .6rem; }
+body :is(.archive-page, .article-reading) .archive-prose h1 { font-size: 2.2rem; margin-top: 3.5rem; }
+body :is(.archive-page, .article-reading) .archive-prose h2 { font-size: 1.85rem; margin: 3.2rem 0 1.3rem; padding-bottom: .7rem; border-bottom: 1px solid var(--color-border-strong); }
+body :is(.archive-page, .article-reading) .archive-prose h2::after { display: none; }
+body :is(.archive-page, .article-reading) .archive-prose h3 { font-size: 1.4rem; margin: 2.4rem 0 1rem; padding-left: .8rem; border-left: 3px solid var(--color-primary); }
+body :is(.archive-page, .article-reading) .archive-prose h4 { font-size: 1.15rem; font-weight: 700; margin: 1.8rem 0 .8rem; color: var(--color-primary); }
+body :is(.archive-page, .article-reading) .archive-prose h5 { font-size: 1rem; font-weight: 700; margin: 1.6rem 0 .7rem; }
+body :is(.archive-page, .article-reading) .archive-prose h6 { font-size: .9rem; font-weight: 600; color: var(--color-muted); margin: 1.5rem 0 .6rem; }
 @media (max-width: 720px) {
   body .topbar { padding-inline: 1rem; }
   body .topbar-primary, body .topbar-actions { gap: .6rem; }
@@ -173,12 +173,14 @@ body .content :is(th, td) { border: 0; border-bottom: 1px solid var(--color-bord
 body .content th { border-bottom: 1px solid var(--color-foreground-soft); }
 body .content tbody tr:last-child td { border-bottom: 0; }
 body .content tbody tr:nth-child(even) { background: transparent; }
-body .archive-page .archive-prose :is(h2,h3) { margin-top: 2rem; margin-bottom: .9rem; }
-body .archive-page .archive-prose h4 { margin-top: 1.5rem; margin-bottom: .7rem; }
-body .archive-page .archive-prose { display: block; }
+body :is(.archive-page, .article-reading) .archive-prose :is(h2,h3) { margin-top: 2rem; margin-bottom: .9rem; }
+body :is(.archive-page, .article-reading) .archive-prose h4 { margin-top: 1.5rem; margin-bottom: .7rem; }
+body :is(.archive-page, .article-reading) .archive-prose { display: block; }
 body .archive-prose > :is(p, ul, ol, blockquote) { margin-block: 1em; }
 body .archive-prose > :is(figure, .image-grid, .mermaid-block, pre), body .archive-prose > p:has(> img) { margin-block: 1.8rem; }
 body .archive-prose .image-grid > figure { margin: 0; }
+/* Legacy callouts use the same wrapper treatment on every writing route. */
+body .content blockquote:has(> p:is(.callout, [class*="prompt-"]):only-child) { padding: 0; border: 0; background: transparent; box-shadow: none; margin: 0; }
 body .content pre.astro-code { background: var(--shiki-dark-bg, #16121d) !important; color: var(--shiki-dark, #e1dce7) !important; border: 1px solid var(--color-border); border-radius: .3rem; box-shadow: none; backdrop-filter: none; scrollbar-gutter: auto; }
 body .content pre.astro-code span { color: var(--shiki-dark) !important; }
 body .content pre.astro-code::before { border: 0; background: transparent; color: var(--color-muted); padding: 0; left: 1.2rem; top: .7rem; }

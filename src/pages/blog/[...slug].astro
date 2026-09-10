@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import ArticleBody from '@/components/reading/ArticleBody.astro';
 import Card from "@/components/ui/Card.astro";
 import Comments from "@/components/ui/Comments.astro";
 import ResponsiveCover from "@/components/media/ResponsiveCover.astro";
@@ -18,9 +19,6 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props as { entry: BlogEntry };
 const { Content, headings } = await entry.render();
-type RenderHeading = (typeof headings)[number];
-const documentHeadingDepth = Math.min(...headings.map((heading: RenderHeading) => heading.depth), 2);
-const tocHeadings = headings.filter((heading: RenderHeading) => heading.depth <= 6);
 const [posts, nodes, artifacts] = await Promise.all([getPublishedBlogPosts(), getRoadmapNodes(), getArtifacts()]);
 
 const currentSlug = normalizeSlug(entry);
@@ -132,37 +130,7 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
       <DirectoryTrail section="blog" id={entry.id} />
     </header>
 
-    {tocHeadings.length > 0 && (
-      <details class="reading-outline" data-toc-dock style={`--outline-count:${tocHeadings.length}`}>
-        <summary aria-label="展开或收起文章目录">
-          <span class="outline-summary-label">目录 <span class="outline-chevron" aria-hidden="true">⌄</span></span>
-          <strong data-toc-progress>0%</strong>
-          <span class="outline-minimap" aria-hidden="true">
-            {tocHeadings.map((heading: { depth: number; slug: string; text: string }) => <span data-outline-mark style={`--depth:${heading.depth - documentHeadingDepth + 1}`}></span>)}
-          </span>
-        </summary>
-        <nav class="outline-scroll" aria-label="文章目录" tabindex="0">
-          <ul class="toc-outline">
-            {tocHeadings.map((heading: { depth: number; slug: string; text: string }) => {
-              const depth = heading.depth - documentHeadingDepth + 1;
-              return <li class={`toc-outline-item depth-${depth}`} data-toc-depth={depth} style={`--depth:${depth}`}>
-                <a href={`#${heading.slug}`} data-toc-link>{heading.text}</a>
-              </li>;
-            })}
-          </ul>
-        </nav>
-      </details>
-    )}
-
-    <div class="archive-reading-shell">
-      <div class="archive-reading-marker" aria-hidden="true">
-        <span>NOCTURNE</span>
-        <span>{currentSlug}</span>
-      </div>
-      <div class="article-content content archive-prose">
-        <Content />
-      </div>
-    </div>
+    <ArticleBody headings={headings}><Content /></ArticleBody>
 
     <footer class="archive-document-footer">
       <section class="archive-related-section" aria-labelledby="related-roadmap-title" data-animate>
@@ -222,37 +190,4 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
     </footer>
   </article>
 
-  <script>
-    import { installReadingOutline } from '@/lib/reading-outline';
-    installReadingOutline();
-  </script>
-  <script is:inline>
-    const legacyMarkerOnlyPattern = /^\{\:\s*(?:\.[A-Za-z0-9_-]+\s*)+\}$/;
-    document.querySelectorAll(".content p, .content blockquote p").forEach((node) => {
-      const text = node.textContent?.trim();
-      if (!text || !legacyMarkerOnlyPattern.test(text)) return;
-
-      const classes = text.match(/\.[A-Za-z0-9_-]+/g)?.map((item) => item.slice(1)) ?? [];
-      const previousElement = node.previousElementSibling;
-      const target = previousElement ?? node.parentElement?.closest("blockquote, li, div, section");
-
-      if (target && classes.length > 0) {
-        target.classList.add(...classes);
-      }
-
-      node.remove();
-    });
-
-    document.querySelectorAll(".content blockquote > p.callout, .content blockquote > p[class*='prompt-']").forEach((node) => {
-      const wrapper = node.parentElement;
-      if (!(wrapper instanceof HTMLElement) || wrapper.children.length !== 1) return;
-
-      node.classList.forEach((className) => wrapper.classList.add(className));
-      wrapper.style.padding = "0";
-      wrapper.style.border = "0";
-      wrapper.style.background = "transparent";
-      wrapper.style.boxShadow = "none";
-      wrapper.style.margin = "0";
-    });
-  </script>
 </BaseLayout>

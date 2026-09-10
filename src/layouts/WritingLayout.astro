@@ -1,4 +1,5 @@
 ---
+import ArticleBody from "@/components/reading/ArticleBody.astro";
 import BaseLayout from './BaseLayout.astro';
 import WritingLinks from '@/components/library/WritingLinks.astro';
 import EntryList from '@/components/library/EntryList.astro';
@@ -19,7 +20,6 @@ const related = library.entries.filter(e => e.id !== me.id && (me.books.length ?
 if (me.books.length) related.sort((a,b) => a.order - b.order || a.date.getTime() - b.date.getTime());
 const home = `/${entry.collection}/`;
 const section = sectionLabels[entry.collection];
-const depth = Math.min(...headings.map(h => h.depth), 2);
 const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.id));
 ---
 <BaseLayout title={entry.data.title} description={entry.data.summary} pagefindFilters={{ kind: entry.collection, tags: entry.data.tags }}>
@@ -40,11 +40,7 @@ const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.i
       {entry.collection !== 'research' && <DirectoryTrail section={entry.collection} id={entry.id} />}
       </div>
     </header>
-    {headings.length > 2 && <details class="reading-outline" data-toc-dock style={`--outline-count:${headings.length}`}>
-      <summary aria-label="展开或收起文章目录"><span class="outline-summary-label">目录 <span class="outline-chevron" aria-hidden="true">⌄</span></span><strong data-toc-progress>0%</strong><span class="outline-minimap" aria-hidden="true">{headings.map(h => <span data-outline-mark style={`--depth:${h.depth - depth + 1}`}></span>)}</span></summary>
-      <nav class="outline-scroll" aria-label="文章目录" tabindex="0"><ul class="toc-outline">{headings.map(h => <li class={`toc-outline-item depth-${h.depth - depth + 1}`} data-toc-depth={h.depth - depth + 1} style={`--depth:${h.depth - depth + 1}`}><a href={`#${h.slug}`} data-toc-link>{h.text}</a></li>)}</ul></nav>
-    </details>}
-    <div class="archive-reading-shell"><div class="article-content content archive-prose"><Content /></div></div>
+    <ArticleBody headings={headings}><Content /></ArticleBody>
     <footer class="folio-document-footer">
       {citedPapers.length > 0 && <section class="folio-section"><h2>文中论文</h2><PaperCards papers={citedPapers} excludeEntry={me.id} /></section>}
       {entry.data.sources.length > 0 && <details class="folio-sources"><summary>资料来源与整理说明</summary><ul>{entry.data.sources.map(s => <li><a href={s.url} target="_blank" rel="noreferrer">{s.title} ↗</a></li>)}</ul></details>}
@@ -53,4 +49,3 @@ const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.i
     </footer>
   </article>
 </BaseLayout>
-<script>import { installReadingOutline } from '@/lib/reading-outline'; installReadingOutline();</script>

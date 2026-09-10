@@ -1,0 +1,16 @@
+---
+interface Props { headings: { depth: number; slug: string; text: string }[]; }
+const headings = Astro.props.headings.filter(h => h.depth <= 6);
+const depth = Math.min(...headings.map(h => h.depth), 2);
+---
+{headings.length > 0 && <details class="reading-outline" data-toc-dock style={`--outline-count:${headings.length}`}>
+  <summary aria-label="展开或收起文章目录">
+    <span class="outline-summary-label">目录 <span class="outline-chevron" aria-hidden="true">⌄</span></span>
+    <strong data-toc-progress>0%</strong>
+    <span class="outline-minimap" aria-hidden="true">{headings.map(h => <span data-outline-mark style={`--depth:${h.depth - depth + 1}`}></span>)}</span>
+  </summary>
+  <nav class="outline-scroll" aria-label="文章目录" tabindex="0"><ul class="toc-outline">
+    {headings.map(h => <li class={`toc-outline-item depth-${h.depth - depth + 1}`} data-toc-depth={h.depth - depth + 1} style={`--depth:${h.depth - depth + 1}`}><a href={`#${h.slug}`} data-toc-link>{h.text}</a></li>)}
+  </ul></nav>
+</details>}
+<script>import { installReadingOutline } from '@/lib/reading-outline'; installReadingOutline();</script>

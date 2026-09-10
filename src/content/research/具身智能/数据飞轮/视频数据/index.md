@@ -225,6 +225,150 @@ $$
 
 潜在动作（Latent Actions）通过从未标注人类视频中直接学习动作隐表示，绕过昂贵的显式 HOI 与几何标注，更适合大规模跨形态学习；其发展重点是让表示从简单帧间变化逐步转向真正的动作动力学，但仍面临视觉干扰解耦和向具体机器人控制空间落地的问题。
 
-<img src="/assets/images/具身智能/数据飞轮/视频数据/learn_from_video-latent_action_transfer.png" alt="作为桥梁的示能的高层架构图" width="500" height="500">
+<img src="/assets/images/具身智能/数据飞轮/视频数据/learn_from_video-latent_action_transfer.png" alt="作为桥梁的潜在动作的高层架构图" width="500" height="500">
 
 总之，以行动为导向的迁移直接关注“机器人该怎么动”，主要包括两条互补路线：Affordance 用显式的手轨迹、物体运动和交互关系提供更强的物理可解释性与可控性，Latent Action 则用隐式动作表示换取更好的数据规模化能力。整体趋势是让动作表示越来越结构化、可执行，并最终落到机器人真实动作空间；未来更可能通过二者结合，在物理约束与大规模学习能力之间取得平衡。
+
+# 不同数据与学习方式下的人类视频到机器人迁移
+
+## 不同数据配置下的差异
+
+### 视角层面
+
+第三人称（Exocentric）更适合看全局任务结构，第一人称（Egocentric）更适合看局部交互细节。 第三人称视频场景稳定、全局结构清楚，方便识别任务阶段、子任务和整体意图；第一人称视频则更直接看到手-物接触、操作顺序和精确时机，所以越靠近实际动作执行，第一人称价值越高。
+
+- 任务导向迁移明显偏第三人称，Exo 占 65%，Ego 只有 13%。因为这一类主要关心“做什么、先做什么、任务如何分解”，稳定的外部视角更容易保留完整场景和长程任务结构。
+- 观察导向迁移开始转向第一人称，Ego 49%、Exo 40%。它关心的是缩小 Human-Robot 的视觉差异，因此第一人称更接近机器人自身摄像头看到的局部操作视角，但第三人称在场景变换和进度估计上仍然有优势。
+- 行动导向迁移对第一人称偏好最明显，Ego 52%、Exo 41%。因为 Affordance、Latent Action、灵巧手、双手协同和 Contact-rich Manipulation 都依赖精确的手部轨迹、抓握姿态和接触时序，这些第一人称看得最清楚。
+
+### 真机数据需求
+
+任务导向对机器人数据依赖最低，Human Videos Only 占 48%，因为输出往往只是任务结构、程序或高层计划，可以直接交给已有 Planner、VLM 或 Skill Library，而不必自己学低层控制。它解决的是“做什么”，不是“这个机器人具体怎么动”。
+
+观察导向和行动导向则更依赖真实机器人数据。观察导向虽然能把 Human Observation 对齐到 Robot Observation，但它并没有自动解决“Observation → Action”的映射，因此通常还需要 Robot Demonstration。行动导向已经更接近执行，但 Affordance 或 Latent Action 最后仍然经常需要 Robot Action Supervision，把人类动作结构 Ground 到具体机器人运动学上。
+
+总体上，人类视频目前还不能完全替代真实机器人数据。复杂 OOD 场景、运动学可行性和闭环纠错仍然需要 Robot Demonstration 或 Real-world Interaction，因此 Human Video 更像具身数据金字塔中的重要一层，而不是整座塔。
+
+## 不同学习范式下的差异
+
+学习范式的关键区别其实很朴素：Human Video 提供的信号，是能直接给 Policy 用，还是只能间接影响优化。 前者天然对应 IL / Behavior Cloning / VLA-style Supervised Post-training；后者更接近 RL、Reward Shaping 或 Exploration Prior。还有一些方法干脆把视频变成程序、轨迹、Affordance，再通过 Retargeting、Optimization 或解析控制器直接执行，不走完整的 IL / RL。
+
+- 任务导向迁移主要是 IL 风格。Task Embedding、Prompt Video、Subgoal 或 Plan 通常作为高层条件输入，下游动作仍通过 Behavior Cloning 学出来。只有当任务进度被显式转成 Reward 时，才偶尔使用 RL；如果输出本身就是 Program / Plan，则甚至不需要标准 IL 或 RL。
+- 观察导向迁移最灵活。同样的 Observation Bridge，如果作为 Robot-aligned Visual Input，就偏 IL；如果拿来定义 Goal Similarity、Progress 或 Success Score，就偏 RL；如果主要提供探索先验，则形成 Exploration-centric Policy。
+- 行动导向迁移覆盖范围最广。Affordance Backbone Pretraining、Co-training、Latent Action 大量采用 IL / VLA Post-training；当 Affordance 被直接用来定义 Reward，或 Human-Robot Embodiment Gap 太大导致直接模仿不可靠时，就更适合 RL；而 Affordance as Policy 又可以直接做 Zero-shot Retargeting、Trajectory Optimization 或直接执行。
+
+因此，前面几类方法其实可以很自然地理解成不同的适用条件：
+
+- Task-oriented：适合长时程、语义复杂任务，而且机器人已经有 Skill Library，主要难点是“下一步做什么”。
+- Observation-oriented：适合已有 Policy / Controller，只是视觉泛化、域差异、Goal Matching 不够好。
+- Affordance-based Action Transfer：适合空间精度高、需要 Contact Localization、Few-shot / Zero-shot Retargeting 的操控任务。
+- Latent-action Transfer：适合大规模 VLA 预训练和跨数据集吸收 Human Behavior Prior，但默认后面还会有 Robot Demonstration 来做 Grounding。
+
+随着 Observation Alignment、Affordance Extraction 和 Latent Action Modeling 变强，人类视频越来越可以被转换成 Robot-aligned Observation、Pseudo-action 和 Executable Intermediate，因此 IL / VLA-style 大规模预训练越来越实用；但只要 Embodiment Gap 大、接触动力学复杂、离线数据难以覆盖真实物理，RL 仍然不可替代。比较自然的方向就是：先用海量 Human Video 做 IL-style Pretraining 学通用先验，再在目标环境里用 RL 做在线物理适配。
+
+| 定向转移路线 | 核心原理与作用 | 易失效场景 | 适用场景（首选条件） |
+| :--- | :--- | :--- | :--- |
+| **以任务为导向的迁移**<br>*(Task-oriented)* | 以高度具身无关（Embodiment-agnostic）的方式传递信息。将任务结构、意图与程序抽象化，绕过人与机器人低层级的动作空间差异，直接指导目标机器人现有的技能库或高层规划器 *(Ding 等人, 2024; Wake 等人, 2024; Wang 等人, 2024a; Ye 等人, 2025a)*。 | 当高层规划缺乏精细接触执行的具体细节时；当视觉语言模型（VLM）生成的步骤出现幻觉或忽略物理约束时；或者当机器人缺乏将规划接地落地（Grounding）所需的底层原子技能时。 | 任务属于长时程（Long-horizon）或语义复杂任务；目标机器人已具备可用的技能库或底层控制器；核心瓶颈在于“决策下一步做什么”，而非学习低级控制。 |
+| **以观察为导向的迁移**<br>*(Observation-oriented)* | 通过编辑具身外观、预测类机器人视角或学习共享视觉表征，缩小人类视频与机器人观察之间的感知差距 *(Nair 等人, 2022; Li 等人, 2024b; Lepert 等人, 2025a; Li 等人, 2025a)*。 | 当视觉对齐仅停留在表面层次时：生成的视频可能包含伪影；共享嵌入表征可能忽略与接触相关的物理动力学；视觉上相似的状态仍可能需要完全不同的机器人动作。 | 下游策略或控制器已具备（或仅需少量机器人数据即可训练）；核心瓶颈在于提升视觉泛化能力、数据增强，或目标/奖励函数的匹配。 |
+| **基于可供性的动作迁移**<br>*(Affordance-based)* | 显式提取几何线索（如接触区域、手部运动轨迹、物体姿态等）。这些线索具备可解释性，可直接用于奖励函数塑造（Reward Shaping）、策略条件约束、运动重定向（Retargeting）或直接控制执行 *(Bahl 等人, 2023; Bharadhwaj 等人, 2024b; Kuang 等人, 2024; Chen 等人, 2025e; Zhang 等人, 2025a)*。 | 当手-物交互（HOI）解析因遮挡、相机运动、物体重建错误或形态差异过大而不可靠时；或者仅凭视觉无法推断出作用力、顺应性（Compliance）及接触稳定性时。 | 任务需要高精度的空间操控、单样本/少样本迁移、以物体为中心的运动、接触点定位；或者仅基于人类视频并通过解析重定向/通用控制器直接部署。 |
+| **潜在动作迁移**<br>*(Latent-action)* | 从大规模视频中学习紧凑的动作抽象表征，无需显式的几何标注。这使其具备极强的扩展性，适用于 VLA 预训练及吸收野外（In-the-wild）异构数据 *(Ye 等人, 2024; Chen 等人, 2024c; Chen 等人, 2025h; Luo 等人, 2025; Yang 等人, 2025d)*。 | 当潜在代码（Latent code）捕捉到了相机运动、背景变化等干扰动态而非实际可控动作时；即便学习到了良好的潜在动作，在真机执行前仍需要通过机器人演示进行接地/落地（Grounding）。 | 目标是进行大规模策略预训练、跨数据集吸收人类行为模式，或构建通用的 VLA 主干网（且后续有机器人演示数据用于下游真机落地）。 |
+
+# 数据基础 (Data Foundations)
+
+## 开源人类视频数据集
+
+LfHV 的前提是先有足够的人类视频。虽然可以直接爬互联网视频，但研究中更常见的是两类来源：一类是经过组织和设计的 Curated 数据，另一类是自然场景中的 In-the-wild 数据。
+
+通过调研近几年的相关数据集，可以发现一些明显的特点或趋势：
+
+- 数据规模一直很大：人类视频天然比机器人 demonstration 更容易采集，很多数据集达到数百、数千甚至十万小时，因此在规模化上有明显优势。尤其 Web 或自然录制得到的 In-the-wild 数据，规模通常最大。
+- 单纯追求 In-the-wild 正在降温：虽然自然视频便宜、丰富，但噪声大、标注弱、可控性差。近年的研究越来越愿意牺牲一点场景多样性，换取更可靠的手部姿态、关节和交互标注。
+- 从单一数据集转向混合数据集：单个数据集很难同时覆盖不同视角、任务、手部动作和场景，因此 UniHand 等工作开始把多个数据源融合成统一训练集。
+- 手部标注越来越细：随着灵巧操控和 HOI 迁移的重要性上升，Hand Pose、Hand Joint 等信息越来越关键。Vision Pro、Aria 这类设备也让手部追踪成本下降。
+- 语言描述越来越丰富：早期常见的是简单“动词 + 名词”标签，现在更倾向完整 narration 或 task description，因为 VLA 和语言驱动机器人训练需要更强的语言对齐。
+
+从“什么数据最常被用”来看，Ego4D 和 EPIC-KITCHENS 系列是 LfHV 中非常核心的数据源。它们虽然噪声更大，但胜在规模大、交互自然、时间多样，尤其适合视觉预训练和生成建模。这个现象说明，对于通用 Representation Learning，很多时候 数据规模和交互多样性比有限场景里的精确几何标注更重要。
+
+但越接近实际机器人执行，情况就反过来了。Affordance、灵巧手和 Action-oriented Transfer 更依赖 DexYCB、H2O、OakInk2、EgoDex、HOT3D 这类注释丰富的数据，因为这时 Hand Pose、Joint、Object Pose 等精细几何信息会直接影响动作规划。
+
+最近的 VLA 和 Latent Action 路线则越来越倾向 Mixed Dataset Composition，因为单一数据集已经很难满足跨视角、跨场景、跨 Embodiment 的需求。
+
+## 人类视频生成
+
+现有数据集再大，也只覆盖“已经被录下来”的任务和场景。想继续扩规模，继续找人戴相机拍几万小时显然不是一个特别文明的工程方案，于是另一条路线出现了：直接生成训练用的人类操作视频。
+
+早期方法主要依靠 Simulation 合成人体动作视频，用它代替真实 demonstration；后来随着视频生成模型变强，开始直接根据 Language Instruction + Current Observation 生成未来的人类或机器人操作视频，再从视频中恢复动作。当前该领域的主要方法包括：
+
+- 视频作为未来计划：例如先生成“任务应该怎么完成”的未来视频，再通过 Inverse Dynamics Model 从视频中恢复 Robot Action。
+- 生成视频直接作为 Policy Condition：先合成人类操作，再让 Closed-loop Policy 根据这些视频执行。
+- 从生成视频提取 6D Pose：恢复工具或物体的 6D trajectory，再 Retarget 到机器人末端执行器。
+- 从生成视频提取 3D Object Flow：相比 6D rigid pose 更灵活，可以处理刚体、关节物体甚至可变形物体，再把 Flow 用作机器人控制接口。
+- 直接生成手部运动：一些方法开始专门建模 Human Hand Motion，或者把 Hand Mesh 与 Static 3D Scene 分开，让视频模型只生成“动作引起的变化”，而不是重新生成整个场景。
+
+这一方向可以主动生成现实中还没拍过的任务、场景和视角，因此是现有静态数据集的重要补充。不过生成的视频看起来像，不等于物理上真的对。最终效果依赖三件事：交互动力学是否真实、能否从视频中提取可靠的物理运动信号、这些信号能否跨 Embodiment 稳定迁移到机器人。
+
+# 挑战与未来方向 (Discussion: Challenges and Future Directions)
+
+## 从“局部模仿”走向物理世界模型
+
+现在很多方法只学任务、视觉表征、Affordance 或 Latent Action，本质上还是在学局部线索，缺少对“世界会因为动作怎样持续演化”的整体建模，所以一到长时程、强接触、开放环境就容易失真。
+
+未来更重要的是构建 Physically Grounded World Model：不仅预测“下一帧长什么样”，而是预测动作会带来什么真实物理后果，并在长时间尺度上保持因果和物理一致性。这样可以把视觉预测、Affordance、Latent Action、Reward 等目前分散的方法统一进一个预测框架，并进一步支持 Counterfactual Reasoning、Failure Recovery、Closed-loop Planning。
+
+## 从几何 Affordance 走向“功能 + 物理”的 Affordance
+
+现在 Affordance 主要还是 Contact Region、Hand Trajectory、Object Pose、Motion Flow，告诉机器人“在哪里碰、怎么动”，但还没有充分回答：为什么这里能操作、这个部件有什么功能、动作必须满足什么物理约束。
+
+未来的方向是 Physics-aware Functional Affordance，把视觉交互 + 功能语义 + 物体结构 + 运动学/动力学约束统一表示起来。
+
+例如对锤子，不只是知道“抓这里、往这里挥”，而是理解抓柄、锤头是功能部件、冲击方向是什么、怎样接触才能实现敲击功能。这对于工具、关节物体和 Contact-rich Manipulation 尤其重要。
+
+## 从一次性离线训练走向持续学习
+
+现在绝大多数 LfHV 还是收一批 Human Video → 训练一次 → 固定模型。这对于开放世界显然不够，因为新的物体、任务和环境会持续出现。
+
+未来应该让机器人能够持续吸收新的人类视频：
+
+- 新 Ego Video 持续补充新的 Manipulation Prior。
+- Latent Action 自动把新视频转成 Pseudo-action。
+- Affordance 系统持续更新新的交互方式。
+- 不需要每出现一个新任务都重新采集大量 Robot Demonstration。
+
+真正的难点会转向 数据质量筛选、Memory-based Sampling、高效增量适配、灾难性遗忘与持续评估。
+
+## 从单机器人模仿走向多智能体协作
+
+目前几乎所有 LfHV 都默认：一个人演示 → 一个机器人模仿。但现实任务大量是协作的，比如共同搬运、递物、装配、人机协作。人-人视频里其实包含大量现在还没被充分利用的信息：角色分工、时间同步、共享约束、互相预测。
+
+未来可以研究：
+
+- Role-aware Latent Action：不同 Agent 学不同角色。
+- Hierarchical Collaborative Planning：把协作任务拆成各 Agent 的 Subgoal。
+- Explicit Synchronization：显式建模谁什么时候行动。
+- Coupled Action Space：一个 Agent 的动作会改变另一个 Agent 可以做什么。
+
+这意味着 LfHV 会从“Individual Skill Transfer”扩展成真正的 Multi-Agent Coordination Learning。
+
+## 从纯视觉走向多模态人类经验
+
+Human Experience 本来就不是只有视觉，但目前 LfHV 基本把人压缩成了一台会移动的 RGB 摄像机，这自然会丢掉大量信息。未来最值得加入的三种信号是：
+
+- Audio：可以补充遮挡接触、材料变化、碰撞、失败等视觉难观察的信息。
+- Gaze：提供人的 Attention 和 Intention，告诉机器人“人在关注什么、下一步可能操作哪里”。
+- Tactile：提供 Contact Force、Slip、Compliance、Surface Interaction，这是精细操控最缺的一层。
+
+最终目标是把 Vision + Audio + Gaze + Tactile + Language + Pose 融合成人类真实 Sensorimotor Experience，而不是只从像素猜物理。
+
+## 不再只过滤差数据，而是学会利用差数据
+
+互联网视频规模巨大，但里面充满模糊、遮挡、相机抖动、失败操作、被动观察。现在很多方法的解决方案相当朴素：不好就扔。 这会直接损失 Human Video 最大的优势，也就是规模和长尾。
+
+未来更值得研究的是 Low-quality-aware Learning，更重要的是，所谓“低质量视频”里的遮挡、杂乱和视角变化，本来就是机器人进入真实开放世界以后一定会遇到的问题。因此学会从差数据中提取可靠信息，本身就是 Generalization 的一部分。
+
+## 建立真正统一的 Benchmark 和数据生态
+
+现在 LfHV 最大的工程问题之一，是论文 A 用机器人 A、任务 A、视频 A，论文 B 又全部换一套，最后大家都说自己有效，至于谁真的更强，只能靠信仰。未来需要统一评估 Human Video Understanding → Cross-embodiment Transfer → Robot Execution 的完整过程，而且不能只看 Task Success 或者 单纯 Simulation，因为真实 Human Video 的视角、相机运动、外观和交互动力学很难完整复现，因此未来可能需要结合高保真 Scene Reconstruction 构建更接近真实视频的 Benchmark。
+
+与此同时，还需要从“一次性发布一个 Dataset”转向真正的 Egocentric Data Ecosystem：统一采集协议、任务语义、存储接口、标注格式和评估规范，让实验室、企业甚至个人可以持续贡献新的 Ego Video，并逐步加入 3D Pose、Language、Audio、Gaze、Tactile 等信息。
+
+综合来看，LfHV 的核心价值在于：用规模更大、获取成本更低的人类视频，补足机器人真实示范数据昂贵且稀缺的问题。现有方法已经形成从任务理解、视觉对齐到动作迁移的完整链路，并通过任务结构、视觉表征、Affordance 和 Latent Action 等不同中间表示连接 Human Video 与 Robot Policy。未来真正决定这一领域能否走向通用化的，不只是更大的模型，而是能否同时解决长时程物理建模、多模态人类信号利用、噪声视频学习、标准化评测与可持续数据生态，最终把人类视频从辅助数据源变成可规模化的具身经验来源。

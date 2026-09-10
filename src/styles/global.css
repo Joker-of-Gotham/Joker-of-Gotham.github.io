@@ -2619,8 +2619,8 @@ pre.astro-code > code {
 }
 
 @media (max-width: 480px) {
-  .archive-page .archive-prose pre,
-  .archive-page .archive-prose pre.astro-code {
+  :is(.archive-page, .article-reading) .archive-prose pre,
+  :is(.archive-page, .article-reading) .archive-prose pre.astro-code {
     box-sizing: border-box;
     inline-size: calc(100vw - (var(--space-4) * 2));
     max-inline-size: calc(100vw - (var(--space-4) * 2));

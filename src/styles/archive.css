@@ -772,7 +772,7 @@
   line-height: var(--leading-body);
 }
 
-.archive-page .archive-prose :where(h1, h2, h3, h4, h5, h6) {
+:is(.archive-page, .article-reading) .archive-prose :where(h1, h2, h3, h4, h5, h6) {
   color: var(--component-article-heading);
 }
 
@@ -796,15 +796,15 @@
   font-size: var(--text-xl);
 }
 
-.archive-page .archive-prose :where(strong, b) {
+:is(.archive-page, .article-reading) .archive-prose :where(strong, b) {
   color: var(--color-foreground);
 }
 
-.archive-page .archive-prose :where(em, i) {
+:is(.archive-page, .article-reading) .archive-prose :where(em, i) {
   color: var(--color-accent);
 }
 
-.archive-page .archive-prose .katex {
+:is(.archive-page, .article-reading) .archive-prose .katex {
   color: inherit;
 }
 
@@ -843,9 +843,9 @@
   background: var(--component-card-bg);
 }
 
-.page-main .archive-page .archive-prose > :where(figure, .image-grid, .mermaid-block, .katex-display, .table-wrap),
-.page-main .archive-page .archive-prose > table,
-.page-main .archive-page .archive-prose > p:has(> img:only-child) {
+.page-main :is(.archive-page, .article-reading) .archive-prose > :where(figure, .image-grid, .mermaid-block, .katex-display, .table-wrap),
+.page-main :is(.archive-page, .article-reading) .archive-prose > table,
+.page-main :is(.archive-page, .article-reading) .archive-prose > p:has(> img:only-child) {
   inline-size: var(--archive-wide-content);
   max-inline-size: none;
   margin-inline-start: calc((100% - var(--archive-wide-content)) / 2);
@@ -1790,9 +1790,9 @@
     max-inline-size: none;
   }
 
-  .page-main .archive-page .archive-prose > :where(figure, .image-grid, .mermaid-block, .katex-display, .table-wrap),
-  .page-main .archive-page .archive-prose > table,
-  .page-main .archive-page .archive-prose > p:has(> img:only-child) {
+  .page-main :is(.archive-page, .article-reading) .archive-prose > :where(figure, .image-grid, .mermaid-block, .katex-display, .table-wrap),
+  .page-main :is(.archive-page, .article-reading) .archive-prose > table,
+  .page-main :is(.archive-page, .article-reading) .archive-prose > p:has(> img:only-child) {
     inline-size: min(100%, calc(100vw - (var(--space-4) * 2)));
     max-inline-size: calc(100vw - (var(--space-4) * 2));
     margin-inline-start: 0;
