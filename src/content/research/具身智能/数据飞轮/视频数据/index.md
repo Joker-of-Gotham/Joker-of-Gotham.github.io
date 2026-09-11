@@ -4,7 +4,68 @@ summary: 记录生活，是人类生命中的重要部分。从古代人类在�
 ---
 阻碍具身人工智能和机器人技术进一步发展的关键瓶颈在于机器人数据的规模化挑战。为了解决这一问题，近年来，在人类活动视频资源的丰富和计算机视觉技术的进步推动下，利用人类视频数据学习机器人操作技能的研究领域迅速发展，并引起了广泛关注 (LfHV)。该研究方向有望使机器人能够从海量的人类演示资源中被动地习得技能，从而极大地促进通用机器人系统的可扩展学习。
 
-该部分将基于论文 [《机器人从人类视频中学习：一项调查》](https://arxiv.org/html/2604.27621v1) 整理近几年视频数据对具身智能训练和发展的影响。
+```mermaid
+flowchart TD
+
+    A["L0 · Raw / Random Video Pool<br/>Web Video · Instructional Video · Exocentric<br/>Egocentric · Human Demo · Robot Video · Generated Video"]
+
+    B["L1 · Video Corpus Construction<br/>检索 · 去重 · 质量筛选 · 时序切分<br/>任务发现 · Caption / Narration · 数据配对"]
+
+    A --> B
+
+    B --> C1["P1 · Task / Semantic Extraction<br/>任务是什么 · 意图 · 目标 · 阶段 · 成功条件"]
+    B --> C2["P2 · Visual / Temporal Representation<br/>场景 · 物体 · 时序变化 · Physical Features"]
+    B --> C3["P3 · Affordance / Interaction Extraction<br/>在哪里交互 · 接触点 · 物体运动 · Point Track"]
+    B --> C4["P4 · Explicit Motion Reconstruction<br/>Camera · Depth · 3D Hand / Body / Object<br/>SE(3) Trajectory · Contact"]
+    B --> C5["P5 · Latent Action Discovery<br/>Frame Transition → Action-like Latent"]
+    B --> C6["P6 · Predictive World / Video Modeling<br/>当前状态 → Future Visual / Latent State"]
+
+    C1 --> D1["Task / Goal / Reward Representation"]
+    C2 --> D2["Embodiment-neutral Physical Representation"]
+    C3 --> D2
+
+    C4 --> D3["Human → Robot Translation<br/>Retargeting · Correspondence<br/>Shared / Unified Action Space"]
+    C5 --> D3
+
+    C6 --> D4["Planning / Imagination Interface<br/>Future Rollout · Latent Dynamics<br/>Synthetic Trajectory"]
+
+    D1 --> E["L4 · Robot Grounding"]
+    D2 --> E
+    D3 --> E
+    D4 --> E
+
+    R["Robot-native Data<br/>Teleoperation · Robot Demonstrations<br/>Paired H-R Data · Real Rollouts"]
+    R --> E
+
+    E --> F["L5 · Robot-native Policy Learning<br/>BC · ACT · Diffusion / Flow<br/>VLA · World-Action Model · Action Chunking"]
+
+    G["L5b · Test-time Task Specification<br/>Language Instruction · Goal Image<br/>Human Demo Video · Behavior Prompt"]
+    B -. "Video can also be the prompt" .-> G
+    G --> F
+
+    F --> H["L6 · Closed-loop Robot Control<br/>Observe → Predict → Act → Re-observe<br/>Receding Horizon · Replanning · Recovery"]
+
+    H --> I["L7 · Robot Instruction Following<br/>Task Completion · Long-Horizon Manipulation<br/>Imitation · One/Few-shot Behavior Acquisition"]
+
+    I --> J["Deployment Experience<br/>Success · Failure · Recovery · Human Correction"]
+
+    J --> R
+    J --> B
+```
+
+在该部分，我们将探索从充满噪声的视频数据到机器人长程任务执行的完整链路，发掘 LfHV 的隐藏路径：
+
+- Video → Semantic / Task Information：视频告诉机器人“做什么”能做到什么程度？
+- Video → Actionable Physical Information：不知道 action，但能不能知道“物体应该怎么变化”？
+- Video → Explicit Human Motion：能不能直接恢复人真正执行的三维动作？
+- Human Motion → Cross-Embodiment Action：human action 和 robot action 到底怎么统一？
+- Video → Latent Action / World Action：既然显式动作不可靠，能不能让 representation 自己找到 action？
+- Video Model → Robot Policy：video predictor 最后是不是可以直接成为 controller？
+- Video / Behavior → Test-time Instruction Following：能不能在部署时“给我看一次，我就会”？
+
+---
+
+本总起章将基于论文 [《机器人从人类视频中学习：一项调查》](https://arxiv.org/html/2604.27621v1) 整理近几年视频数据对具身智能训练和发展的影响。
 
 论文中，人类视频与机器人执行动作相结合的桥接方法被概括为三类：
 
