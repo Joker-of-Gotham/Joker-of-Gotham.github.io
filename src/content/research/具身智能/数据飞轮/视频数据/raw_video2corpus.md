@@ -118,7 +118,7 @@ EPIC-KITCHENS-100 数据集是自中心化数据集，作为 EPIC-KITCHENS 的�
 <img src="/assets/images/具身智能/数据飞轮/视频数据/epic_kitchen_100-action_retrieval.png" alt="文本转视频动作检索的定性结果。排名前三的视频，以及在前 50 个检索结果中语义相关性为 
 ℛ 的视频（红色表示不相关，绿色表示相关）。" width="900" height="300">
 
-其相关更新见 (Egocentric Datasets & Benchmarks)[https://epic-kitchens.github.io/]。
+其相关更新见 [Egocentric Datasets & Benchmarks](https://epic-kitchens.github.io/)。
 
 # [Ego4D](https://arxiv.org/html/2110.07058v3)
 
