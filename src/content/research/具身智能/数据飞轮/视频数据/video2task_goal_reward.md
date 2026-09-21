@@ -3,8 +3,8 @@ title: Video2Task：让视频提供任务、目标和奖励
 slug: video2task_goal_reward
 date: 2026-09-21
 kind: reflection
-cover: /assets/img/covers/孤独摇滚-山田凉1.webp
-order: 10
+cover: /assets/img/covers/GBC-仁菜.webp
+order: 11
 summary: 这部分整理，如何从视频数据中提取任务、目标和奖励。具体以 AVID、DVD、VIP、LIV 和 RoboCLIP 为典型案例进行分析。
 tags: [研究札记, 视频数据, 任务提取, 目标与奖励设置]
 papers:
@@ -62,9 +62,13 @@ $$\mathcal{L}_{cyc}(G,F)=\mathbb{E}[|| x-F(G(x))||_1 + || y-G(F(y))||_1]$$
 
 $$\mathcal{L}_{CG}(G,F,D_X,D_Y)=\mathcal{L}_{GAN}(G,D_Y)+\mathcal{L}_{GAN}(F,D_X)+\lambda \mathcal{L}_{cyc}(G,F)$$
 
+该部分使用 CycleGAN，将人类演示视频翻译为机器人演示视频。
+
 ### 结构化表示学习 (Structured Representation Learning)
 
 在基于图像的控制学习中，状态表示学习是一种提高数据利用效率的有效方法，通过定义一个概率性的、具有时间结构的潜在变量模型来学习图像观测到的潜在状态表示。
+
+<img src="/assets/images/具身智能/数据飞轮/视频数据/avid-pgm.png" alt="AVID使用的潜变量模型用于表示机器人图像和动作。其中，生成模型用实线表示，而变分族和编码器则用虚线表示。" width="400" height="800">
 
 首先定义：
 
@@ -104,4 +108,6 @@ $$\text{ELBO} = \underbrace{\mathbb{E}_q [\log p(\mathbf{o}_t\vert{}\mathbf{s}_t
 - 重构项 (Reconstruction Term)：从 $s_t$ 解码出的图片 $o_t$ 和实际看到的图片越像越好（要求 $s_t$ 保留图片信息）。
 - 初始约束 (Initial KL Divergence)：第一个时刻预测的状态分布，不能偏离预设的先验分布 $p(s_1)$ 太远。
 - 动态一致性约束 (Transition KL Divergence)：要求“用下一张图片直接编码出的状态 $q(s_{t+1}\vert{}o_{t+1})$”与“用上一时刻状态加上动作推导出的状态 $p(s_{t+1}\vert{}s_t, a_t)$”尽可能一致。
+
+该部分利用翻译好的机器人图像序列，提炼出纯粹的物理状态轨迹 $\mathbf{s}_{1:T}$（如物体与机械臂的相对位姿），进而以提炼出的 $\mathbf{s}_T$ 作为目标状态（Goal State），利用学习到的隐空间动态模型 $p(\mathbf{s}_{t+1} \vert{} \mathbf{s}_t, \mathbf{a}_t)$ 进行预演规划（Latent Planning），计算出机械臂当前应该执行的物理动作 $\mathbf{a}_t$。
 
