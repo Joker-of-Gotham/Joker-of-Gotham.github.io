@@ -141,3 +141,102 @@ $$\text{ELBO} = \underbrace{\mathbb{E}_q [\log p(\mathbf{o}_t\vert{}\mathbf{s}_t
 
 ## 实验结果
 
+该项目的实验探索三个问题：
+
+- AVID 能否直接从人类演示中解决时间跨度较长的基于视觉的任务？
+- 使用教学图像和潜在空间规划能给我们带来哪些好处（如果有的话）？
+- 如果我们无法直接观看机器人演示，会产生哪些成本（如果有的话）？
+
+### 方法对比
+
+该研究使用以下方法和 AVID 作对比：
+
+- **行为克隆 (Behavioral Cloning, BC)**：利用专家遥控操作（Teleoperation）获取的“观察-动作”数据，直接进行监督学习来拟合策略。该方法作为拥有完整动作标注的“理想基线”。因其不具备阶段概念且存在单步误差累积（分布偏移）问题，以此证明 AVID “分阶段强化学习” 的优势。
+- **基于观察的行为克隆 (BCO)**：同样使用遥控数据，但假设无法获取动作，仅有图像观察。先训练一个逆模型（Inverse Model）去“反推”动作，再利用推断出的动作做行为克隆。评估在缺乏直接动作标注时，仅靠“反推动作+克隆”的表现，作为无动作监督下的基础基线。
+- **全视频消融 (Full-video Ablation)**：不将任务拆解为关键阶段，而是直接使用完整的真人演示视频（经域转换后），结合 BCO 算法进行端到端模仿学习。验证 AVID “仅抽取阶段指令图像” 的轻量化设计是否比“直接学习整段连续视频”更高效且有效。
+- **像素空间消融 (Pixel-space Ablation / DVF)**：保留 AVID 的分阶段训练、学习重置和人工反馈机制，但将其中的“隐空间（Latent Space）规划”替换为基于 DVF（深度视觉预测）的“像素空间（Pixel Space）规划”。控制其他变量一致，专门验证 AVID 在 “高维隐空间中进行规划” 相比于“直接在原始像素空间规划”的性能提升。
+- **时间对比网络 (TCN)**：通过时序一致性损失（Temporal Consistency）学习单视角人类视频的表征嵌入，并以当前轨迹与人类演示在特征空间中的距离（负欧氏距离）作为 RL 的奖励信号。验证 AVID 所采用的 “阶段分类器奖励” 是否优于这种基于“时序嵌入特征距离”的经典特征奖励机制。
+
+### 实验结果
+
+研究使用两个视觉领域的、时间跨度较长的任务来评估 AVID 方法：操作个人咖啡机和从关闭的抽屉中取出杯子。这些任务表明，AVID 方法能够通过遵循从人类演示中提取的一系列指令，学习按顺序组合多种技能。
+
+| 监督 (Supervision) | 方法 (Method) | 咖啡制作<br>Coffee making<br>Stage 1 | 咖啡制作<br>Coffee making<br>Stage 2 | 咖啡制作<br>Coffee making<br>Stage 3 | 杯子取出<br>Cup retrieval<br>Stage 1 | 杯子取出<br>Cup retrieval<br>Stage 2 | 杯子取出<br>Cup retrieval<br>Stage 3 | 杯子取出<br>Cup retrieval<br>Stage 4 | 杯子取出<br>Cup retrieval<br>Stage 5 |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Human Demos**<br>人类演示 | **AVID (ours)**<br>AVID（我们的） | 100% | 80% | 80% | 100% | 100% | 100% | 80% | 70% |
+| **Human Demos**<br>人类演示 | **Full-video ablation**<br>全视频消融 | 70% | 10% | 0% | 0% | 0% | 0% | 0% | 0% |
+| **Human Demos**<br>人类演示 | **Pixel-space ablation**<br>像素空间消融 | 60% | 20% | 0% | 50% | 50% | 30% | 10% | 0% |
+| **Human Demos**<br>人类演示 | **TCN [46]** | 10% | 10% | 0% | 60% | 20% | 0% | 0% | 0% |
+| **Teleoperated Robot Demos**<br>遥控机器人演示 | **BCO [56]** | 80% | 30% | 0% | 30% | 10% | 0% | 0% | 0% |
+| **Teleoperated Robot Demos**<br>遥控机器人演示 | **Behavioral Cloning**<br>行为克隆 | 90% | 90% | 90% | 100% | 100% | 60% | 60% | 40% |
+
+# Learning Generalizable Robotic Reward Functions from “In-The-Wild” Human Videos (领域无关视频判别器， DVD)
+
+视频平台中具有大量真实场景数据，但利用这类“真实场景”的人类数据进行机器人学习会面临诸多挑战，包括：观察空间差异、智能体形态与场景视觉呈现差异、人类和机器人的动作空间差异、视频噪声大且质量参差不齐等等。
+
+此前的相关研究已大量关注逆强化学习或逆最优控制问题，即从任务演示中学习奖励函数的问题；进一步的，本研究聚焦于学习用于视觉机器人操作的可泛化的多任务奖励函数，该函数可通过对“展示人类完成任务的单个视频”进行条件化，为不同的任务生成奖励。
+
+另外，也有许多研究探讨了如何从人类视频中学习机器人行为，包括在人类视频中显式进行物体或手部跟踪、通过像素转换讲人类演示或目标转换为机器人视角、对人类视频中的动作/奖励/状态值进行推测等等。
+
+此外，许多先前的研究也探讨了如何利用广泛的数据集来增强机器人学习的泛化能力。这些研究主要集中于如何以可扩展的方式收集大型且多样化的机器人数据集，以及如何以离线或在线的方式从这类数据中学习通用策略等。
+
+针对上述问题和已有研究进展，本研究提出方法——领域无关视频判别器 (DVD)，来预测两个视频是否在完成相同的任务。具体来说，通过利用许多人类视频数据集自带的活动标签，以及少量机器人演示视频，该模型能够捕捉来自截然不同视觉领域的视频之间的功能相似性。训练完成后，DVD 以一段人类视频作为演示，以机器人的行为作为另一段视频，并输出一个分数，该分数可以有效地衡量任务的成功或奖励。
+
+## 问题陈述与奖励函数设计
+
+记机器人完成 $K$ 个任务的集合为 $\mathcal{T} = \{\mathcal{T}_i\}_{i=1}^K$，其中每个任务 $\mathcal{T}_i$ 蕴含一个潜在的标量奖励函数 $\mathcal{R}_i$。对于任意给定任务 $\mathcal{T}_i$，机器人与人类分别运行于有限时域马尔可夫决策过程（MDP）$\mathcal{M}_r^i = (\mathcal{S}, \mathcal{A}_r, p_r, \mathcal{R}_i, T)$ 与 $\mathcal{M}_h^i = (\mathcal{S}, \mathcal{A}_h, p_h, \mathcal{R}_i, T)$ 中。
+
+在此设定下，双方共享以 RGB 图像表征的状态空间 $\mathcal{S}$、任务奖励函数 $\mathcal{R}_i$ 及回合最大时限 $T$，但在动作空间（机器人的 $\mathcal{A}_r$ 与人类的 $\mathcal{A}_h$）和转移动力学（机器人的 $p_r(s_{t+1} \mid s_t, a_t^r)$ 与人类的 $p_h(s_{t+1} \mid s_t, a_t^h)$）上存在域间差异。
+
+### 任务奖励函数 $\mathcal{R}_{i}$
+
+假设任务奖励函数 $\mathcal{R}_{i}$ 不可观测，需要通过任务视频推断。本研究假设时间 $t$ 的奖励取决于 $H \leq T$ 个时间步，进一步构造参数模型，该模型能根据任务指定的视频估计每个任务的潜在奖励函数。数学表达为：
+
+$$
+\begin{aligned}
+& \text{Given } \mathcal{T} = \{\mathcal{T}_i\}_{i=1}^K, \quad d_i = s_{1:t_{d_i}}^* \in \mathcal{S}^{t_{d_i}} \\
+& \text{where } \mathcal{M}_r^i = (\mathcal{S}, \mathcal{A}_r, p_r, \mathcal{R}_i, T), \quad \mathcal{M}_h^i = (\mathcal{S}, \mathcal{A}_h, p_h, \mathcal{R}_i, T) \\
+& \text{s.t.} \\
+& \quad \mathcal{S} \subseteq \mathbb{R}^{H \times W \times 3} \\
+& \quad p_r: \mathcal{S} \times \mathcal{A}_r \to \Delta(\mathcal{S}), \quad p_h: \mathcal{S} \times \mathcal{A}_h \to \Delta(\mathcal{S}) \\
+& \quad \mathcal{A}_r \neq \mathcal{A}_h, \quad p_r \neq p_h \\
+& \quad \mathcal{R}_i: \mathcal{S}^H \to \mathbb{R} \\
+& \text{Find } \mathcal{R}_\theta: \mathcal{S}^H \times \mathcal{S}^* \to \mathbb{R} \\
+& \text{s.t. } \mathcal{R}_\theta(s_{1:H}, d_i) \approx \mathcal{R}_i(s_{1:H}), \quad \forall i \in \{1, \dots, K\}, \, s_{1:H} \in \mathcal{S}^H
+\end{aligned}
+$$
+
+其中，$\mathcal{T}_i$（共 $K$ 个）表示具体任务，对应人类提供的参考视频演示 $d_i$；$\mathcal{M}_r^i$ 与 $\mathcal{M}_h^i$ 分别表示机器人和人类的马尔可夫决策过程，两者共享 RGB 图像状态空间 $\mathcal{S}$（分辨率 $H\times W$）、最大回合时限 $T$ 以及真实奖励函数 $\mathcal{R}_i$，但在动作空间（$\mathcal{A}_r, \mathcal{A}_h$）与环境动力学（$p_r, p_h$）上互相独立；连续 $H$ 步状态构成的轨迹 $s_{1:H}$ 用于捕获非马尔可夫时序特征；而 $\mathcal{R}_\theta$ 则是待学习的目标神经网络，负责根据机器人当前轨迹 $s_{1:H}$ 与人类演示 $d_i$ 计算出逼近真实奖励 $\mathcal{R}_i$ 的标量评估值。
+
+### 奖励函数 $\mathcal{R}_\theta(s_{1:H}, d_i)$
+
+为训练奖励函数 $\mathcal{R}_\theta$，研究者构建由跨域视觉演示构成的非对称双语料数据集，仅依赖无标注的原始 RGB 图像序列推断奖励。
+
+$$
+\begin{aligned}
+& \text{Given Datasets } \mathcal{D}_h = \{\mathcal{D}_{\mathcal{T}_i}^h\}_{i=1}^N, \quad \mathcal{D}_r = \{\mathcal{D}_{\mathcal{T}_i}^r\}_{i=1}^M \\
+& \text{s.t.} \\
+& \quad M \le N < K, \quad M \ll N \\
+& \quad \{\mathcal{T}_i\}_{i=1}^M \subset \{\mathcal{T}_i\}_{i=1}^N \subset \{\mathcal{T}_i\}_{i=1}^K \\
+& \quad \mathcal{D}_{\mathcal{T}_i}^h = \{ d_{i,j}^h \}_{j=1}^{n_i^h}, \quad \mathcal{D}_{\mathcal{T}_i}^r = \{ d_{i,k}^r \}_{k=1}^{n_i^r}, \quad n_i^r \ll n_i^h \\
+& \quad d_{i,j}^h, d_{i,k}^r \in \mathcal{S}^* = \bigcup_{t=1}^{\infty} \mathcal{S}^t, \quad \mathcal{S} \subseteq \mathbb{R}^{H \times W \times 3} \\
+& \quad a_t^h, a_t^r \notin \text{Observed}, \quad s_{\text{low-dim}} \notin \text{Observed} \\
+& \quad \mathbb{P}(\mathcal{S} \mid \mathcal{D}_h) \neq \mathbb{P}(\mathcal{S} \mid \mathcal{D}_r)
+\end{aligned}
+$$
+
+数据集中，$\mathcal{D}_h$ 与 $\mathcal{D}_r$ 分别为人类与机器人的视觉演示集合；$N$ 与 $M$ 代表各自覆盖的任务数，满足 $M \ll N < K$，体现了“人类数据覆盖广、机器人数据极其稀缺”的非对称假设；$d_{i,j}^h$ 与 $d_{i,k}^r$ 为纯 RGB 图像构成的变长视频序列，且单任务人类样本数 $n_i^h$ 远大于机器人样本数 $n_i^r$；系统的关键约束在于完全无动作（$a_t$）与低维状态信息叠加，且状态分布差异 $\mathbb{P}(\mathcal{S} \mid \mathcal{D}_h) \neq \mathbb{P}(\mathcal{S} \mid \mathcal{D}_r)$ 刻画了视角、背景及具身形态所带来的巨大领域偏移（Domain Gap）。
+
+评估阶段旨在以目标演示为条件隐式推断奖励信号，既要保障已知任务的高效解决，又要实现对未见过新任务的零样本（Zero-Shot）泛化。
+
+$$
+\begin{aligned}
+& \text{Goal: Optimize } \pi^* = \arg\max_\pi \mathbb{E}_{\tau \sim \pi} \left[ \sum_{t=1}^T \mathcal{R}_\theta(s_{1:t}, d) \right] \\
+& \text{s.t.} \\
+& \quad \text{Task Completion: } d = d_i \implies \text{Solves } \mathcal{T}_i, \quad \forall \mathcal{T}_i \in \{\mathcal{T}_k\}_{k=1}^N \\
+& \text{Zero-Shot Generalization: } d = d_{\text{new}} \implies \text{Solves } \mathcal{T}_{\text{new}}, \quad \forall \mathcal{T}_{\text{new}} \notin \{\mathcal{T}_k\}_{k=1}^N
+\end{aligned}
+$$
+
+公式表达了策略 $\pi^*$ 在奖励函数 $\mathcal{R}_\theta$ 驱动下的决策优化过程：核心在于让 $\mathcal{R}_\theta$ 具备**条件化表征**与**跨任务泛化**能力——当输入已知任务的演示 $d_i$ 时，能准确引导机器人完成当前任务 $\mathcal{T}_i$；当输入完全未见过的新任务演示 $d_{\text{new}}$ 时，无需重新训练即可仅凭该演示引导机器人完成全新任务 $\mathcal{T}_{\text{new}}$。
+
