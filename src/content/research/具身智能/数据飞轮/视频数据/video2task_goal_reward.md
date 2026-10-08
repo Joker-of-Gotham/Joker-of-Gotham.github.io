@@ -240,3 +240,5 @@ $$
 
 公式表达了策略 $\pi^*$ 在奖励函数 $\mathcal{R}_\theta$ 驱动下的决策优化过程：核心在于让 $\mathcal{R}_\theta$ 具备**条件化表征**与**跨任务泛化**能力——当输入已知任务的演示 $d_i$ 时，能准确引导机器人完成当前任务 $\mathcal{T}_i$；当输入完全未见过的新任务演示 $d_{\text{new}}$ 时，无需重新训练即可仅凭该演示引导机器人完成全新任务 $\mathcal{T}_{\text{new}}$。
 
+## Domain-Agnostic Video Discriminators (DVD，领域无关视频判别器)
+
