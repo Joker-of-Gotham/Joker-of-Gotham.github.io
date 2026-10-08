@@ -242,3 +242,137 @@ $$
 
 ## Domain-Agnostic Video Discriminators (DVD，领域无关视频判别器)
 
+### 判别器训练与损失函数设计
+
+DVD 的核心思想是将奖励函数建模为任务功能相似度分类器，通过判断两段跨域视频（人类或机器人）是否完成同一任务，从而学习对领域变化鲁棒的隐式奖励信号。
+
+$$
+\begin{aligned}
+& \text{Sample } d_i, d_i' \in \mathcal{D}_{\mathcal{T}_i}^h \cup \mathcal{D}_{\mathcal{T}_i}^r, \quad d_j \in \mathcal{D}_{\mathcal{T}_j}^h \cup \mathcal{D}_{\mathcal{T}_j}^r \quad \text{s.t. } i \neq j \\
+& \text{Minimize } \mathcal{J}(\theta) = -\mathbb{E}_{(d_i, d_i', d_j) \sim \mathcal{D}_h \cup \mathcal{D}_r} \left[ \log \mathcal{R}_\theta(d_i, d_i') + \log (1 - \mathcal{R}_\theta(d_i, d_j)) \right] \\
+& \text{s.t.} \\
+& \quad \mathcal{R}_\theta: \mathcal{S}^* \times \mathcal{S}^* \to [0, 1] \\
+& \quad \mathcal{R}_\theta(d_i, d_i') \to 1 \quad (\text{Same Task } \mathcal{T}_i) \\
+& \quad \mathcal{R}_\theta(d_i, d_j) \to 0 \quad (\text{Different Tasks } \mathcal{T}_i \neq \mathcal{T}_j)
+\end{aligned}
+$$
+
+损失函数 $\mathcal{J}(\theta)$ 采用标准二分类交叉熵形式，通过从联合数据集 $\mathcal{D}_h \cup \mathcal{D}_r$ 中采样的正样本对 $(d_i, d_i')$（同任务 $\mathcal{T}_i$）与负样本对 $(d_i, d_j)$（异任务 $\mathcal{T}_i \neq \mathcal{T}_j$）构建三元组；$\mathcal{R}_\theta$ 输出标量概率得分，迫使网络无视具身外观、视角及背景等外观属性的异质性，聚焦提取跨域对齐的功能性行为特征。
+
+### DVD 网络架构与跨域采样策略
+
+在实现层面，DVD 将固定预训练的 3D 卷积视频编码器与待优化的相似度计算网络进行解耦，并通过跨域平衡采样机制缓解非对称数据分布导致的领域偏差。
+
+$$
+\begin{aligned}
+& \text{Architecture: } \mathcal{R}_\theta(d_i, d_j) = f_{\text{sim}}(f_{\text{enc}}(d_i), f_{\text{enc}}(d_j); \theta) \\
+& \text{s.t.} \\
+& \quad h_i = f_{\text{enc}}(d_i) \in \mathbb{R}^d, \quad f_{\text{enc}} \text{ frozen (Pretrained on Sth-Sth V2)} \\
+& \quad f_{\text{sim}}: \mathbb{R}^d \times \mathbb{R}^d \to [0, 1], \quad \theta \text{ trainable (MLP)} \\
+& \quad \mathbb{P}(d \in \mathcal{D}_r) = 0.5, \quad \mathbb{P}(d \in \mathcal{D}_h) = 0.5 \quad \forall d \in \{d_i, d_i', d_j\}
+\end{aligned}
+$$
+
+式中 $f_{\text{enc}}$ 为预先在 Something-Something V2 数据集上训练好的 3D 卷积编码器，用以将原始视频像素映射为高维时序表征 $h$，且在训练全程保持参数冻结；$f_{\text{sim}}$ 为由 $\theta$ 参数化的多层感知机（MLP），负责计算隐空间特征对的相似度；为防止分类器过度拟合数量占优的人类数据，采集中强制对三元组中的每个视频施加各 $50\%$ 的跨域采样概率，强迫网络忽略“人类 vs 机器人”的域间属性差异。
+
+### 基于 DVD 的视觉模型预测控制 (VMPC)
+
+在控制决策阶段，由于 DVD 仅提供标量评估信号而缺乏梯度控制动作的能力，研究采用视觉模型预测控制（VMPC）结合交叉熵方法（CEM）在隐式的视觉动力学推演中选择最优动作序列。
+
+$$
+\begin{aligned}
+& \text{Given Current Observation } s_t \text{ and Goal Demo } d_i \\
+& \text{Model: } \tilde{s}_{t+1:t+H} \sim p_\phi(s_{t+1:t+H} \mid s_t, a_{t:t+H}) \quad (\text{SV2P Dynamics}) \\
+& \text{Action Optimization: } a_{t:t+H}^* = \arg\max_{a_{t:t+H}} \mathcal{R}_\theta(\tilde{s}_{t+1:t+H}, d_i) \\
+& \text{s.t.} \\
+& \quad \{a_{t:t+H}^{(g)}\}_{g=1}^G \sim \text{CEM}(\mu, \Sigma) \\
+& \quad \tilde{s}_{t+1:t+H}^{(g)} \sim p_\phi(s_t, a_{t:t+H}^{(g)}), \quad g \in \{1, \dots, G\} \\
+& \quad \text{Execute } a_t^* \text{ from } a_{t:t+H}^* = \arg\max_{\{a^{(g)}\}} \mathcal{R}_\theta(\tilde{s}_{t+1:t+H}^{(g)}, d_i)
+\end{aligned}
+$$
+
+控制流程首先依靠基于 SV2P 训练的动作条件视觉动力学模型 $p_\phi$，以当前图像观察 $s_t$ 为起点，预演由交叉熵方法（CEM）采样的 $G$ 组候选动作轨迹对应的预测未来画面 $\tilde{s}_{t+1:t+H}^{(g)}$；随后将预测画面序列与目标任务的人类演示 $d_i$ 喂入训练好的 DVD 奖励函数 $\mathcal{R}_\theta$ 进行打分，最终在演练结果中挑选得分最高动作序列并下发首步动作，实现端到端的基于视觉想象的任务规划。
+
+综上所述，该框架构建了一个“跨域离线表征学习 + 在线视觉模型预测规划”的端到端具身智能决策闭环。整个系统在完全摒弃低维状态和动作标签的严苛设定下，巧妙地解决了跨具身（人类到机器人）的任务迁移难题。其核心设计哲学在于将“识别任务是否完成”（由 DVD 负责）与“预测物理世界演变”（由 SV2P 负责）进行解耦与协同控制。
+
+在训练阶段，系统并行推进两套完全解耦的学习通道：
+
+- **任务奖励学习（DVD）**：联合庞大的无标注人类演示语料 $\mathcal{D}_h$ 与极其稀缺的机器人语料 $\mathcal{D}_r$，借助预训练的 3D 卷积视频编码器与 $50\%$ 跨域平衡采样策略，通过对比学习将视角、背景及具身外观差异极大的异构视频映射至统一的任务功能空间，训练出对领域差异鲁棒的隐式奖励函数 $\mathcal{R}_\theta$。
+- **物理动力学学习（SV2P）**：利用机器人无监督探索数据，以自监督方式独立训练动作条件的视频预测模型 $p_\phi$，仅依靠视觉像素重建误差捕获机器人动作与环境状态改变之间的底层物理演化规律，不依赖任何人类视频或任务标签。
+
+在部署阶段，面对已知任务或未见过的新任务演示 $d_i$，系统无需重新微调网络参数，直接以演示视频为条件启动 VMPC（视觉模型预测控制）闭环：
+
+- 脑海演练（Imagination）：机器人结合当前时刻的真实视觉观察 $s_t$，利用 CEM（交叉熵方法） 采样多组候选动作序列，并通过 SV2P 动力学模型在“脑海”中推演生成多条预测的未来画面轨迹 $\tilde{s}_{t+1:t+H}$。
+- 相似度评估（Evaluation）：冻结的 DVD 奖励函数充当“裁判”，将每一条虚拟演练的画面序列与目标人类演示 $d_i$ 进行比对，输出对应的任务完成度评分。
+- 滚动时域控制（Receding Horizon Execution）：选择打分最高的那条演练轨迹，并将该轨迹的首步动作 $a_t^*$ 下发给机器人真实执行。环境状态更新后，系统进入下一个时间步重复上述过程。
+
+这一机制成功打通了从“高层跨域人类演示视频”到“底层机器人连续物理动作”的映射，既保障了离线训练的高效性，又具备了在线规划对新任务的零样本泛化能力。
+
+```text
+Algorithm 1 Domain-agnostic Video Discriminator (DVD)
+算法 1 领域无关视频判别器 (DVD)
+
+ 1: // Training DVD
+    // 培训 DVD
+ 2: Require: 𝒟h human demonstration data for N tasks {𝒯n}
+    要求： 𝒟h 项任务的人工演示数据 N {𝒯n}
+ 3: Require: 𝒟r robot demonstration data for M tasks {𝒯m} ⊆ {𝒯n}
+    要求： 𝒟r 个机器人演示数据，用于 M 个任务 {𝒯m} ⊆ {𝒯n}
+ 4: Require: Pre-trained video encoder f_enc
+    要求： 预训练视频编码器 f_enc
+ 5: Randomly initialize θ
+    随机初始化 θ
+ 6: while training do
+    训练期间
+ 7:     Sample anchor video di ∈ 𝒟h ∪ 𝒟r
+        示例锚视频 di ∈ 𝒟h ∪ 𝒟r
+ 8:     Sample positive video di' ∈ {𝒟_{𝒯i}^h} ∪ {𝒟_{𝒯i}^r} \ di
+        正面视频示例 di' ∈ {𝒟_{𝒯i}^h} ∪ {𝒟_{𝒯i}^r} \ di
+ 9:     Sample negative video dj ∈ {𝒟_{𝒯j}^h} ∪ {𝒟_{𝒯j}^r} ∀j ≠ i
+        负片样本 dj ∈ {𝒟_{𝒯j}^h} ∪ {𝒟_{𝒯j}^r} ∀j ≠ i
+10:     Update ℛθ with di, di', dj according to Eq. 1
+        根据公式 1 将 ℛθ 更新为 di, di', dj
+11: // Planning Conditioned on Video Demo
+    // 根据视频演示进行规划
+12: Require: Trained reward function ℛθ & video prediction model pϕ
+    要求： 已训练的奖励函数 ℛθ 和视频预测模型 pϕ
+13: Require: Human video demo di for task 𝒯i
+    要求： 任务 𝒯i 的人类视频演示 di
+14: for trials 1,…,n do
+    对于试验 1,…,n 执行
+15:     Sample {a_{1:H}^{1:G}} & get predictions {s~_{1:H}^g} ∼ {pϕ(s0, a_{1:H}^g)}
+        采样 {a_{1:H}^{1:G}} 并获得预测结果 {s~_{1:H}^g} ∼ {pϕ(s0, a_{1:H}^g)}
+16:     Step a*_{1:H} which maximizes ℛθ(s~_{1:H}^g, di)
+        步骤 a*_{1:H} 最大化 ℛθ(s~_{1:H}^g, di)
+```
+
+## 实验结果
+
+### 核心研究问题
+
+本实验旨在评估 DVD 能否通过跨域人类视频提升机器人对新环境与新任务的泛化能力，重点回答四个问题：
+* **环境泛化**：利用人类视频能否帮助模型泛化至未见过的物理环境？
+* **任务泛化**：人类视频的多样性能否支持模型零样本迁移至全新任务？
+* **单样本模仿**：相比已有基线，DVD 能否更有效地从“单次”人类演示中推断奖励？
+* **真机落地**：DVD 学到的奖励函数能否直接驱动真实机器人完成控制规划？
+  
+### 实验设置
+
+仿真实验基于改编自 Meta-World 的 MuJoCo 桌面环境，包含 Sawyer 机械臂与抽屉、水龙头、咖啡机等物体的交互。为了系统评估环境泛化能力，实验设计了四个难度递增的环境变体（`Train Env` 以及引入颜色改变的 `Test Env 1`、增加视角变化的 `Test Env 2`、叠加物体重新排列的 `Test Env 3`）。评估的三项核心目标任务包括：关抽屉、右转水龙头、推开咖啡杯，且均由未公开的真实人类视频作为任务指定。
+
+数据集方面，人类演示选用 Something-Something-V2 数据集（22 万余条视频，包含 174 类日常人类动作），根据配置抽取 3 至 15 种任务的数据；机器人演示则仅在初始训练环境下收集 3 个任务的 120 条轨迹（后续消融实验验证了更少数据下的表现）。
+
+### 仿真实验：环境与任务泛化
+
+在**环境泛化实验**中，将仅用机器人数据训练的模型（`Robot Only`）与引入不同数量人类任务数据（`Robot + K Human Tasks`）的模型进行对比。结果表明，引入人类视频可将跨环境任务成功率**平均提升 20%**。即使仅引入与目标任务完全无关的人类视频（如 $K > 3$），模型的泛化性能依然显著优于纯机器人数据。这证明人类数据中的视觉与动态多样性，有效防止了奖励函数过拟合于特定背景或视觉外观。
+
+在**任务泛化实验**中，训练阶段完全屏蔽了三个目标任务的任何机器或人类数据，仅依靠无关任务进行学习。实验发现，`Robot Only` 在面对未见过的人类演示时，往往只会盲目移动到环境的固定区域，无法识别新任务；而加入 6 个以上无关人类任务后，模型的任务泛化成功率提升超过 **20%**（如 9 个人类任务配置下平均成功率达 55.11%）。这说明多样化的人类动作视角对于模型提取通用的“任务功能语义”至关重要。
+
+### 基线对比与真机验证
+
+与已有代表性工作的对比进一步体现了 DVD 的架构优势：
+* **对比 Concept2Robot**（纯人类数据预训练视频分类器）：DVD 平均成功率高出 20%，证明**极少量机器人数据**对跨越“人-机具身鸿沟”不可或缺。
+* **对比演示条件行为克隆（BC）**：DVD 性能领先 30% 以上。BC 方法在多样化人类视频输入下容易陷入单一轨迹模仿，而 DVD 成功将“奖励评估”与“轨迹规划（Visual MPC）”解耦，极大地降低了数据依赖。
+
+在 **WidowX200 真实机器人**评估中（训练于文件柜环境，测试于玩具厨房环境），结合人类视频训练的 DVD 模型在未知环境下的成功率达到 **65%–70%**，为纯机器人数据模型（最高 40%）的 **2 倍左右**。最后的数据量消融实验表明，即便将每个任务的机器人演示从 120 条大幅削减至 **20 条**，DVD 的泛化性能也仅有轻微下降，证明了其在具身数据稀缺场景下的极高实用价值。
+
