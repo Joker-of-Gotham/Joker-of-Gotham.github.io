@@ -15,3 +15,5 @@ summary: 具身智能的近期发展同时发生在动作建模、世界预测�
 2. 第二层是 Learning and Optimization，主要涉及 RL、AutoRL 和自监督学习，需要确定更新对象、奖励来源、经验利用和优化算法。
 3. 第三层是 Agent Architecture，包含 Plan、Act、Evaluate 和 Memory，通过组织不同的模型、工具，设计控制器和反馈极致构建完整的结构。
 4. 第四层是 Recursive Self-Improvement，包含自主采集、自主训练、自主验证、更新并改进下一轮学习过程等多个自主模块。
+
+<img src="/assets/images/具身智能/自主学习/自主学习结构.png" alt="从具身模型到具身 RSI 的四层知识体系依赖关系" width="900" height="450">
