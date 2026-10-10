@@ -376,3 +376,112 @@ Algorithm 1 Domain-agnostic Video Discriminator (DVD)
 
 在 **WidowX200 真实机器人**评估中（训练于文件柜环境，测试于玩具厨房环境），结合人类视频训练的 DVD 模型在未知环境下的成功率达到 **65%–70%**，为纯机器人数据模型（最高 40%）的 **2 倍左右**。最后的数据量消融实验表明，即便将每个任务的机器人演示从 120 条大幅削减至 **20 条**，DVD 的泛化性能也仅有轻微下降，证明了其在具身数据稀缺场景下的极高实用价值。
 
+# VIP: Towards Universal Visual Reward and Representation via Value-Implicit Pre-Training (通过价值隐性预训练实现通用视觉奖励和表征)
+
+机器人控制预训练的一个关键未解难题是奖励设定的挑战。与模拟环境不同，现实世界的机器人任务并不具备预先设定的环境状态信息，也没有定义在该状态空间上的良好奖励函数。以往用于控制的预训练表征仅在模拟环境下的视觉强化学习（RL）中取得了一定的成果，前提是能够获取良好稠密的奖励函数或者通过视觉模仿学习（IL），无论采用哪种方法，学习每个新任务都需要大量的工程投入。
+
+相比之下，一种简单通用的现实世界操作任务设定方法是提供一个目标图像，该目标图像能够捕捉环境所需的视觉变化。然而，正如我们在实验中所展示的，尽管现有的预训练视觉表征作为纯粹的视觉编码器非常有效，但它们并不能产生有效的奖励函数，例如与目标图像的嵌入距离。这就引出了一个关键问题：是否有可能完全从域外数据中学习到通用的视觉奖励函数？
+
+鉴于领域内特定任务的机器人数据固有的成本和稀缺性，从大型、多样化的离线人类视频中学习已成为获取通用控制视觉表征的一种途径；然而，如何将这些人类视频用于通用奖励学习仍然悬而未决。本研究提出了 价值隐式预训练 (VIP, Value-Implicit Pre-training)，为未见过的机器人任务生成密集且平滑的奖励函数。本文证明，这种通用的奖励模型确实可以从预训练的视觉表征中导出。可以通过将从各种人类视频数据中学习表征视为一个大型离线目标条件强化学习问题来获取这种表征。
+
+本研究的关键洞见在于，与其解决从域外、无动作视频中直接学习策略这个不可能的原始问题，不如解决目标条件价值函数学习的 Fenchel 对偶问题。这个对偶价值函数可以在完全自监督的情况下进行训练，无需动作信息，因此适用于在没有机器人动作标签的（域外）视频上进行预训练。
+
+## 域外预训练的问题设置
+
+本节定义了利用域外数据预训练视觉编码器，并在冻结编码器的马尔可夫决策过程（MDP）中进行策略评估的数学框架。
+
+$$
+\begin{aligned}
+& \text{Given } \mathcal{D} = \{v_i = (o_1^i, \dots, o_{h_i}^i)\}_{i=1}^N \\
+& \text{s.t.} \\
+& \quad o \in \mathcal{O} \subseteq \mathbb{R}^{H \times W \times 3} \\
+& \quad \mathcal{D} \sim P_{\text{out-of-domain}} \\
+& \text{Find } \phi = \mathcal{A}(\mathcal{D}): \mathcal{O} \to \mathbb{R}^K \\
+& \text{Given Task MDP } \mathcal{M}(\phi) := \left( \phi(\mathcal{O}), \mathcal{A}, \mathcal{R}(o_t, o_{t+1}, \phi, g), \mathcal{T}, \gamma, g \right) \\
+& \text{s.t.} \\
+& \quad \phi \text{ is frozen} \\
+& \quad g \in \mathcal{O} \\
+& \quad \mathcal{R}(o_t, o_{t+1}, \phi, g) = \mathcal{S}_\phi(o_{t+1}, g) - \mathcal{S}_\phi(o_t, g) \\
+& \quad \mathcal{S}_\phi(o, g) = - \|\phi(o) - \phi(g)\|_2 \\
+& \text{Optimize } \pi: \mathbb{R}^K \to \mathcal{A} \quad \text{s.t. } a_t \sim \pi(\phi(o_t))
+\end{aligned}
+$$
+
+* **数据集与输入相关**：
+  * $\mathcal{D}$：预训练使用的原始数据集（包含 $N$ 条视频 $v_i$；若 $h_i=1$ 则退化为普通图像集如 ImageNet）。
+  * $o \in \mathcal{O}$：机器人看眼前的**原始 RGB 图像**（分辨率为高 $H \times$ 宽 $W \times 3$ 通道）。
+  * $P_{\text{out-of-domain}}$：**域外数据分布**，指预训练数据不包含任何机器人要做的具体任务或环境信息。
+
+* **编码器与表征相关**：
+  * $\mathcal{A}$：**预训练算法**（比如各种自监督对比学习算法）。
+  * $\phi$：经过预训练学到的**视觉特征提取器（编码器）**，把高维图片压缩成 $K$ 维的特征向量。
+  * $\phi(\mathcal{O}) \in \mathbb{R}^K$：特征向量构成的**低维状态空间**。测试时 $\phi$ 保持**参数冻结**（Frozen）。
+
+* **MDP 环境与任务相关**：
+  * $\mathcal{M}(\phi)$：由编码器 $\phi$ 诱导生成的**下游评估马尔可夫决策过程**。
+  * $g \in \mathcal{O}$：指定的**目标图像**（Goal Image），代表希望机器最终把物体弄成的样子。
+  * $\mathcal{A}$ / $\mathcal{T}$ / $\gamma$：机器人可执行的**动作空间**、环境**转移动力学**（物理规律）、**折扣因子**。
+
+* **奖励与策略相关**：
+  * $\mathcal{S}_\phi(o, g)$：图像 $o$ 的特征与目标图像 $g$ 特征之间的**距离得分**（这里取负欧氏距离，特征越靠近，得分越接近 0）。
+  * $\mathcal{R}(o_t, o_{t+1}, \phi, g)$：**整形后的标量奖励**，等于“下一时刻相比上一时刻离目标的距离缩小了多少”。比旧状态更靠近目标就给正奖励，反之给负奖励。
+  * $\pi$：待学习的**控制策略**，输入当前图像提取出的特征向量 $\phi(o_t)$，直接输出机械臂动作 $a_t$。
+
+## Value-Implicit Pre-Training (VIP，价值型预训练)
+
+本节提出价值隐式预训练 (VIP) 框架。首先从被动人类视频中推导离线 RL 的对偶价值函数目标，随后证明该目标等价于一种隐式时间对比学习，该特性诱导了时间上平滑的嵌入空间。最后利用负 L2 距离近似价值函数，构建无需显式学习 V 网络的极简算法。
+
+---
+
+### 基于人类视频的自监督价值学习
+
+在人类视频中，虽然缺少机器人的动作标签 $\mathcal{A}_r$，但人类的行为天然具有目标导向性。可以定义关于人类动作 $\tilde{a}_H \sim \pi_H(\phi(o) \mid \phi(g))$ 的目标条件离线 RL 问题，并导出无需动作标签的对偶优化目标。
+
+原问题为基于 KL 正则化的目标条件离线 RL 问题：
+
+$$\begin{aligned} & \text{Maximize } \mathcal{J}(\pi_H, \phi) = \mathbb{E}_{\pi_H} \left[ \sum_{t=0}^{\infty} \gamma^t r(o_t, g) \right] - D_{\text{KL}}\left( d^{\pi_H}(o, \tilde{a}_H; g) \parallel d^{\mathcal{D}}(o, \tilde{a}_H; g) \right) \\ & \text{s.t.} \\ & \quad o, g \in \mathcal{O} \subseteq \mathbb{R}^{H \times W \times 3} \\ & \quad \tilde{a}_H \in \mathcal{A}_H \quad (\text{隐式未观测动作}) \\ & \quad d^{\mathcal{D}} \text{ 为数据集 } \mathcal{D}_H \text{ 的经验边际分布} \end{aligned}$$
+
+通过 Fenchel 对偶性（Fenchel Duality），消去不可观测的动作 $\tilde{a}_H$，得到等价的对偶价值函数优化问题：
+
+$$\begin{aligned} & \text{Optimization Problem (Dual Value Objective):} \\ & \min_{\phi} \max_{V} \mathbb{E}_{g \sim p(g)} \left[ (1-\gamma) \mathbb{E}_{o \sim \mu_0(o,g)} [V(\phi(o), \phi(g))] \right. \\ & \qquad \qquad \qquad \left. + \log \mathbb{E}_{(o, o', g) \sim \mathcal{D}_H} \left[ \exp \left( r(o,g) + \gamma V(\phi(o'), \phi(g)) - V(\phi(o), \phi(g)) \right) \right] \right] \\ & \text{s.t.} \\ & \quad r(o,g) = \delta_{\tilde{g}}(o) := \mathbb{I}(o == g) - 1 \in \{-1, 0\} \\ & \quad (o, o') \sim \mathcal{D}_H \quad (\text{视频序列中的相邻时间步帧}) \end{aligned}$$
+
+* **输入与采样分布**：
+  * $\mathcal{D}_H$：人类视频数据集，元组 $(o, o', g)$ 表示从同一视频中采样的当前帧 $o$、下一帧 $o'$ 及目标尾帧 $g$。
+  * $p(g)$：目标图像 $g$ 的采样分布（取视频序列的末帧）。
+  * $\mu_0(o, g)$：初始观测分布（取视频序列的首帧）。
+* **奖励与价值函数**：
+  * $r(o,g) = \delta_{\tilde{g}}(o)$：自监督任务无关奖励。当 $o \neq g$ 时恒为 $-1$，当 $o = g$ 时为 $0$。
+  * $V(\phi(o), \phi(g))$：目标条件价值网络，物理意义代表从当前观察 $o$ 到达目标 $g$ 所需的折扣时间步数的负值。
+  * $\gamma \in (0, 1)$：折现因子，控制时间距离的衰减率。
+
+### 隐式时间对比学习 (Implicit Time Contrastive Learning)
+
+假设已获得最优价值函数 $V^*$，并将 $V^*(\phi(o), \phi(g))$ 解释为嵌入空间中的相似度度量，上述对偶目标可代数化简为类似 InfoNCE 的对比学习形式：
+
+$$\begin{aligned} & \min_{\phi} (1-\gamma) \mathbb{E}_{g \sim p(g), o \sim \mu_0(o,g)} \left[ -\log \frac{\exp\left(V^*(\phi(o), \phi(g))\right)}{\mathbb{E}_{(o, o', g) \sim \mathcal{D}_H} \left[ \exp \left( \delta_{\tilde{g}}(o) + \gamma V^*(\phi(o'), \phi(g)) - V^*(\phi(o), \phi(g)) \right) \right]^{\frac{1}{1-\gamma}}} \right] \end{aligned}$$
+
+* **正负样本机制（推拉机制）**：
+  * **正样本（拉近）**：分子显式拉近初始帧 $o_0 \sim \mu_0$ 与目标帧 $g$ 的表征距离，捕捉长时序任务依赖。
+  * **负样本（隐式排斥）**：分母不包含显式的斥力项，而是要求最小化一步 Temporal-Difference (TD) 误差。因为 $V^*$ 编码了折扣时间距离，通过 TD 值的递归传播，在时间上远离目标帧的中间帧会被自然地推远，形成**自发涌现的隐式排斥（Emergent Implicit Repulsion）**。
+* **局部平滑性**：相比传统 TCN（时间对比网络）存在大量局部极小值，VIP 学习到的嵌入在时间轴上具备严格的单调递减性与局部平滑性，便于直接提取下游控制奖励。
+
+### 价值隐式预训练算法 (VIP)
+
+VIP 采用非参数化设定：直接将最优价值函数 $V^*$ 替换为负 L2 距离，即 $V^*(\phi(o), \phi(g)) := -\Vert{}\phi(o) - \phi(g)\Vert{}_2$。利用 Jensen 不等式上界化对偶损失函数，获得数值稳定的最终优化目标。
+
+$$\begin{aligned} & \min_{\phi} \mathcal{L}(\phi) = (1-\gamma) \mathbb{E}_{g \sim p(g), o \sim \mu_0(o,g)} \left[ \Vert{}\phi(o) - \phi(g)\Vert{}_2 \right] \\ & \qquad + \log \mathbb{E}_{(o, o', g) \sim \mathcal{D}_H} \left[ \exp \left( \Vert{}\phi(o) - \phi(g)\Vert{}_2 - \delta_{\tilde{g}}(o) - \gamma \Vert{}\phi(o') - \phi(g)\Vert{}_2 \right) \right] \end{aligned}$$
+
+从数据集 $\mathcal{D}_H$ 中随机采样 Batch size 为 $B$ 的子轨迹元组 $\{ (o_t^i, o_k^i, o_{k+1}^i, o_T^i) \}_{i=1}^B$，其中 $o_t^i$ 为首帧（初始状态），$o_T^i$ 为尾帧（目标 $g$），$o_k^i, o_{k+1}^i$ 为中间相邻帧。
+
+```text
+1: Require: Offline human video dataset D = { (o_1^i, ..., o_{h_i}^i) }_{i=1}^N, Visual encoder phi
+2: for number of training iterations do
+3:     Sample sub-trajectories { (o_t^i, ..., o_k^i, o_{k+1}^i, ..., o_T^i) }_{i=1}^B ~ D
+       where 1 <= t < k < T <= h_i
+4:     Compute loss L(phi):
+           L(phi) = (1 - gamma) / B * sum_{i=1}^B [ || phi(o_t^i) - phi(o_T^i) ||_2 ] 
+                    + log( 1 / B * sum_{i=1}^B [ exp( || phi(o_k^i) - phi(o_T^i) ||_2 
+                    - delta_{o_T^i}(o_k^i) - gamma * || phi(o_{k+1}^i) - phi(o_T^i) ||_2 ) ] )
+5:     Update parameters: phi <- phi - alpha * grad(L(phi))
+```
+
