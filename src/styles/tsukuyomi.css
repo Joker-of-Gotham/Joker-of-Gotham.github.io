@@ -38,8 +38,7 @@ body .topbar-brand-mark, body .topbar-brand-copy, body .theme-toggle-orbit, body
 body .topbar-brand { display: none; }
 body .topbar-primary { gap: 1.5rem; }
 body .topbar-actions { gap: 1rem; }
-body .theme-toggle-label, body .drawer-toggle-label, body .top-search-label { display: inline; }
-body .sidebar, body .sidebar-panel { background: var(--color-background); box-shadow: none; }
+body .theme-toggle-label, body .top-search-label { display: inline; }
 body .archive-page { gap: 2.5rem; }
 body .archive-masthead { display: block; min-height: 0; padding: 2rem 0; border-bottom: 1px solid var(--color-border); }
 body .archive-masthead h1 { font-size: clamp(2.5rem, 5vw, 4rem); }

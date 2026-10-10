@@ -1,4 +1,5 @@
 ﻿---
+import ContentNavigation from '@/components/ui/ContentNavigation.astro';
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Badge from "@/components/ui/Badge.astro";
 import Card from "@/components/ui/Card.astro";
@@ -159,6 +160,7 @@ const crumbs = [
     tags: entry.data.tags
   }}
 >
+  <ContentNavigation items={[{label:"计划",href:"/roadmap/"}, ...parentChain.map(node=>({label:node.data.title,href:`/roadmap/${normalizeSlug(node)}/`}))]} />
   <section class="archive-page archive-node-detail">
     <header class="archive-node-console" aria-labelledby="roadmap-node-title">
       {entry.data.cover && (

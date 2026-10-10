@@ -1,4 +1,5 @@
 ﻿---
+import ContentNavigation from '@/components/ui/ContentNavigation.astro';
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import Card from "@/components/ui/Card.astro";
 import Comments from "@/components/ui/Comments.astro";
@@ -88,6 +89,7 @@ const normalizedLinks: Array<{ label: string; url: string; isInternal: boolean }
   }}
 >
   <article class="archive-page archive-document archive-document--artifact">
+    <ContentNavigation items={[{label:"作品",href:"/artifacts/"}]} />
     <header class="archive-document-header">
       {entry.data.cover ? (
         <div class="archive-document-cover archive-document-cover--image full-bleed">

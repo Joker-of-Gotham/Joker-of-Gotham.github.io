@@ -4,7 +4,7 @@ import {test, expect} from '@playwright/test';
 test('research sequence and plan navigation use the requested labels', async ({page}) => {
   await page.goto('/research/');
   await expect(page.locator('.folio-page > .folio-section > .folio-section-head > h2')).toHaveText(['研究方向','研读札记','论文收藏']);
-  const links = await page.locator('.sidebar-nav').first().locator('a').allTextContents();
+  const links = await page.locator('.home-site-nav').locator('a').allTextContents();
   expect(links.map(s=>s.trim()).slice(-2)).toEqual(['计划','关于']);
   await page.goto('/roadmap/');
   await expect(page.locator('h1')).toHaveText('计划');

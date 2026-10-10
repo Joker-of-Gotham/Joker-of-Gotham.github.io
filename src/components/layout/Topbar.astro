@@ -4,16 +4,17 @@ const { home = false } = Astro.props;
 const pathname = Astro.url.pathname;
 ---
 <header class="site-nav observatory-nav-shell" transition:name="site-navigation">
-  <button class="site-menu" id="drawer-toggle" type="button" aria-label="打开主导航" aria-controls="site-sidebar" aria-expanded="false">
-    <span aria-hidden="true">≡</span><span class="site-menu-label">导航</span>
-  </button>
-  <a class="observatory-brand" href={home ? '#signal-gate' : '/'}>Komari</a>
+  <a class="observatory-brand" href={home ? '#signal-gate' : '/'} aria-label="Komari 首页">
+    <img class="site-avatar" src="/assets/img/observatory/komari-avatar-151602028.jpg" alt="" width="40" height="40" decoding="async" />
+    <span>Komari</span>
+  </a>
   <nav class="home-site-nav" aria-label="主导航">
     <a href="/blog/" aria-current={pathname.startsWith('/blog/') ? 'page' : undefined}>博客</a>
     <a href="/research/" aria-current={pathname.startsWith('/research/') ? 'page' : undefined}>研究</a>
     <a href="/reading/" aria-current={pathname.startsWith('/reading/') ? 'page' : undefined}>阅读</a>
     <a href="/musings/" aria-current={pathname.startsWith('/musings/') ? 'page' : undefined}>杂谈</a>
     <a href="/artifacts/" aria-current={pathname.startsWith('/artifacts/') ? 'page' : undefined}>作品</a>
+    <a href="/roadmap/" aria-current={pathname.startsWith('/roadmap/') ? 'page' : undefined}>计划</a>
     <a href="/about/" aria-current={pathname.startsWith('/about/') ? 'page' : undefined}>关于</a>
   </nav>
   <div class="observatory-nav-actions">
@@ -24,14 +25,4 @@ const pathname = Astro.url.pathname;
     </button>
   </div>
 </header>
-<noscript>
-  <style is:inline>
-    body .site-nav .site-menu, body .site-nav [data-theme-toggle] { display: none; }
-    @media(max-width:960px) {
-      body .site-nav { position: relative; flex-wrap: wrap; }
-      body .site-nav .home-site-nav { display: flex; flex-wrap: wrap; order: 4; width: 100%; justify-content: space-between; gap: .5rem; }
-      body .site-nav .home-site-nav a:last-child { display: flex; }
-      body[data-shell-variant="standard"] .main-area { padding-top: 0; }
-    }
-  </style>
-</noscript>
+<noscript><style is:inline>body .site-nav [data-theme-toggle] { display: none; }</style></noscript>

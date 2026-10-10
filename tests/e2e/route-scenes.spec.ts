@@ -49,7 +49,7 @@ test('fixed route viewpoints survive reload and scroll, and detail reading pause
   await expect(page.locator('[data-observatory-root]')).toHaveAttribute('data-render-state','ready');
 });
 
-test('shared header, sidebar and scenery are usable on a narrow light page and reduced motion',async({page})=>{
+test('shared header and scenery are usable on a narrow light page and reduced motion',async({page})=>{
   await mkdir(output,{recursive:true});
   await page.setViewportSize({width:390,height:844});
   await page.emulateMedia({colorScheme:'light',reducedMotion:'reduce'});
@@ -59,10 +59,8 @@ test('shared header, sidebar and scenery are usable on a narrow light page and r
     await expect(header.getByText('Komari',{exact:true})).toBeVisible();
     const controls=await header.locator('a,button').evaluateAll(els=>els.filter(el=>el.getBoundingClientRect().width>0).map(el=>({left:el.getBoundingClientRect().left,right:el.getBoundingClientRect().right})));
     expect(controls.every(box=>box.left>=0 && box.right<=390)).toBe(true);
-    await page.locator('#drawer-toggle').click();
-    await expect(page.locator('#site-sidebar')).toHaveAttribute('aria-hidden','false');
-    await page.keyboard.press('Escape');
-    await expect(page.locator('#site-sidebar')).toHaveAttribute('aria-hidden','true');
+    await expect(page.locator('#drawer-toggle, #site-sidebar')).toHaveCount(0);
+    await expect(page.locator('.home-site-nav')).toBeVisible();
     await page.screenshot({path:`${output}/header-${path==='/'?'home':path.includes('artifacts')?'artifacts':'article'}-phone.png`});
   }
 });

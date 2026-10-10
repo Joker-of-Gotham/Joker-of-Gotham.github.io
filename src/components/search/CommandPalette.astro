@@ -3,7 +3,7 @@
   <section class="command-panel" role="dialog" aria-modal="true" aria-labelledby="command-title">
     <header class="command-header">
       <div class="command-heading">
-        <p class="sidebar-brand-kicker">Nocturne Research Archive</p>
+        <p class="command-brand-kicker">Nocturne Research Archive</p>
         <h2 id="command-title">快速搜索</h2>
       </div>
       <div class="command-header-actions">
@@ -159,8 +159,6 @@
     };
 
     const open = async (initialQuery = "") => {
-      // Close the drawer before capturing focus or locking the background for search.
-      document.dispatchEvent(new Event("site:before-command-open"));
       const wasHidden = root.hidden;
       if (wasHidden) {
         restoreTarget = document.activeElement instanceof HTMLElement ? document.activeElement : null;

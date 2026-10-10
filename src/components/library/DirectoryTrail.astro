@@ -1,10 +1,12 @@
 ---
 import {getDirectories,type DirectorySection} from '@/lib/content/directory-queries';
 import {ancestors,parentPath} from '@/lib/content/directories';
-interface Props {section:DirectorySection; id:string;}
-const {section,id}=Astro.props;
-const path=parentPath(id);
+import {sectionLabels} from '@/lib/content/library';
+import ContentNavigation from '@/components/ui/ContentNavigation.astro';
+interface Props {section:DirectorySection; id?:string; path?:string;}
+const {section,id,path = parentPath(id ?? '')}=Astro.props;
 const dirs=await getDirectories(section);
-const trail=ancestors(path).filter(Boolean).map(p=>dirs.find(d=>d.path===p)).filter(Boolean);
+const items=ancestors(path).map(p=>dirs.find(d=>d.path===p)).filter(d=>Boolean(d)).map(d=>({label:d!.path ? d!.title : sectionLabels[section],href:d!.href}));
+if (!items.length) items.push({label:sectionLabels[section],href:`/${section}/`});
 ---
-{trail.length>0 && <nav class="folio-breadcrumb directory-trail" aria-label="所属目录" data-pagefind-ignore>{trail.map((d,i)=><>{i>0 && <span aria-hidden="true">/</span>}<a href={d.href}>{d.title}</a></>)}</nav>}
+<ContentNavigation items={items} />

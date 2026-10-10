@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
+import remarkDisplayMath from "./src/lib/markdown/remarkDisplayMath.ts";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import remarkLegacyCallout from "./src/lib/markdown/remarkLegacyCallout.ts";
@@ -33,7 +34,7 @@ export default defineConfig({
   markdown: {
     syntaxHighlight: "shiki",
     shikiConfig: { themes: { light: "github-light", dark: "github-dark-default" }, defaultColor: false },
-    remarkPlugins: [remarkNormalizeDocumentHeadings, remarkLegacyCallout, remarkMath],
+    remarkPlugins: [remarkNormalizeDocumentHeadings, remarkLegacyCallout, remarkMath, remarkDisplayMath],
     rehypePlugins: [
       [
         rehypeKatex,

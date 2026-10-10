@@ -3,13 +3,11 @@ import "@/styles/main.css";
 import "@/styles/markdown-preview.css";
 import "@/styles/route-transitions.css";
 import { ClientRouter } from "astro:transitions";
-import Sidebar from "@/components/layout/Sidebar.astro";
 import Topbar from "@/components/layout/Topbar.astro";
 import StationaryScene from '@/components/home/observatory/StationaryScene.astro';
 import { sceneForRoute } from '@/lib/observatory/route-scene';
 import CommandPalette from "@/components/search/CommandPalette.astro";
 import PagefindFilters from "@/components/search/PagefindFilters.astro";
-import { getSiteConfig } from "@/lib/content/queries";
 
 interface Crumb {
   label: string;
@@ -31,16 +29,8 @@ const {
   pagefindFilters = {},
   variant = "standard"
 } = Astro.props;
-const { home, taxonomy } = await getSiteConfig();
 const routeScene = variant === 'standard' ? sceneForRoute(Astro.url.pathname) : undefined;
 
-const quickLinks = home?.quick_links?.length
-  ? home.quick_links
-  : [
-      { label: "GitHub", url: "https://github.com/Joker-of-Gotham", external: true },
-      { label: "Kaggle", url: "https://www.kaggle.com/gothamjocker", external: true }
-    ];
-const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy?.tracks ?? [];
 ---
 
 <!doctype html>
@@ -76,9 +66,6 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
   <body data-shell-variant={variant} data-scene-page={routeScene}>
     <a class="skip-link" href="#main-content">跳转至主要内容</a>
     {variant === 'standard' && <StationaryScene chapter={routeScene} />}
-    <!-- Keep the drawer beside the backdrop, outside the scene shell's stacking context. -->
-    <Sidebar pathname={Astro.url.pathname} quickLinks={quickLinks} pinnedTracks={pinnedTracks} />
-
     {
       variant === "observatory" ? (
         <div class="site-shell site-shell--observatory" data-variant="observatory">
@@ -105,129 +92,6 @@ const pinnedTracks = home?.pinned_tracks?.length ? home.pinned_tracks : taxonomy
     }
 
     <CommandPalette />
-
-    <script>
-      let _sidebarAC: AbortController | null = null;
-
-      function initSidebar() {
-        _sidebarAC?.abort();
-        _sidebarAC = new AbortController();
-        const sig = _sidebarAC.signal;
-
-        const sidebar = document.getElementById("site-sidebar");
-        const toggle = document.getElementById("drawer-toggle");
-        if (!sidebar || !toggle) return;
-        const mainArea = document.querySelector<HTMLElement>(".main-area");
-
-        let restoreTarget: HTMLElement | null = null;
-
-        const focusableSelector = [
-          "a[href]",
-          "button:not([disabled])",
-          "input:not([disabled])",
-          "select:not([disabled])",
-          "textarea:not([disabled])",
-          "[tabindex]:not([tabindex='-1'])"
-        ].join(",");
-
-        function setExpanded(expanded: boolean) {
-          toggle!.setAttribute("aria-expanded", String(expanded));
-          sidebar!.setAttribute("aria-hidden", String(!expanded));
-          if (expanded) {
-            sidebar!.removeAttribute("inert");
-            if (mainArea) mainArea.inert = true;
-            document.body.dataset.drawerOpen = "";
-          } else {
-            sidebar!.setAttribute("inert", "");
-            if (mainArea) mainArea.inert = false;
-            document.body.removeAttribute("data-drawer-open");
-          }
-        }
-
-        function closeSidebar(restoreFocus = true) {
-          const wasOpen = sidebar!.classList.contains("open");
-          sidebar!.classList.remove("open");
-          setExpanded(false);
-          document.querySelector(".mobile-mask")?.remove();
-
-          if (wasOpen && restoreFocus) {
-            const target = restoreTarget?.isConnected ? restoreTarget : toggle;
-            target?.focus({ preventScroll: true });
-          }
-
-          restoreTarget = null;
-        }
-
-        function openSidebar() {
-          restoreTarget = document.activeElement instanceof HTMLElement ? document.activeElement : toggle;
-          sidebar!.classList.add("open");
-          setExpanded(true);
-          sidebar!.scrollTop = 0;
-
-          if (!document.querySelector(".mobile-mask")) {
-            const mask = document.createElement("button");
-            mask.type = "button";
-            mask.className = "mobile-mask";
-            mask.setAttribute("aria-label", "关闭导航栏");
-            mask.addEventListener("click", () => closeSidebar(), { signal: sig });
-            document.body.appendChild(mask);
-          }
-
-          const firstControl = sidebar!.querySelector<HTMLElement>("[data-sidebar-close], a[href], button:not([disabled])");
-          firstControl?.focus({ preventScroll: true });
-        }
-
-        toggle.addEventListener("click", (e) => {
-          e.stopPropagation();
-          sidebar.classList.contains("open") ? closeSidebar() : openSidebar();
-        }, { signal: sig });
-
-        sidebar.querySelector("[data-sidebar-close]")?.addEventListener("click", () => closeSidebar(), { signal: sig });
-
-        sidebar.addEventListener("click", (event) => {
-          const target = event.target;
-          if (target instanceof Element && target.closest("a[href]") && !target.closest("[data-command-palette-trigger]")) {
-            closeSidebar(false);
-          }
-        }, { signal: sig });
-
-        document.addEventListener("site:before-command-open", () => {
-          if (sidebar.classList.contains("open")) closeSidebar();
-        }, { signal: sig });
-
-        document.addEventListener("keydown", (e) => {
-          if (!sidebar.classList.contains("open")) return;
-
-          if (e.key === "Escape") {
-            e.preventDefault();
-            closeSidebar();
-            return;
-          }
-
-          if (e.key !== "Tab") return;
-          const focusable = Array.from(sidebar.querySelectorAll<HTMLElement>(focusableSelector)).filter(
-            (element) => !element.hasAttribute("disabled") && element.getAttribute("aria-hidden") !== "true"
-          );
-          if (focusable.length === 0) return;
-
-          const first = focusable[0];
-          const last = focusable[focusable.length - 1];
-          if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
-        }, { signal: sig });
-
-        document.addEventListener("astro:before-swap", () => closeSidebar(false), { once: true, signal: sig });
-        closeSidebar(false);
-      }
-
-      document.addEventListener("astro:page-load", initSidebar);
-      initSidebar();
-    </script>
 
     <script>
       // @ts-nocheck

@@ -61,7 +61,7 @@ for (const theme of ['dark','light'] as const) test(`readable Mermaid and zoomab
   await expect(second).toHaveAttribute('data-diagram-ready','true',{timeout:30000});
 });
 
-test('mobile image and cover viewer, sidebar avatar and moon favicon',async({page})=>{
+test('mobile image and cover viewer, header avatar and moon favicon',async({page})=>{
   await page.setViewportSize({width:390,height:844});
   await page.goto(article);
   await page.getByRole('button',{name:'查看图片'}).click();
@@ -76,11 +76,10 @@ test('mobile image and cover viewer, sidebar avatar and moon favicon',async({pag
   await page.screenshot({path:`${output}/image-viewer-phone.png`});
   await page.keyboard.press('Escape');
   await expect(img).toBeFocused();
-  await page.locator('#drawer-toggle').click();
-  await expect(page.locator('.sidebar-avatar')).toHaveAttribute('src','/assets/img/observatory/komari-avatar-151602028.jpg');
-  await expect.poll(()=>page.locator('.sidebar-avatar').evaluate((img:HTMLImageElement)=>img.complete && img.naturalWidth===460)).toBe(true);
+  await expect(page.locator('.site-avatar')).toHaveAttribute('src','/assets/img/observatory/komari-avatar-151602028.jpg');
+  await expect.poll(()=>page.locator('.site-avatar').evaluate((img:HTMLImageElement)=>img.complete && img.naturalWidth===460)).toBe(true);
   await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href','/favicon-moon.svg');
-  await page.screenshot({path:`${output}/sidebar-phone.png`});
+  await page.screenshot({path:`${output}/header-phone.png`});
 });
 
 test('article direct load does not initialize WebGL; route cycles pause and retain one scene',async({page})=>{

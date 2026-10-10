@@ -10,12 +10,12 @@ test('directory introductions precede existing article components and link throu
   await expect(page.locator('[data-blog-item]')).toHaveCount(5);
   await page.locator('[data-blog-item]').filter({hasText:'定义与案例'}).click();
   await expect(page).toHaveURL(/\/blog\/2025-07-08-/);
-  await page.getByRole('navigation',{name:'所属目录'}).getByRole('link',{name:'图论导论',exact:true}).click();
+  await page.getByRole('navigation',{name:'文章与目录导航'}).first().getByRole('link',{name:'图论导论',exact:true}).click();
   await expect(page).toHaveURL(blog);
   await page.goto(reading);
   await expect(page.locator('.topic-overview strong')).toContainText('随机图模型');
   await expect(page.locator('.folio-entry')).toHaveCount(1);
-  await page.locator('.folio-breadcrumb').getByRole('link',{name:'网络科学引论',exact:true}).click();
+  await page.locator('.content-navigation').getByRole('link',{name:'网络科学引论',exact:true}).click();
   await expect(page.locator('h1')).toHaveText('网络科学引论');
   await page.getByRole('navigation',{name:'书内目录'}).getByRole('link',{name:/随机图/}).click();
   await expect(page).toHaveURL(reading);

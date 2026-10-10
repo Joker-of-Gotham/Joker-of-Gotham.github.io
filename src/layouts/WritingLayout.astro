@@ -7,7 +7,7 @@ import DirectoryTrail from '@/components/library/DirectoryTrail.astro';
 import PaperCards from '@/components/library/PaperCards.astro';
 import ResponsiveCover from '@/components/media/ResponsiveCover.astro';
 import { getLibrary } from '@/lib/content/library';
-import { sectionLabels, type WritingEntry } from '@/lib/content/library';
+import { type WritingEntry } from '@/lib/content/library';
 import { formatDate } from '@/lib/content/queries';
 import '@/styles/archive.css';
 import '@/styles/library.css';
@@ -18,12 +18,11 @@ const library = await getLibrary();
 const me = library.entries.find(e => e.id === `${entry.collection}:${entry.id}`)!;
 const related = library.entries.filter(e => e.id !== me.id && (me.books.length ? e.books.some(b => me.books.includes(b)) : e.topics.some(t => me.topics.includes(t))));
 if (me.books.length) related.sort((a,b) => a.order - b.order || a.date.getTime() - b.date.getTime());
-const home = `/${entry.collection}/`;
-const section = sectionLabels[entry.collection];
 const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.id));
 ---
 <BaseLayout title={entry.data.title} description={entry.data.summary} pagefindFilters={{ kind: entry.collection, tags: entry.data.tags }}>
   <article class="archive-page archive-document folio-document">
+    <DirectoryTrail section={entry.collection} id={entry.id} />
     <header class="archive-document-header folio-illustrated-header">
       <div class="archive-document-cover archive-document-cover--image full-bleed">
         <ResponsiveCover src={me.cover!} alt="" loading="eager" fetchpriority="high" sizes="(max-width: 960px) 100vw, 1440px" />
@@ -37,7 +36,6 @@ const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.i
       {entry.data.summary && <p class="folio-deck">{entry.data.summary}</p>}
       <div class="folio-meta">{entry.data.tags.map(tag => <span>{tag}</span>)}</div>
       <WritingLinks books={entry.data.books} research={entry.data.research} />
-      {entry.collection !== 'research' && <DirectoryTrail section={entry.collection} id={entry.id} />}
       </div>
     </header>
     <ArticleBody headings={headings}><Content /></ArticleBody>
@@ -45,7 +43,7 @@ const citedPapers = library.papers.filter(p => p.entries.some(e => e.id === me.i
       {citedPapers.length > 0 && <section class="folio-section"><h2>文中论文</h2><PaperCards papers={citedPapers} excludeEntry={me.id} /></section>}
       {entry.data.sources.length > 0 && <details class="folio-sources"><summary>资料来源与整理说明</summary><ul>{entry.data.sources.map(s => <li><a href={s.url} target="_blank" rel="noreferrer">{s.title} ↗</a></li>)}</ul></details>}
       {related.length > 0 && <section class="folio-section" data-pagefind-ignore><h2>{me.books.length ? '继续阅读这本书' : '沿着这个问题继续'}</h2><EntryList entries={related.slice(0, 6)} compact /></section>}
-      <a class="folio-back" href={home}>← 返回{section}</a>
+      <DirectoryTrail section={entry.collection} id={entry.id} />
     </footer>
   </article>
 </BaseLayout>

@@ -83,6 +83,7 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
   }}
 >
   <article class="archive-page archive-document archive-document--blog">
+    <DirectoryTrail section="blog" id={entry.id} />
     <header class="archive-document-header">
       {entry.data.cover ? (
         <div class="archive-document-cover archive-document-cover--image full-bleed">
@@ -127,11 +128,11 @@ const readMinutes = entry.data.reading_time ?? readingTimeFromBody(entry.body);
         {entry.data.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}
       </div>
       <WritingLinks books={entry.data.books} research={entry.data.research} />
-      <DirectoryTrail section="blog" id={entry.id} />
     </header>
 
     <ArticleBody headings={headings}><Content /></ArticleBody>
 
+    <DirectoryTrail section="blog" id={entry.id} />
     <footer class="archive-document-footer">
       <section class="archive-related-section" aria-labelledby="related-roadmap-title" data-animate>
         <div class="archive-section-heading archive-section-heading--compact">
