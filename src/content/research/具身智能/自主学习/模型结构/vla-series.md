@@ -14,6 +14,9 @@ papers:
   - title: "FAST: Efficient Action Tokenization for Vision-Language-Action Models"
     url: https://arxiv.org/html/2501.09747v1
     year: 2025
+  - title: "RDT2: Exploring the Scaling Limit of UMI Data Towards Zero-Shot Cross-Embodiment Generalization"
+    url: https://arxiv.org/html/2602.03310v1
+    year: 2026
 ---
 
 # 离散自回归动作 Token
@@ -527,3 +530,249 @@ $$\hat{\mathbf{v}}_\theta = \mathbf{v}_\theta(\mathbf{A}_t^\tau, \mathbf{o}_{t-T
 2. **异步线程 1（子目标生成）**：当子任务 $\hat{\ell}$ 发生变更，或计时器满 $\Delta = 4$ 秒时，异步调用世界模型更新子目标图像：$\mathbf{g}^\star \sim p_\psi(\mathbf{g}^\star \mid \mathbf{o}_t, \hat{\ell}, m)$，并刷新上下文 $\mathcal{C}$。
 3. **主控制线程（动作专家推断）**：若距离上次推断已执行 $\hat{H}$ 步（$\hat{H} \in [15, 25]$），调用动作专家进行流匹配采样生成新动作块：$\mathbf{A}_t \sim \pi_\theta(\mathbf{A} \mid \mathbf{o}_{t-T:t}, \mathcal{C}, \mathbf{a}_{t:})$（结合训练期模拟的 $0 \sim 240\text{ms}$ 延迟残差做平滑衔接）。
 4. **底层执行**：下发当前步物理动作 $\mathbf{a}_t$ 给底层 PD/IK 控制器执行。
+
+# 统一或混合式动作生成
+
+## RDT2：探索UMI数据在零样本跨具身泛化中的扩展极限
+
+RDT2 旨在解决大规模多模态动作分布建模与超大型 VLA 模型实时部署的冲突。系统通过硬件升级采集大规模 UMI（Universal Manipulation Interface）双手数据，并引入三阶段混合训练架构（离散预训练 $\to$ 连续流匹配专家 $\to$ 扩散蒸馏），兼顾 VLM 知识保留、表达能力与低延迟推理。
+
+### 硬件迭代与数据规模 (Hardware & Dataset Scaling)
+
+采用重新设计的手持 UMI 硬件，通过 CNC 尼龙66/玻璃纤维加工提升机械刚度，引入红外光六维姿态跟踪解决无纹理/高速运动场景漂移，并优化平行颌夹爪结构。
+
+在自然环境中录制超过 10,000 小时、涵盖 100+ 家庭的双手 6 自由度末端姿态与夹爪动作数据集 $\mathcal{D}$：
+
+$$
+\mathcal{D} := \left\{ \left( \ell^{(i)}, \, \mathbf{o}_t^{(i)}, \, \mathbf{A}_t^{(i)} \right) \;\middle|\; 0 \le t < T^{(i)}, \, 1 \le i \le N \right\}
+$$
+
+* $\ell^{(i)}$：第 $i$ 条轨迹的自由格式自然语言任务指令。
+* $\mathbf{o}_t^{(i)} \in \mathbb{R}^{H \times W \times C}$：时间步 $t$ 的单帧 RGB 视觉观测（假定包含决策所需的完备信息）。
+* $\mathbf{A}_t^{(i)} = [\mathbf{a}_t^{(i)}, \mathbf{a}_{t+1}^{(i)}, \dots, \mathbf{a}_{t+T_a}^{(i)}]^\top \in \mathbb{R}^{T_a \times d}$：连续动作块（Action Chunk），其中 $d$ 为单步动作维度（末端姿态 + 夹爪宽度），$T_a$ 为动作块预测步长。
+* $N$：轨迹总数（$N > 10,000$ 小时数据）。
+
+### 第一阶段：残差矢量量化与离散 VLM 预训练 (Stage 1: RVQ & Discrete VLM Pre-training)
+
+为了保留预训练 VLM 的语言推理与离散概率知识，并加速收敛，第一阶段通过残差矢量量化（RVQ）将连续动作块离散化，使用交叉熵目标对 VLM 骨干网进行预训练。
+
+#### RVQ 动作分词器 (RVQ Action Tokenizer)
+
+采用一维时间卷积神经网络编码器 $\phi_{\text{enc}}$、深度为 $M$ 的码本（Codebook）与解码器 $\phi_{\text{dec}}$：
+
+$$
+\{\mathbf{z}_i\}_{i=1}^n = \phi_{\text{enc}}(\mathbf{A}_t), \quad \mathbf{z}_i \in \mathbb{R}^C
+$$
+
+对每个潜在向量 $\mathbf{z}_i$（令初始残差 $\mathbf{r}_0^i = \mathbf{z}_i$），通过深度 $j = 1, \dots, M$ 迭代量化：
+
+$$
+\begin{aligned}
+k_j^i &= \arg\min_{1 \le k \le K} \left\| \mathbf{r}_{j-1}^i - \mathbf{e}_j(k) \right\|_2^2 \\
+\mathbf{r}_j^i &= \mathbf{r}_{j-1}^i - \mathbf{e}_j(k_j^i)
+\end{aligned}
+$$
+
+解码重构动作块 $\hat{\mathbf{A}}_t$ 及训练损失 $\mathcal{L}_{\text{vq}}$：
+
+$$
+\hat{\mathbf{A}}_t = \phi_{\text{dec}}\left( \left\{ \hat{\mathbf{z}}_i \right\}_{i=1}^n \right) = \phi_{\text{dec}}\left( \left\{ \sum_{j=1}^M \mathbf{e}_j(k_j^i) \right\}_{i=1}^n \right)
+$$
+
+$$
+\mathcal{L}_{\text{vq}} = \mathbb{E}_{(\cdot, \cdot, \mathbf{A}_t) \sim \mathcal{D}} \left[ \|\mathbf{A}_t - \hat{\mathbf{A}}_t\|_2^2 + \|\text{sg}(\mathbf{z}_i) - \hat{\mathbf{z}}_i\|_2^2 + \beta \|\mathbf{z}_i - \text{sg}(\hat{\mathbf{z}}_i)\|_2^2 \right]
+$$
+
+* $\mathbf{e}_j \in \mathbb{R}^{K \times C}$：第 $j$ 层深度大小为 $K$ 的可学习码本（通过余弦相似度、EMA 平滑更新及不活跃条目重启防止崩溃）。
+* $\{k_1^i, \dots, k_M^i\}_{i=1}^n$：动作块 $\mathbf{A}_t$ 压缩后生成的 $n \times M$ 个离散动作 Token 索引。
+* $\text{sg}(\cdot)$：Stop-gradient 算子。
+
+#### VLM 骨干网交叉熵预训练
+
+基于 Qwen2.5-VL (7B) 骨干网，覆盖词表末尾使用频率最低的 1024 个标记用于映射动作 Token。采用标准自回归下一个 Token 预测（Next-Token Prediction）目标训练 128k 次迭代：
+
+$$
+\mathcal{L}_{\text{Stage1}}(\Theta_{\text{VLM}}) = -\sum_{i=1}^n \sum_{j=1}^M \log P_{\Theta_{\text{VLM}}}\left( k_j^i \;\middle|\; k_{<j}^i, k_{<i}, \ell, \mathbf{o}_t \right)
+$$
+
+* $\Theta_{\text{VLM}}$：Qwen2.5-VL 7B 可训练参数。
+
+### 第二阶段：连续流匹配动作专家训练 (Stage 2: Flow Matching Action Expert)
+
+为了消除自回归生成的量化误差与低效性，第二阶段**冻结已预训练的 VLM 骨干网**，训练一个 400M 参数的连续动作专家（RDT-1B 变体，引入 GQA 优化速度）。动作专家通过交叉注意力（Cross-Attention）融合 VLM 各层的潜在特征。
+
+#### 连续流匹配训练目标 (Flow Matching Loss)
+
+采样流匹配时间步 $\tau \sim \mathcal{U}(0, 1)$ 及高斯噪声 $\boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$，构造带噪动作轨迹 $\mathbf{A}_t^\tau$ 与真实速度 $\mathbf{u}$：
+
+$$
+\mathbf{A}_t^\tau = (1 - \tau)\boldsymbol{\epsilon} + \tau \mathbf{A}_t, \quad \mathbf{u}(\mathbf{A}_t^\tau \mid \mathbf{A}_t) = \mathbf{A}_t - \boldsymbol{\epsilon}
+$$
+
+动作专家去噪网络 $\mathbf{v}_\theta$ 的优化目标为：
+
+$$
+\mathcal{L}_{\text{expert}}(\theta) = \mathbb{E}_{(\ell, \mathbf{o}_t, \mathbf{A}_t) \sim \mathcal{D}, \, \tau \sim \mathcal{U}(0, 1), \, \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})} \left[ \left\| \mathbf{v}_\theta\left( \tau, \mathbf{A}_t^\tau, \text{VLA}_{\text{frozen}}(\ell, \mathbf{o}_t) \right) - (\mathbf{A}_t - \boldsymbol{\epsilon}) \right\|_2^2 \right]
+$$
+
+* $\theta$：动作专家网络可训练参数，训练 66k 次迭代。
+* $\text{VLA}_{\text{frozen}}(\ell, \mathbf{o}_t)$：冻结的 VLM 骨干网各层特征，在多步积分推断中仅计算一次前向传播。
+
+#### 采样推断 (Multi-step Euler Inference)
+
+从纯高斯噪声 $\mathbf{A}_t^0 \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$ 开始，采用 5 步前向欧拉积分（步长 $\delta\tau = 0.2$）解算动作块：
+
+$$
+\mathbf{A}_t^{\tau + \delta\tau} = \mathbf{A}_t^\tau + \delta\tau \cdot \mathbf{v}_\theta\left( \tau, \mathbf{A}_t^\tau, \text{VLA}_{\text{frozen}}(\ell, \mathbf{o}_t) \right), \quad \tau \in \{0, 0.2, 0.4, 0.6, 0.8\}
+$$
+
+### 第三阶段：单步生成器扩散蒸馏 (Stage 3: Diffusion Distillation for Fast Inference)
+
+为满足高动态任务（如打乒乓球）的极低延迟需求，第三阶段通过在线扩散蒸馏，将第二阶段的多步动作专家 $\mathbf{v}_\theta$ 压缩为单步生成器 $\mathcal{G}_{\theta'}$。
+
+#### 单步回归目标 (On-the-fly Regression Loss)
+
+初始化可训练参数 $\theta' \leftarrow \theta$，冻结 VLM 与第二阶段教师专家 $\mathbf{v}_\theta$。在训练过程中实时运行教师模型的 5 步采样过程 $\mathcal{F}$（避免离线数据集过拟合）：
+
+$$
+\begin{aligned}
+& \mathcal{F}(\mathbf{A}_t^0, \ell, \mathbf{o}_t; \theta) = \mathbf{A}_t^{\tau=1} \quad (\text{来自第二阶段教师模型的 5 步积分结果}) \\
+& \mathcal{G}(\mathbf{A}_t^0, \ell, \mathbf{o}_t; \theta') = \mathbf{A}_t^0 + \mathbf{v}_{\theta'}\left( 0, \mathbf{A}_t^0, \text{VLA}_{\text{frozen}}(\ell, \mathbf{o}_t) \right)
+\end{aligned}
+$$
+
+损失函数定义为单步预测与教师 5 步结果的 MSE 回归：
+
+$$
+\mathcal{L}_{\text{distill}}(\theta') = \mathbb{E}_{(\ell, \mathbf{o}_t) \sim \mathcal{D}, \, \mathbf{A}_t^0 \sim \mathcal{N}(\mathbf{0}, \mathbf{I})} \left[ \left\| \mathcal{F}(\mathbf{A}_t^0, \ell, \mathbf{o}_t; \theta) - \mathcal{G}(\mathbf{A}_t^0, \ell, \mathbf{o}_t; \theta') \right\|_2^2 \right]
+$$
+
+#### 极速推断 (Single-Step Inference)
+
+部署时仅需一次前向传播即可直接生成最终连续动作块：
+
+$$
+\mathbf{A}_t^{\text{final}} = \mathbf{A}_t^0 + \mathbf{v}_{\theta'}\left( 0, \mathbf{A}_t^0, \text{VLA}_{\text{frozen}}(\ell, \mathbf{o}_t) \right), \quad \mathbf{A}_t^0 \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+$$
+
+## 离散扩散 VLA：将离散扩散引入 视觉-语言-行动策略中的动作解码
+
+离散扩散 VLA（Discrete Diffusion VLA）旨在解决传统自回归 VLA 模型（如 OpenVLA）逐标记预测导致的高延迟问题，同时消除单独引入连续扩散网络时与 VLM 交叉熵损失产生的梯度竞争。
+
+<img src="/assets/images/具身智能/自主学习/模型结构/discretevla_method.png" alt="离散扩散 VLA 架构概述：扩展了 VLM 主干网络，该网络编码多视图 RGB 图像（SigLIP+DINOv2 ViTs）和语言指令，并通过扩散式迭代细化解码离散动作块。自适应解码（左下）在每一轮中保留高置信度标记，并使用余弦调度来降低保留比例。二级重掩蔽（右下）使用阈值检查来重新掩蔽不确定标记，从而确保多迭代一致性并实现鲁棒的纠错。" width="900" height="400">
+
+该架构将感知、指令理解与动作去噪统一于单一 Transformer 主干网络中，将动作生成表述为在离散词表上的掩码扩散（Masked Diffusion）过程，支持测试期的高效动作块并行解码与自适应二次重掩蔽（Secondary Remasking）。
+
+### 动作离散化与词表扩充 (Action Discretization & Vocabulary Augmentation)
+
+输入动作采用基于分位数的离散化方案，将连续动作块映射为离散标记序列，并扩充特殊掩码标记 `[MASK]`。
+
+$$\begin{aligned} & \mathbf{a}_0 = (a_{0, 1}, a_{0, 2}, \dots, a_{0, L}), \quad a_{0, i} \in \{1, 2, \dots, K\} \\ & L = H \times D_{\text{action}}, \quad D_{\text{action}} = 7, \quad K = 256 \\ & \mathcal{V}_{\text{action}} = \{1, 2, \dots, K\} \cup \{\text{[MASK]}\}, \quad \vert{}\mathcal{V}_{\text{action}}\vert{} = V = K + 1 \end{aligned}$$
+
+* $H$：连续动作块包含的时间步数。
+* $D_{\text{action}}$：单步控制维度（如 3 平移 + 3 旋转 + 1 夹爪 = 7）。
+* $L$：一个完整动作块展开后的总动作标记数量。
+* $K$：基于训练集第 1 至 99 分位数划分的离散箱（Bin）数量，单维度离散化为 256 个档位。
+* $\mathbf{a}_0$：原始无噪离散动作块，每个标记位置用 One-hot 向量 $\mathbf{e}_{a_{0, i}} \in \mathbb{R}^V$ 表示。
+
+> **动作离散化与词表扩充：把物理动作变成“填字游戏”**  
+> 这里的核心目的是：把机器人连续的物理运动（比如“机械臂向左移动 $0.0123\text{m}$”），转换成大语言模型（LLM/VLM）能看懂的“单词（Token）”。  
+> - 机械臂的单步动作（$D_{\text{action}} = 7$）：机械臂在任意一个瞬间，控制它需要 7 个数字（3 个空间平移 $\Delta x, \Delta y, \Delta z$ + 3 个角度旋转 $\Delta \text{roll}, \Delta \text{pitch}, \Delta \text{yaw}$ + 1 个夹爪开合度）。  
+> - 动作块（Action Chunk, $H$）：模型不会只预测眼下一个瞬间，而是预测未来一小段连续轨迹（比如预测未来 $H = 10$ 个时间步）。  
+> - 动作序列总长度 $L$（$L = H \times D_{\text{action}}$）：如果预测未来 $H=10$ 步，每步有 7 个控制量，那么总共就要预测 $10 \times 7 = 70$ 个数字。这里的 $L$ 就是总数字个数（$L=70$），而 $i$ 代表这 70 个数字里的第 $i$ 个位置（比如 $i=1$ 是第 1 步的 $x$ 轴平移，$i=7$ 是第 1 步的夹爪开合度，$i=8$ 是第 2 步的 $x$ 轴平移……）。  
+{: .prompt-info }
+
+> **$\{1, \dots, K\}$ 与 \[MASK\] 的“交集”到底在做什么**  
+> - $\{1, \dots, K\}$（用 $K=256$ 个桶来装数字）：物理动作是连续的（比如移动量可以是 $0.0123456\dots\text{m}$），但语言模型只懂离散的单词。所以我们把动作允许的最大最小值之间切成 256 个等份区间（桶）。每一个连续的物理数值，映射进去后都会变成一个 $1 \sim 256$ 之间的整数编号。这就是 $\{1, \dots, K\}$，代表 256 个具体的动作指令。  
+> - \[MASK\] 遮罩标记：这是一个特殊符号，代表“还没想好 / 空白”。  
+> - 扩充词表 $\mathcal{V} = \{1, \dots, K\} \cup \{\text{[MASK]}\}$：动作块是一条长度为 $L$ 的长横条纸带（共有 $L$ 个格子）。在推断刚开始时，模型不知道机器人该干嘛，纸带上全是空白格（也就是全是 \[MASK\]）。模型每往前推一步，就会把某些格子上的 [MASK] 擦掉，填入真实的动作编号（即从 $\{1, \dots, K\}$ 中选一个 $1 \sim 256$ 的数字填进去）。所以，这个词表必须同时包含“具体的动作指令 $\{1,\dots,K\}$”和“代表空白待填的 \[MASK\]”。  
+{: .prompt-info }
+
+### 离散扩散马尔可夫前向过程 (Discrete Diffusion Forward Noise Process)
+
+前向加噪过程定义为离散马尔可夫链 $\{ \mathbf{a}_t \}_{t=0}^T$。在每一步，每个标记位置以概率 $\beta_t$ 被替换为特殊标记 `[MASK]`（记为 $\mathbf{e}_M$），以概率 $1 - \beta_t$ 保持原状。
+
+单步转移矩阵 $\mathbf{Q}_t \in \mathbb{R}^{V \times V}$ 与任意时刻 $t$ 的边际破坏分布 $q(\mathbf{a}_t \mid \mathbf{a}_0)$ 定义如下：
+
+$$\begin{aligned} & \mathbf{Q}_t \mathbf{e}_{a_{t, i}} = (1 - \beta_t) \mathbf{e}_{a_{t, i}} + \beta_t \mathbf{e}_M \\ & \bar{\mathbf{Q}}_t = \mathbf{Q}_t \mathbf{Q}_{t-1} \cdots \mathbf{Q}_1 \\ & q(\mathbf{a}_t \mid \mathbf{a}_0) = \prod_{i=1}^L \text{Categorical}\left( a_{t, i} \;\middle\vert{}\; \bar{\mathbf{Q}}_t \mathbf{e}_{a_{0, i}} \right) \end{aligned}$$
+
+* $\beta_t \in (0, 1)$：时刻 $t$ 的加噪率。
+* $\gamma_t \in (0, 1]$：时刻 $t$ 的累积掩码比例（Mask Ratio），即整条序列中被替换为 `[MASK]` 的标记比例。
+* $\tilde{\mathbf{a}}_t$：根据掩码比例 $\gamma_t$ 随机将选定位置替换为 `[MASK]` 后获得的损坏动作序列。
+
+> **离散扩散马尔可夫前向过程：通俗理解与核心目的**  
+> 这一步本质上是在训练阶段给模型“出难题/做坏事”，教模型以后怎么把被涂黑的字擦掉还原。离散扩散的前向过程，就是拿着涂改液，按照时间一步步往纸带上随机盖遮罩（涂黑）。这就是数学公式 $q(\mathbf{a}_t \mid \mathbf{a}_0)$ 干的事情：它根据当前的时间步 $t$（对应涂黑比例 $\gamma_t$），随机把一部分原本正确的动作 Token 破坏成 \[MASK\]。  
+> 前向加噪过程的最终目的只有一个：制造“半成品（破坏数据）”，拿去训练模型学会“反向去噪/修补（逆过程）”。有了这个训练出来的能力，在实际部署（推断）时：模型拿到的直接就是一条100% 全被 [MASK] 涂黑的空白纸带。模型看一眼摄像头画面，第一轮先填上它最有把握的 20% 动作；第二轮看着这 20% 的已知信息，再填上剩下 80% [MASK] 中的一部分……经过几轮迭代（比如 5 步），原本全黑的纸带就被并行且自适应地恢复成了一条完整的平滑运动轨迹！  
+{: .prompt-info }
+
+### 统一多模态骨干网架构 (Unified Transformer Architecture)
+
+基于 Prismatic-7B / Llama 2 VLM 骨干网络，多模态特征输入与注意力掩蔽规则如下：
+
+$$\begin{aligned} & \mathbf{c} = \left[ \mathbf{X}_{\text{vis}}, \, \mathbf{X}_{\text{lang}}, \, \mathbf{X}_{\text{prop}} \right] \\ & \mathbf{X}_{\text{vis}} = \text{Projector}\left( \left[ \text{SigLIP}(I_{\text{head}}), \, \text{DINOv2}(I_{\text{head}}), \, \text{WristViews} \right] \right) \\ & \mathbf{X}_{\text{prop}} = \text{MLP}(\mathbf{q}_{\text{arm}}) \\ & \mathbf{Z}_{\text{in}} = \left[ \mathbf{c} \,\Vert{}\, \tilde{\mathbf{a}}_t \right] \\ & p_\theta(\cdot \mid \tilde{\mathbf{a}}_t, \mathbf{c}) = \text{Softmax}\left( \mathbf{W}_{\text{head}} \cdot f_\theta(\mathbf{Z}_{\text{in}}) \right) \end{aligned}$$
+
+* $\mathbf{c}$：拼接后的多模态上下文特征（包含头部与双腕图像特征 $\mathbf{X}_{\text{vis}}$、语言指令嵌入 $\mathbf{X}_{\text{lang}}$ 以及本体状态特征 $\mathbf{X}_{\text{prop}}$）。
+* $\tilde{\mathbf{a}}_t$：带掩码的动作标记序列。
+* **全模态融合注意力**：取消动作标记上的因果掩蔽，对动作标记采用**全双向注意力（Full Bidirectional Attention）**，使其可以同时感知所有视觉、语言、本体特征及其他动作标记。
+* $\mathbf{W}_{\text{head}} \in \mathbb{R}^{K \times D_{\text{hidden}}}$：共享分类头，将隐藏状态直接投影到 256 路动作词表中。
+
+> **统一多模态骨干网架构的变量与符号拆解**  
+> - $\mathbf{Z}_{\text{in}} = \left[ \mathbf{c} \,\Vert{}\, \tilde{\mathbf{a}}_t \right]$（统一输入 Token 序列）：  
+>   - $\mathbf{c}$：多模态上下文特征（把头部/手腕摄像头图像特征、语言指令 Token、机械臂本体状态特征直接拼接在一起）。  
+>   - $\tilde{\mathbf{a}}_t$：带有 [MASK] 的动作标记序列（即长为 $L$ 的“被部分涂黑的纸带”）。  
+>   - $\mathbf{Z}_{\text{in}}$ 就是把上下文和带掩码的动作拼接成一条长序列，直接喂给 Transformer。  
+> - $f_\theta(\mathbf{Z}_{\text{in}})$（统一 Transformer 主干网的隐层输出）：  
+>   - $f_\theta$ 表示整个 Prismatic-7B / Llama 2 骨干网络（参数为 $\theta$）。
+>   - 输出结果是每个 Token 对应的高维隐层特征向量（Hidden States）。  
+> - $\mathbf{W}_{\text{head}}$（共享分类头矩阵 / Action Head）：  
+>   - 这是一个线性投影矩阵（Linear Projection Layer），维度为 $K \times D_{\text{hidden}}$（其中 $K = 256$ 是离散化档位数，$D_{\text{hidden}}$ 是 Transformer 的隐层特征维度）。  
+>   - 它的作用是将动作位置输出的高维抽象特征映射到 256 个档位的原始 Logits 上。
+> - $\text{Softmax}(\cdot)$（归一化函数）：把分类头输出的 256 个数值转换成相加等于 $1$ 的概率分布。  
+> - $p_\theta(\cdot \mid \tilde{\mathbf{a}}_t, \mathbf{c})$（最终输出的概率分布）：代表在给定当前上下文 $\mathbf{c}$ 和损坏动作序列 $\tilde{\mathbf{a}}_t$ 的条件背景下，模型对动作位置填空结果的后验预测分布。  
+> 
+{: .prompt-info }
+
+### 离散扩散训练目标 (Discrete Diffusion Training Objective)
+
+训练时采样扩散时间时刻的掩码比例 $\gamma_t \sim \text{CosineSchedule}$，对动作位置施加掩码，仅对被掩码标记计算交叉熵损失（使用硬标签独热向量监督）：
+
+$$\mathcal{L}_{\text{CE}}(\theta) = - \sum_{i \in \mathcal{M}_{\gamma_t}} \log p_\theta\left( a_{0, i} \;\middle\vert{}\; \tilde{\mathbf{a}}_t, \mathbf{c} \right)$$
+
+* $\mathcal{M}_{\gamma_t}$：根据掩码比例 $\gamma_t$ 选中的被掩码标记索引集合（包含 $\gamma_t \times L$ 个位置）。
+* 单次前向传播同时并行预测所有 $L$ 个动作位置，所有参数（VLM 骨干网与动作投影头）进行端到端更新，无辅助损失项。
+
+### 推理流水线：自适应解码与二次重掩蔽 (Adaptive Inference & Secondary Remasking)
+
+推理阶段从全掩码序列 $\mathbf{a}_T = [\text{MASK}]^L$（对应 $\gamma_1 = 1$）出发，执行 $T$ 轮并行细化。
+
+在每个时间步 $t$（掩码比例由 $\gamma_t$ 余弦递减至 $\gamma_{t+1}$）：
+
+#### 贝叶斯反向去噪核 (Bayesian Reverse Step)
+
+对每个位置 $i \in \{1, \dots, L\}$ 计算恢复概率分布与置信度评估：
+
+$$p_\theta(a_{t-1, i} \mid a_{t, i}, \mathbf{c}) = \begin{cases}  \delta(a_{t-1, i} = a_{t, i}), & a_{t, i} \neq \text{[MASK]} \\  \text{Categorical}\left( a_{t-1, i} \;\middle\vert{}\; \pi_\theta(i \mid \mathbf{c}) \right), & a_{t, i} = \text{[MASK]}  \end{cases}$$
+
+设置两种自适应置信度评估指标之一：
+
+$$\begin{aligned} & \text{最大置信度: } s_{t, i} = \max_k p_\theta(k \mid \mathbf{a}_t, \mathbf{c}) \\ & \text{置信度间隙: } g_{t, i} = p_\theta(k^{(1)} \mid \mathbf{a}_t, \mathbf{c}) - p_\theta(k^{(2)} \mid \mathbf{a}_t, \mathbf{c}) \end{aligned}$$
+
+* $k^{(1)}, k^{(2)}$：概率最高与次高的预测标签。
+
+#### 提交选择与 Gumbel 采样 (Commitment & Gumbel Sampling)
+
+选取置信度评分最高的前 $(1 - \gamma_{t+1}) L$ 个位置构成已保留集合 $\mathcal{K}_t$。对该集合中的位置进行带温度衰减的 Gumbel-Max 采样以增加探索能力：
+
+$$a_{t+1, i} \in \mathcal{K}_t \sim \text{Categorical}\left( \text{Softmax}\left( \frac{\log p_\theta(\cdot \mid \mathbf{a}_t, \mathbf{c}) + \boldsymbol{\varepsilon}}{\tau_t} \right) \right)$$
+
+* $\boldsymbol{\varepsilon} \sim \text{Gumbel}(0, 1)$：独立同分布的 Gumbel 噪声。
+* $\tau_t$：随着时间步逐步衰减的采样温度。
+
+#### 二次重掩蔽与阈值检查 (Secondary Remasking)
+
+为了防止早期步骤中低置信度错误标记累积传播，在提交位置集 $\mathcal{K}_t$ 上运行阈值检查：
+
+$$\begin{aligned} & \mathcal{R}_t^{\text{abs}} = \left\{ i \in \mathcal{K}_t \;\middle\vert{}\; s_{t, i} < \eta_t^{\text{abs}} \right\} \\ & \forall i \in \mathcal{R}_t^{\text{abs}}, \quad a_{t+1, i} \leftarrow \text{[MASK]} \end{aligned}$$
+
+* $\eta_t^{\text{abs}}$：单调递增的步长依赖门限阈值。置信度低于该阈值的已有标记将被重新重置为 `[MASK]`，供后续迭代继续优化，直到 $\gamma_T = 0$ 最终输出纯净动作块 $\mathbf{a}_0$。
+
