@@ -9,14 +9,71 @@ summary: 这部分以 VLA 为主线，整理，按照 Action Decoder 的结构�
 tags: [研究札记, VLA, 强化学习]
 papers:
   - title: "OpenVLA: An Open-Source Vision-Language-Action Model"
-    url: https://arxiv.org/html/2406.09246v3
+    url: "https://arxiv.org/abs/2406.09246"
     year: 2024
+    venue: "arXiv"
+    abstract: "融合 DINOv2 与 SigLIP 视觉特征，以语言模型自回归预测离散动作 Token。"
+    abstract_kind: "summary"
   - title: "FAST: Efficient Action Tokenization for Vision-Language-Action Models"
-    url: https://arxiv.org/html/2501.09747v1
+    url: "https://arxiv.org/abs/2501.09747"
     year: 2025
-  - title: "RDT2: Exploring the Scaling Limit of UMI Data Towards Zero-Shot Cross-Embodiment Generalization"
-    url: https://arxiv.org/html/2602.03310v1
+    venue: "arXiv"
+    abstract: "通过离散余弦变换和压缩分词表示高频动作序列，用于自回归 VLA。"
+    abstract_kind: "summary"
+  - title: "RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control"
+    url: "https://arxiv.org/abs/2307.15818"
+    year: 2023
+    venue: "arXiv"
+    abstract: "将机器人动作表示为 Token，联合视觉语言任务与机器人数据学习控制策略。"
+    abstract_kind: "summary"
+  - title: "Octo: An Open-Source Generalist Robot Policy"
+    url: "https://arxiv.org/abs/2405.12213"
+    year: 2024
+    venue: "arXiv"
+    abstract: "以可适配多种观察和动作空间的 Transformer 与扩散动作头构建通用机器人策略。"
+    abstract_kind: "summary"
+  - title: "3D Diffusion Policy: Generalizable Visuomotor Policy Learning via Simple 3D Representations"
+    url: "https://arxiv.org/abs/2403.03954"
+    year: 2024
+    venue: "arXiv"
+    abstract: "利用稀疏点云编码的紧凑三维表征，为扩散动作策略提供空间条件。"
+    abstract_kind: "summary"
+  - title: "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion"
+    url: "https://arxiv.org/abs/2303.04137"
+    year: 2023
+    venue: "arXiv"
+    abstract: "把视觉运动控制建模为条件动作去噪，以滚动时域执行预测的动作序列。"
+    abstract_kind: "summary"
+  - title: "π₀: A Vision-Language-Action Flow Model for General Robot Control"
+    url: "https://arxiv.org/abs/2410.24164"
+    year: 2024
+    venue: "arXiv"
+    abstract: "将预训练视觉语言模型与连续动作流匹配专家连接，生成机器人动作块。"
+    abstract_kind: "summary"
+  - title: "π₀.₇: a Steerable Generalist Robotic Foundation Model with Emergent Capabilities"
+    url: "https://arxiv.org/abs/2604.15483"
     year: 2026
+    venue: "arXiv"
+    abstract: "通过多样化上下文条件、子目标和性能信息，使通用机器人策略更易于指引。"
+    abstract_kind: "summary"
+  - title: "RDT2: Exploring the Scaling Limit of UMI Data Towards Zero-Shot Cross-Embodiment Generalization"
+    url: "https://arxiv.org/abs/2602.03310"
+    year: 2026
+    venue: "arXiv"
+    abstract: "研究规模化 UMI 数据与分阶段动作建模，面向零样本跨具身泛化。"
+    abstract_kind: "summary"
+  - title: "RDT-1B: a Diffusion Foundation Model for Bimanual Manipulation"
+    url: "https://arxiv.org/abs/2410.07864"
+    year: 2024
+    venue: "arXiv"
+    abstract: "通过大规模扩散 Transformer 学习双臂机器人操作的连续动作分布。"
+    abstract_kind: "summary"
+  - title: "Discrete Diffusion VLA: Bringing Discrete Diffusion to Action Decoding in Vision-Language-Action Policies"
+    url: "https://proceedings.mlr.press/v306/liang26l.html"
+    year: 2026
+    venue: "ICML"
+    abstract: "在统一 Transformer 中对离散动作块迭代去噪，支持并行解码与不确定位置的重新掩蔽。"
+    abstract_kind: "summary"
 ---
 
 # 离散自回归动作 Token

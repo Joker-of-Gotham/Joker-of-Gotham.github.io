@@ -44,11 +44,15 @@ export async function getLibrary() {
     item.summary = preview.text;
   }));
   const excludedPapers = new Set(allPapers.filter(e => !isPublic(e) && e.data.url).map(e => paperKey(e.data.url)));
-  const papers = collectPapers(entries, allPapers.filter(isPublic).map(entry => {
+  const directoryPapers = tree.filter(e => (isOverview(e) || isBook(e)) && isPublic(e))
+    .flatMap(e => e.data.papers.map(p => ({...p, title: p.title, url: p.url, topics: publicTopics(e.data.research)})));
+  const collectedPapers = allPapers.filter(isPublic).map(entry => {
     const p = entry.data;
     if (!p.url || !p.abstract) throw new Error(`${entry.id}: 论文收藏需要 url 和 abstract`);
     return {...p, title: p.title, url: p.url, topics: publicTopics(p.research)};
-  })).filter(p => !excludedPapers.has(paperKey(p.url)));
+  });
+  const papers = collectPapers(entries, [...collectedPapers, ...directoryPapers])
+    .filter(p => !excludedPapers.has(paperKey(p.url)));
   const topics = buildTopics(entries, [...overviews.flatMap(e => e.data.research), ...papers.flatMap(p => p.topics)]);
   const names = [...new Set([...bookEntries.map(e => cleanBook(e.data.title)), ...entries.flatMap(e => e.books)])].filter(name => !excluded.has(name));
   const books = names.map(title => {

@@ -9,6 +9,21 @@ import { getLibrary } from '../../src/lib/content/library';
 const writing = (collection:string, id:string, extra = {}) => ({collection,id,slug:id,data:{title:id,date:new Date('2026-09-09'),summary:'',tags:[],books:[],research:[],kind:'note',order:0,papers:[],...extra}});
 describe('public content graph', () => {
   beforeEach(() => { for (const key of Object.keys(rows)) delete rows[key]; });
+  it('indexes public directory citations without creating articles or replacing standalone metadata', async () => {
+    const url = 'https://example.org/shared';
+    rows.research = [
+      writing('research','models/index.md',{title:'models',papers:[{title:'Shared',url,abstract:'Directory summary'},{title:'Overview only',url:'https://example.org/overview'}]}),
+      writing('research','models/note.md',{papers:[{title:'Shared',url}]}),
+      writing('research','models/paper.md',{kind:'reference',title:'Shared',url,abstract:'Canonical abstract'}),
+      writing('research','private/index.md',{draft:true,papers:[{title:'Private',url:'https://example.org/private'}]}),
+    ];
+    const lib = await getLibrary();
+    expect(lib.entries).toHaveLength(1);
+    expect(lib.papers).toHaveLength(2);
+    expect(lib.papers.find(p=>p.url===url)?.abstract).toBe('Canonical abstract');
+    expect(lib.papers.find(p=>p.url===url)?.entries).toHaveLength(1);
+    expect(lib.papers.find(p=>p.url.endsWith('/overview'))?.topics).toEqual(['models']);
+  });
   it('uses frontmatter summaries across every writing section without body fallback', async () => {
     for (const section of ['blog','research','reading','musings']) {
       rows[section] = [

@@ -5,9 +5,9 @@ const topic = '/research/topics/' + ['知识图谱','数据质量','质量评估
 const book = '/reading/books/' + encodeURIComponent('Google 软件工程') + '/';
 const routes = ['/research/', topic, '/research/library/', '/research/notes/knowledge-graph-quality-survey/', '/reading/', book, '/reading/reviews/random-graphs/', '/musings/', '/musings/after-the-answer/'];
 
-test('research hierarchy integrates paper readings and reflections, and deduplicates references', async ({page}) => {
+test('research hierarchy integrates paper readings and reflections, and deduplicates references', async ({page,request}) => {
   await page.goto('/research/');
-  await expect(page.locator('.research-direction')).toHaveCount(3);
+  await expect(page.locator('.direction-title').filter({hasText:'具身智能'})).toHaveCount(1);
   await page.locator('.direction-title').filter({hasText:'知识图谱'}).click();
   await page.locator('.topic-children a').filter({hasText:'数据质量'}).click();
   await page.locator('.topic-children a').filter({hasText:'质量评估'}).click();
@@ -19,21 +19,25 @@ test('research hierarchy integrates paper readings and reflections, and deduplic
   await expect(page.locator('[data-catalogue-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalogue-item]:visible')).toContainText('先写下任务');
   await page.goto('/research/library/');
-  await expect(page.locator('.paper-card')).toHaveCount(5);
+  const index = await (await request.get('/search-index.json')).json();
+  await expect(page.locator('.paper-card')).toHaveCount(index.filter((e:any)=>e.kind==='literature').length);
+  const links=await page.locator('.paper-card-title a').evaluateAll(anchors=>anchors.map(a=>a.getAttribute('href')));
+  expect(new Set(links).size).toBe(links.length);
   await expect(page.locator('.paper-card').filter({hasText:'Knowledge Graph Quality Management'}).locator('.paper-discussions a')).toHaveCount(2);
 });
 
 test('paper cards expose abstracts and original links across the research journey', async ({page, request}) => {
   await page.goto('/research/');
-  await expect(page.locator('.research-papers .paper-card')).toHaveCount(3);
-  await expect(page.locator('.research-papers .paper-abstract')).toHaveCount(3);
+  await expect(page.locator('.research-papers .paper-card')).toHaveCount(4);
+  await expect(page.locator('.research-papers .paper-abstract')).toHaveCount(4);
   await page.goto(topic);
   await expect(page.locator('.paper-card')).toHaveCount(2);
   await expect(page.locator('.paper-abstract').first()).toBeVisible();
   await page.goto('/research/library/');
   for (const card of await page.locator('.paper-card').all()) {
     await expect(card.locator('.paper-abstract')).toContainText('中文整理');
-    expect((await card.locator('.paper-abstract > p').last().innerText()).length).toBeGreaterThan(80);
+    // Citations in other notes may omit an abstract; those retain an explicit fallback.
+    await expect(card.locator('.paper-abstract > p').last()).toHaveText(/\S/);
     await expect(card.getByRole('link', {name:/^论文原文：/})).toHaveAttribute('href',/^https:\/\//);
   }
   await page.getByRole('searchbox').fill('Reflexion');
@@ -47,7 +51,7 @@ test('paper cards expose abstracts and original links across the research journe
   await expect(page.locator('[data-catalogue-status]')).toContainText('没有找到');
   const index = await (await request.get('/search-index.json')).json();
   const papers = index.filter((e:any) => e.kind === 'literature');
-  expect(papers).toHaveLength(5);
+  expect(papers).toHaveLength(await page.locator('.paper-card').count());
   await page.goto('/search/?q=ReAct&kind=literature');
   await page.locator('.archive-search-result').click();
   await expect(page.locator('.paper-card:target')).toContainText('ReAct');

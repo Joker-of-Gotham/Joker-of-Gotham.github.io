@@ -9,14 +9,35 @@ summary: 这部分以 WM 为主线，整理，按照世界状态表示与动力�
 tags: [研究札记, WM, 强化学习]
 papers:
   - title: "Mastering diverse control tasks through world models"
-    url: https://www.nature.com/articles/s41586-025-08744-2
-    year: 2023
-  - title: "Training Agents Inside of Scalable World Models"
-    url: https://arxiv.org/html/2509.24527v1
+    url: "https://www.nature.com/articles/s41586-025-08744-2"
     year: 2025
-  - title: "RDT2: Exploring the Scaling Limit of UMI Data Towards Zero-Shot Cross-Embodiment Generalization"
-    url: https://arxiv.org/html/2602.03310v1
+    venue: "Nature"
+    abstract: "DreamerV3 通过潜在世界模型生成想象轨迹，并联合学习 Actor 与 Critic；此处引用 Nature 正式发表版本。"
+    abstract_kind: "summary"
+  - title: "Training Agents Inside of Scalable World Models"
+    url: "https://arxiv.org/abs/2509.24527"
+    year: 2025
+    venue: "arXiv"
+    abstract: "Dreamer 4 利用可扩展视频世界模型，在想象交互中训练智能体。"
+    abstract_kind: "summary"
+  - title: "DINO-WM: World Models on Pre-trained Visual Features enable Zero-shot Planning"
+    url: "https://proceedings.mlr.press/v267/zhou25t.html"
+    year: 2025
+    venue: "ICML"
+    abstract: "在冻结的 DINOv2 空间特征上学习动力学，并在测试时优化动作序列进行目标导向规划。"
+    abstract_kind: "summary"
+  - title: "DreamDojo: A Generalist Robot World Model from Large-Scale Human Videos"
+    url: "https://proceedings.mlr.press/v306/gao26q.html"
     year: 2026
+    venue: "ICML"
+    abstract: "以连续潜在动作利用大规模人类视频预训练，再适配机器人动作条件，用于预测、评估与规划。"
+    abstract_kind: "summary"
+  - title: "WALL-SS: Scaling Long-horizon World Models via Next-Scale Autoregression"
+    url: "https://arxiv.org/abs/2608.26239"
+    year: 2026
+    venue: "arXiv"
+    abstract: "通过下一尺度自回归、动作条件和有界时间尺度记忆，支持长时程机器人世界模拟。"
+    abstract_kind: "summary"
 ---
 
 # 潜在状态动力学模型 (Ex. Mastering diverse control tasks through world models)
@@ -432,7 +453,7 @@ $$\mathbf{X} = [\mathbf{x}_1, \mathbf{x}_2, \dots, \mathbf{x}_K] \in \mathbb{R}^
 
 ## 核心组件：自监督连续潜在动作模型 (Latent Action VAE)
 
-为了利用海量未标注的人类日常活动视频（DreamerDojo-HV 44,711 小时数据集），系统构建了一个时空 Transformer VAE，自监督地从像素变化中解耦出跨具身的“潜在动作” $\hat{\mathbf{a}}_t$。
+为了利用海量未标注的人类日常活动视频（DreamDojo-HV 44,711 小时数据集），系统构建了一个时空 Transformer VAE，自监督地从像素变化中解耦出跨具身的“潜在动作” $\hat{\mathbf{a}}_t$。
 
 ### 隐动作提取与信息瓶颈 (Latent Action Bottleneck)
 
@@ -450,7 +471,7 @@ $$\mathcal{L}_{\text{LatentAction}}(\theta, \phi) = \mathbb{E}_{q_\phi(\hat{\mat
 
 ## 三阶段训练流程 (Three-Phase Training Recipe)
 
-DreamerDojo 的训练分为三个递进阶段：
+DreamDojo 的训练分为三个递进阶段：
 
 ### 阶段一：人类视频大规模预训练 (Pretraining with Latent Actions)
 
@@ -491,13 +512,13 @@ $$\nabla_\theta \mathcal{L}_{\text{distill}} = - \mathbb{E}_{\mathbf{z}, t} \lef
 
 ## 测试期部署与多场景应用 (Deployment Applications)
 
-蒸馏后的 Dreamer 4 模型支持 4 步自回归实时生成，可在以下场景中闭环部署：
+蒸馏后的 DreamDojo 模型支持 4 步自回归实时生成，可在以下场景中闭环部署：
 
 ### 零样本离线策略评估 (Offline Policy Evaluation)
-将候选策略模型 $\pi(a \mid o)$ 与 Dreamer 4 世界模型闭环连接。策略模型基于当前帧生成动作 Chunk $\mathbf{a}_{t:t+4}$，世界模型实时推演下一 Latent 帧 $\mathbf{x}_{t+1}$，实现大规模真实环境无风险的大模型策略评估。
+将候选策略模型 $\pi(a \mid o)$ 与 DreamDojo 世界模型闭环连接。策略模型基于当前帧生成动作 Chunk $\mathbf{a}_{t:t+4}$，世界模型实时推演下一 Latent 帧 $\mathbf{x}_{t+1}$，实现大规模真实环境无风险的大模型策略评估。
 
 ### 实时遥操作与在线模型规划 (Live Teleoperation & Model-Based Planning)
-支持人类操作员（或采样规划算法，如 CEM）实时下发连续控制指令，世界模型以 20Hz+ 的速度实时渲染未来物理演化视觉反馈，用于复杂场景下的在线视界规划与远程操控。
+支持人类操作员（或采样规划算法，如 CEM）实时下发连续控制指令，世界模型实时渲染未来物理演化视觉反馈，用于复杂场景下的在线视界规划与远程操控。
 
 # 长时程自回归视频 WM (WALL-SS: Scaling Long-horizon World Models via Next-Scale Autoregression)
 

@@ -158,3 +158,37 @@ research: ["复杂网络/模型与基准/随机图"]
 ## 检查
 
 `npm run dev` 预览，`npm run check` 检查内容类型，`npm run build` 检查完整生成及重复地址。目录扫描与父子关系没有人为层数限制，实际路径长度仍受文件系统限制。禁用 JavaScript 时，导读、文章和父子目录链接仍可浏览。
+
+
+## HTML 交互图与视频
+
+Markdown / MDX 正文支持原生 HTML、SVG、表格、`iframe` 和 `video`。完整交互 HTML 文件（包括它自己的样式和脚本）放到 `public/embeds/你的图表/index.html`，在正文用 iframe 嵌入。不要把完整 HTML 文档粘进正文，以免全局样式、脚本和页面路由互相影响。
+
+```html
+<figure class="html-embed">
+  <iframe src="/embeds/你的图表/" title="图表的具体名称" loading="lazy" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-downloads" allow="fullscreen" allowfullscreen></iframe>
+  <figcaption><span>图表说明</span><a href="/embeds/你的图表/" target="_blank" rel="noopener">独立页面查看 ↗</a></figcaption>
+</figure>
+```
+
+`.html-embed` 自动适配阅读宽度，并提供全屏按钮；独立页面链接在无 JavaScript 或全屏不可用时仍可使用。上述 sandbox 适合自包含 HTML；它不开放同源访问。如果图表通过 fetch 加载其他文件，需要这些文件提供相应 CORS 响应，或将数据打包进图表。外部视频服务请使用其官方嵌入地址，并按提供方要求设置 iframe 权限。
+
+本站图谱示例：`/embeds/embodied-architecture-atlas/`。为支持主题同步，iframe 添加 `data-embed-theme`，子页面监听来自 `parent` 的 `{type: 'blog:theme', theme: 'dark' | 'light'}` 消息；不需要主题同步的图表无需添加。
+
+视频文件放到 `public/assets/videos/` 后，可以直接在任意正文中插入：
+
+```html
+<figure>
+  <video controls playsinline preload="metadata" poster="/assets/images/demo-cover.jpg">
+    <source src="/assets/videos/demo.mp4" type="video/mp4">
+    <source src="/assets/videos/demo.webm" type="video/webm">
+    <track kind="captions" src="/assets/videos/demo.zh.vtt" srclang="zh" label="中文字幕" default>
+    当前浏览器不支持视频播放。<a href="/assets/videos/demo.mp4">打开视频</a>
+  </video>
+  <figcaption>演示说明</figcaption>
+</figure>
+```
+
+替换为实际存在的文件；无封面、备用格式或字幕时可删去对应项。有语音的视频建议提供字幕。播放器保留浏览器原生暂停、进度和音量控制，切换文章时自动暂停。默认不自动播放。
+
+目录 `index.md` 也支持 `papers`：在题头按与文章相同的格式填写，目录页会显示参考文献，研究/阅读/杂谈目录的引用也会进入论文库。目录引用不自动继承给每一篇子文章；每篇只列自己实际引用的论文。相同论文使用同一规范 URL 和元数据；`year` 对应所链接的版本（例如 Nature 正式版与 arXiv 首发版不要混写年份）。

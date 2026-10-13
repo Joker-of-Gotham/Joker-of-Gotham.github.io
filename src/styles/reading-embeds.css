@@ -1,0 +1,13 @@
+/* Raw HTML in Markdown and MDX shares the same responsive media surface. */
+.content :is(iframe, video) { display: block; width: 100%; max-width: 100%; border: 0; border-radius: var(--radius-md); background: var(--color-surface); }
+.content iframe { aspect-ratio: 16 / 9; height: auto; min-height: 240px; }
+.content video { height: auto; }
+.content .html-embed { margin-block: var(--space-6); border: var(--line-hairline) solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; background: var(--color-surface); }
+.content .html-embed iframe { height: clamp(480px, 75vh, 850px); aspect-ratio: auto; border-radius: 0; }
+.content .html-embed figcaption { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); font-size: var(--text-sm); text-align: start; }
+.content .html-embed figcaption a { min-height: 44px; display: inline-flex; align-items: center; }
+.embed-fullscreen { margin-inline-start: auto; min-height: 44px; padding: var(--space-2) var(--space-3); border: var(--line-hairline) solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); color: var(--color-foreground); font: inherit; cursor: pointer; }
+.embed-fullscreen:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+.html-embed:fullscreen { display: flex; flex-direction: column; width: 100vw; height: 100dvh; max-width: none; margin: 0; background: var(--color-background); }
+.html-embed:fullscreen iframe { flex: 1; min-height: 0; width: 100%; }
+.html-embed:fullscreen figcaption { flex-shrink: 0; }

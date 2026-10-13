@@ -451,6 +451,8 @@ const routeScene = variant === 'standard' ? sceneForRoute(Astro.url.pathname) : 
       applyEnhancements();
     </script>
     <script>
+      import { installReadingEmbeds } from "@/lib/reading-embeds";
+      installReadingEmbeds();
       import { installReadingDiagrams } from "@/lib/reading-diagrams";
       import { installMediaViewer } from "@/lib/media-viewer";
       installReadingDiagrams();

@@ -8,15 +8,48 @@ order: 15
 summary: 这部分以 WAM 为主线，整理，按照世界与动作的耦合方式选择 RL 。
 tags: [研究札记, WAM, 强化学习]
 papers:
-  - title: "Mastering diverse control tasks through world models"
-    url: https://www.nature.com/articles/s41586-025-08744-2
-    year: 2023
-  - title: "Training Agents Inside of Scalable World Models"
-    url: https://arxiv.org/html/2509.24527v1
-    year: 2025
-  - title: "RDT2: Exploring the Scaling Limit of UMI Data Towards Zero-Shot Cross-Embodiment Generalization"
-    url: https://arxiv.org/html/2602.03310v1
+  - title: "World Action Models are Zero-shot Policies"
+    url: "https://arxiv.org/abs/2602.15922"
     year: 2026
+    venue: "arXiv"
+    abstract: "DreamZero 基于视频生成先验联合预测未来观察与机器人动作，探索零样本策略泛化。"
+    abstract_kind: "summary"
+  - title: "Native Video-Action Pretraining for Generalizable Robot Control"
+    url: "https://arxiv.org/abs/2607.08639"
+    year: 2026
+    venue: "arXiv"
+    abstract: "LingBot-VA 2.0 面向具身控制原生预训练视频与动作模型，耦合预测与闭环执行。"
+    abstract_kind: "summary"
+  - title: "Cosmos 3: Omnimodal World Models for Physical AI"
+    url: "https://arxiv.org/abs/2606.02800"
+    year: 2026
+    venue: "arXiv"
+    abstract: "使用统一 Mixture-of-Transformers 架构处理语言、图像、视频、音频和动作的理解与生成。"
+    abstract_kind: "summary"
+  - title: "GE-Act 2.0: Pretraining and Scaling a World-Action Model for Robotic Manipulation"
+    url: "https://arxiv.org/abs/2609.05588"
+    year: 2026
+    venue: "arXiv"
+    abstract: "从操作数据出发训练世界动作模型，通过压缩表示、视觉规划与动作解码连接预测和控制。"
+    abstract_kind: "summary"
+  - title: "RISE: Self-Improving Robot Policy with Compositional World Model"
+    url: "https://arxiv.org/abs/2602.11075"
+    year: 2026
+    venue: "arXiv"
+    abstract: "将动力学模型与进度价值模型组合，在想象轨迹中改进独立机器人策略。"
+    abstract_kind: "summary"
+  - title: "Ctrl-World: A Controllable Generative World Model for Robot Manipulation"
+    url: "https://arxiv.org/abs/2510.10125"
+    year: 2025
+    venue: "arXiv"
+    abstract: "以动作条件视频世界模型模拟机器人交互，为策略评估及合成数据驱动的改进提供环境。"
+    abstract_kind: "summary"
+  - title: "VLAW: Iterative Co-Improvement of Vision-Language-Action Policy and World Model"
+    url: "https://proceedings.mlr.press/v306/guo26i.html"
+    year: 2026
+    venue: "ICML"
+    abstract: "交替利用真实策略轨迹改进世界模型，再使用合成轨迹提升 VLA 策略。"
+    abstract_kind: "summary"
 ---
 
 # 视频与动作联合生成
