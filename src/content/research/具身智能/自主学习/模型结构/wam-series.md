@@ -1,12 +1,12 @@
 ---
-title: WM：World Model
-slug: wm-series
+title: WAM：World-Action Model
+slug: wam-series
 date: 2026-10-12
 kind: reflection
-cover: /assets/img/covers/GBC-仁菜.webp
-order: 10
-summary: 这部分以 WM 为主线，整理，按照世界状态表示与动力学预测方式选择 RL 。
-tags: [研究札记, WM, 强化学习]
+cover: /assets/img/covers/孤独摇滚-喜多和波奇.webp
+order: 15
+summary: 这部分以 WAM 为主线，整理，按照世界与动作的耦合方式选择 RL 。
+tags: [研究札记, WAM, 强化学习]
 papers:
   - title: "Mastering diverse control tasks through world models"
     url: https://www.nature.com/articles/s41586-025-08744-2
