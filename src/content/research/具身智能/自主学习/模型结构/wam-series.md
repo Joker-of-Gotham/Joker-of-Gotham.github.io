@@ -1,7 +1,7 @@
 ---
 title: WAM：World-Action Model
 slug: wam-series
-date: 2026-10-12
+date: 2026-10-13
 kind: reflection
 cover: /assets/img/covers/孤独摇滚-喜多和波奇.webp
 order: 15
