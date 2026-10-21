@@ -1,0 +1,50 @@
+/* Semantic HTML diagrams in research notes; readable without JavaScript. */
+.archive-prose .research-diagram {
+  container-type: inline-size;
+  margin-block: var(--space-8);
+  padding: var(--space-5);
+  border: var(--line-hairline) solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  text-align: start;
+}
+.research-diagram * { box-sizing: border-box; min-inline-size: 0; }
+.archive-prose .research-diagram :where(p, ol, ul, dl, dd, figure) { margin: 0; }
+.research-diagram .rd-heading { display: block; margin-block-end: var(--space-4); font-size: var(--text-lg); color: var(--color-foreground); }
+.research-diagram .rd-label { display: block; margin-block-end: var(--space-2); font-size: var(--text-xs); letter-spacing: .08em; color: var(--color-primary); }
+.research-diagram .rd-flow { display: grid; gap: var(--space-6); padding: 0; list-style: none; }
+.research-diagram .rd-flow > li { position: relative; margin: 0; padding: var(--space-4); border: var(--line-hairline) solid var(--color-border); border-block-start: 3px solid var(--color-primary); background: var(--color-background); }
+.research-diagram .rd-flow > li:not(:last-child)::after { content: '↓'; position: absolute; inset-block-end: calc(-1 * var(--space-6)); inset-inline-start: 50%; color: var(--color-primary); }
+.research-diagram .rd-flow strong { display: block; margin-block-end: var(--space-2); }
+.research-diagram .rd-flow p, .research-diagram .rd-pair p { color: var(--color-foreground-soft); }
+.research-diagram .rd-return { margin-block-start: var(--space-4); padding: var(--space-3) var(--space-4); border: var(--line-hairline) dashed var(--color-border-strong); color: var(--color-foreground-soft); }
+.research-diagram .rd-variables { display: grid; gap: var(--space-3); margin-block-start: var(--space-4); }
+.research-diagram .rd-variables > div { display: grid; grid-template-columns: 3em 1fr; gap: var(--space-2); padding-block-end: var(--space-2); border-block-end: var(--line-hairline) solid var(--color-border); }
+.research-diagram dt { font-weight: 700; color: var(--color-primary); }
+.research-diagram .rd-pair { display: grid; gap: var(--space-4); }
+.research-diagram .rd-pair > div { padding: var(--space-4); border-inline-start: 3px solid var(--color-primary); background: var(--color-background); }
+.research-diagram .rd-pair > div:nth-child(2) { border-inline-start-color: var(--color-accent); }
+.research-diagram .rd-pair strong { display: block; margin-block-end: var(--space-2); }
+.research-diagram .rd-pair ol { padding-inline-start: var(--space-5); margin-block: var(--space-3); }
+.research-diagram .rd-merge { margin-block-start: var(--space-4); padding: var(--space-4); border-block: var(--line-hairline) solid var(--color-border-strong); text-align: center; }
+.research-diagram .rd-metrics { display: grid; gap: var(--space-3); }
+.research-diagram .rd-metric { display: grid; gap: var(--space-2); padding-block: var(--space-3); border-block-end: var(--line-hairline) solid var(--color-border); }
+.research-diagram .rd-metric > span { color: var(--color-foreground-soft); }
+.research-diagram .rd-metric > strong { color: var(--color-primary); }
+.research-diagram details { margin-block-start: var(--space-3); border: var(--line-hairline) solid var(--color-border); padding: var(--space-3); }
+.research-diagram summary { min-block-size: 44px; align-content: center; cursor: pointer; font-weight: 600; }
+.research-diagram summary:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 3px; }
+.research-diagram details[open] summary { margin-block-end: var(--space-2); }
+.research-diagram details p { color: var(--color-foreground-soft); }
+.archive-prose .research-diagram figcaption { margin-block-start: var(--space-4); padding-block-start: var(--space-3); border-block-start: var(--line-hairline) solid var(--color-border); color: var(--color-foreground-soft); font-size: var(--text-sm); text-align: start; }
+.archive-prose .research-source figcaption { font-size: var(--text-sm); line-height: 1.7; text-align: start; }
+@container (min-width: 600px) {
+  .research-diagram .rd-flow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .research-diagram .rd-flow > li:not(:last-child)::after { content: '→'; inset-inline-start: auto; inset-inline-end: calc(-1 * var(--space-5)); inset-block-end: 50%; }
+  .research-diagram .rd-pair { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .research-diagram .rd-variables { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .research-diagram .rd-metric { grid-template-columns: 1fr 1fr 1.4fr; gap: var(--space-4); align-items: start; }
+}
